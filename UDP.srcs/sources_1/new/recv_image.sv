@@ -411,7 +411,8 @@ module recv_image(
     always_ff @(posedge eth_rxck)begin
         if(st==Hc_End)begin
             {VBUF[0],VBUF[1],VBUF[2],VBUF[3]} <= {RXBUF[26],RXBUF[27],RXBUF[28],RXBUF[29]};
-            {VBUF[4],VBUF[5],VBUF[6],VBUF[7]} <= `my_IP;
+            //{VBUF[4],VBUF[5],VBUF[6],VBUF[7]} <= `my_IP;
+            {VBUF[4],VBUF[5],VBUF[6],VBUF[7]} <= {RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]};        // add 2018.12.5
             {VBUF[8],VBUF[9]} <= 16'h00_11;
             {VBUF[10],VBUF[11]} <= MsgSize+4'd8;
             {VBUF[12],VBUF[13]} <= {RXBUF[34],RXBUF[35]};

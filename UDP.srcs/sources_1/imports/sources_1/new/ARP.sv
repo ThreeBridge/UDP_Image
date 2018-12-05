@@ -24,6 +24,8 @@ module ARP(
     input clk125,
     input rst125,
     input arp_st,
+    input [47:0] my_MACadd,
+    input [31:0] my_IPadd,
     input [47:0] DstMAC,
     input [31:0] DstIP,
     
@@ -70,14 +72,17 @@ module ARP(
     always_ff @(posedge clk125)begin
         if(st==Tx_Ready)begin
             {TXBUF[0],TXBUF[1],TXBUF[2],TXBUF[3],TXBUF[4],TXBUF[5]} <= DstMAC;
-            {TXBUF[6],TXBUF[7],TXBUF[8],TXBUF[9],TXBUF[10],TXBUF[11]} <= `my_MAC;
+            //{TXBUF[6],TXBUF[7],TXBUF[8],TXBUF[9],TXBUF[10],TXBUF[11]} <= `my_MAC;
+            {TXBUF[6],TXBUF[7],TXBUF[8],TXBUF[9],TXBUF[10],TXBUF[11]} <= my_MACadd; // add 2018.12.5
             {TXBUF[12],TXBUF[13]} <= FTYPE;
             {TXBUF[14],TXBUF[15]} <= HTYPE;
             {TXBUF[16],TXBUF[17]} <= PTYPE;
             {TXBUF[18],TXBUF[19]} <= {HLEN,PLEN};
             {TXBUF[20],TXBUF[21]} <= OPER;
-            {TXBUF[22],TXBUF[23],TXBUF[24],TXBUF[25],TXBUF[26],TXBUF[27]} <= `my_MAC;
-            {TXBUF[28],TXBUF[29],TXBUF[30],TXBUF[31]} <= `my_IP;
+            //{TXBUF[22],TXBUF[23],TXBUF[24],TXBUF[25],TXBUF[26],TXBUF[27]} <= `my_MAC;
+            {TXBUF[22],TXBUF[23],TXBUF[24],TXBUF[25],TXBUF[26],TXBUF[27]} <= my_MACadd; // add 2018.12.5
+            //{TXBUF[28],TXBUF[29],TXBUF[30],TXBUF[31]} <= `my_IP; 
+            {TXBUF[28],TXBUF[29],TXBUF[30],TXBUF[31]} <= my_IPadd;                      // add 2018.12.5
             {TXBUF[32],TXBUF[33],TXBUF[34],TXBUF[35],TXBUF[36],TXBUF[37]} <= DstMAC;
             {TXBUF[38],TXBUF[39],TXBUF[40],TXBUF[41]} <= DstIP;
             for(i=42;i<60;i=i+1)begin

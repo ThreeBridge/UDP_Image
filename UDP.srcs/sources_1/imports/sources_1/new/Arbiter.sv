@@ -29,6 +29,7 @@ module Arbiter(
     input                 clk125,
     
     input                 rst_btn,
+    input [7:0]           SW,
     
     output reg            arp_tx,
     output reg            ping_tx,
@@ -76,13 +77,23 @@ parameter  Recv_End    = 8'h03;
         endcase
     end
     
+    /*---MAC/IP addressをDIPスイッチを使って任意に決める(add 2018.12.5)---*/
+    wire [3:0] sw_sel = {SW[3],SW[2],SW[1],SW[0]};
+    reg  [47:0] my_MACadd;
+    reg  [31:0] my_IPadd;
+    always_comb begin
+        my_MACadd   =  {44'h00_0A_35_02_0F_B,sw_sel};
+        my_IPadd    =  {8'd172,8'd31,8'd210,4'd10,sw_sel};  
+    end
+    
     /* DstMAC */
     wire [47:0] host_MAC = {RXBUF[0],RXBUF[1],RXBUF[2],RXBUF[3],RXBUF[4],RXBUF[5]};
     (*dont_touch="true"*)reg [47:0] DstMAC;
     (*dont_touch="true"*)reg [31:0] DstIP;
     always_ff @(posedge eth_rxck) begin
         if(st==Recv_End&&{RXBUF[12],RXBUF[13]}==`FTYPE_ARP)begin
-            if(host_MAC== `bcast_MAC || host_MAC==`my_MAC)begin
+            //if(host_MAC== `bcast_MAC || host_MAC==`my_MAC)begin
+            if(host_MAC== `bcast_MAC || host_MAC==my_MACadd)begin   // add 2018.12.5
                 DstMAC <= {RXBUF[6],RXBUF[7],RXBUF[8],RXBUF[9],RXBUF[10],RXBUF[11]};
                 DstIP <= {RXBUF[28],RXBUF[29],RXBUF[30],RXBUF[31]};
             end
@@ -91,7 +102,7 @@ parameter  Recv_End    = 8'h03;
             DstMAC <= 48'b0;
             DstIP <= 32'b0;
         end
-    end    
+    end
     
     /* rxdとrxctlの遅延 */
     (*dont_touch="true"*)reg [7:0] q_rxd [3:0];
@@ -195,9 +206,11 @@ parameter  Recv_End    = 8'h03;
     always_ff @(posedge eth_rxck)begin
         if(crc_ok)begin
             //if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[20],RXBUF[21]}==`OPR_ARP) arp_st <= 1;
-            if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[38],RXBUF[39],RXBUF[40],RXBUF[41]}==`my_IP) arp_st <= 4'h7;
+            //if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[38],RXBUF[39],RXBUF[40],RXBUF[41]}==`my_IP) arp_st <= 4'h7;
+            if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[38],RXBUF[39],RXBUF[40],RXBUF[41]}==my_IPadd) arp_st <= 4'h7;  // add 2018.12.5
             else if(RXBUF[23]==8'h01) ping_st <= 3'h7;
-            else if(RXBUF[23]==8'h11&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==`my_IP) UDP_st  <= 3'h7;
+            //else if(RXBUF[23]==8'h11&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==`my_IP) UDP_st  <= 3'h7;
+            else if(RXBUF[23]==8'h11&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==my_IPadd) UDP_st  <= 3'h7;             // add 2018.12.5
             else els_packet <= 3'h7;
         end
         else begin
@@ -209,11 +222,15 @@ parameter  Recv_End    = 8'h03;
     end
     
     ARP ARP(
+        /*---INPUT---*/
         .clk125(clk125),
         .rst125(rst125),
         .arp_st(arp_st[3]),
+        .my_MACadd(my_MACadd),  //<---  add 2018.12.5
+        .my_IPadd(my_IPadd),    //--->
         .DstMAC(DstMAC),
         .DstIP(DstIP),
+        /*---OUTPUT---*/
         .arp_tx(arp_tx),
         .d(arp_d)
     );
@@ -234,6 +251,8 @@ parameter  Recv_End    = 8'h03;
         .rx_cnt(rx_cnt),
         .arp_st(arp_st[2]),
         .ping_st(ping_st[2]),
+        .my_MACadd(my_MACadd),
+        .my_IPadd(my_IPadd),
         //.crc_flg_i(crc_flg_i),
         //.DstMAC(DstMAC),
         //.DstIP(DstIP),
@@ -299,6 +318,8 @@ parameter  Recv_End    = 8'h03;
         .imdata(imdata),
         .recvend(recvend),
         //.image_buffer(image_buffer),
+        .my_MACadd(my_MACadd),
+        .my_IPadd(my_IPadd),
         .DstMAC(DstMAC_UDP),
         .DstIP(DstIP_UDP),
         .SrcPort(SrcPort),

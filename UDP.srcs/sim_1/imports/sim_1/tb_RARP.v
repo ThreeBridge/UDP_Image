@@ -32,6 +32,7 @@ module tb_rarp(
      reg reset;
      reg tx_flg;
      reg BTN;
+     reg [7:0] SW;
 
    TOP top_i(
         .eth_rxctl(P_RXDV),
@@ -43,7 +44,8 @@ module tb_rarp(
         .SYSCLK(SYSCLK),
         .CPU_RSTN(CPU_RSTN),
         .reset_i(reset),
-        .BTN_C(BTN)
+        .BTN_C(BTN),
+        .SW(SW)
     );
     
    parameter Idle       =  8'h00;   // 待機状態
@@ -208,6 +210,7 @@ module tb_rarp(
       P_RXDV = 0;
       reset = 0;
       CPU_RSTN = 1;
+      SW = 8'd0;    // add 2018.12.5
       #18.5;
       reset = 1;
       #18.5;
@@ -233,7 +236,18 @@ module tb_rarp(
       #100;
       rstCPU();
       #4000;
-
+      
+      /*---Select MAC/IP address---*/
+      SW = 8'd1;
+      #16
+      SW = 8'd2;
+      #16
+      SW = 8'd3;
+      #16
+      SW = 8'd4;
+      #16      
+      
+      #5000
       // プリアンブル
       repeat(7) recvByte(8'h55);
       recvByte(8'hd5);
@@ -705,7 +719,7 @@ module tb_rarp(
         repeat(7) recvByte(8'h55);
         recvByte(8'hd5);
         // 宛先MAC
-        recvMac(48'h00_0A_35_02_0F_B9);
+        recvMac(48'h00_0A_35_02_0F_B4);
         // 送信元MAC
         recvMac(48'hF8_32_E4_BA_0D_57);
         //フレームタイプ
@@ -745,7 +759,7 @@ module tb_rarp(
         recvIp({8'd172, 8'd31, 8'd210, 8'd129});
         
         // DstIP 172.31.210.130
-        recvIp({8'd172, 8'd31, 8'd210, 8'd130});         
+        recvIp({8'd172, 8'd31, 8'd210, 8'd164});         
         
         /*--UDPHeader--*/
         // SrcPort

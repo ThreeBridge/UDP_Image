@@ -430,6 +430,8 @@ connect_debug_port u_ila_1/probe1 [get_nets [list {R_Arbiter/trans_image/clk_cnt
 connect_debug_port u_ila_1/probe2 [get_nets [list {R_Arbiter/trans_image/clk_cnt_reg__0__0[6]} {R_Arbiter/trans_image/clk_cnt_reg__0__0[7]} {R_Arbiter/trans_image/clk_cnt_reg__0__0[8]} {R_Arbiter/trans_image/clk_cnt_reg__0__0[9]} {R_Arbiter/trans_image/clk_cnt_reg__0__0[10]}]]
 
 
+connect_debug_port u_ila_0/probe2 [get_nets [list {R_Arbiter/recv_image/addra[0]} {R_Arbiter/recv_image/addra[1]} {R_Arbiter/recv_image/addra[2]} {R_Arbiter/recv_image/addra[3]} {R_Arbiter/recv_image/addra[4]} {R_Arbiter/recv_image/addra[5]} {R_Arbiter/recv_image/addra[6]} {R_Arbiter/recv_image/addra[7]} {R_Arbiter/recv_image/addra[8]} {R_Arbiter/recv_image/addra[9]} {R_Arbiter/recv_image/addra[10]} {R_Arbiter/recv_image/addra[11]} {R_Arbiter/recv_image/addra[12]} {R_Arbiter/recv_image/addra[13]}]]
+
 create_debug_core u_ila_0 ila
 set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
 set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
@@ -450,60 +452,56 @@ set_property port_width 11 [get_debug_ports u_ila_0/probe1]
 connect_debug_port u_ila_0/probe1 [get_nets [list {R_Arbiter/recv_image/csum_cnt[0]} {R_Arbiter/recv_image/csum_cnt[1]} {R_Arbiter/recv_image/csum_cnt[2]} {R_Arbiter/recv_image/csum_cnt[3]} {R_Arbiter/recv_image/csum_cnt[4]} {R_Arbiter/recv_image/csum_cnt[5]} {R_Arbiter/recv_image/csum_cnt[6]} {R_Arbiter/recv_image/csum_cnt[7]} {R_Arbiter/recv_image/csum_cnt[8]} {R_Arbiter/recv_image/csum_cnt[9]} {R_Arbiter/recv_image/csum_cnt[10]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe2]
-set_property port_width 14 [get_debug_ports u_ila_0/probe2]
-connect_debug_port u_ila_0/probe2 [get_nets [list {R_Arbiter/recv_image/addra[0]} {R_Arbiter/recv_image/addra[1]} {R_Arbiter/recv_image/addra[2]} {R_Arbiter/recv_image/addra[3]} {R_Arbiter/recv_image/addra[4]} {R_Arbiter/recv_image/addra[5]} {R_Arbiter/recv_image/addra[6]} {R_Arbiter/recv_image/addra[7]} {R_Arbiter/recv_image/addra[8]} {R_Arbiter/recv_image/addra[9]} {R_Arbiter/recv_image/addra[10]} {R_Arbiter/recv_image/addra[11]} {R_Arbiter/recv_image/addra[12]} {R_Arbiter/recv_image/addra[13]}]]
+set_property port_width 8 [get_debug_ports u_ila_0/probe2]
+connect_debug_port u_ila_0/probe2 [get_nets [list {R_Arbiter/recv_image/st[0]} {R_Arbiter/recv_image/st[1]} {R_Arbiter/recv_image/st[2]} {R_Arbiter/recv_image/st[3]} {R_Arbiter/recv_image/st[4]} {R_Arbiter/recv_image/st[5]} {R_Arbiter/recv_image/st[6]} {R_Arbiter/recv_image/st[7]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe3]
 set_property port_width 8 [get_debug_ports u_ila_0/probe3]
-connect_debug_port u_ila_0/probe3 [get_nets [list {R_Arbiter/recv_image/st[0]} {R_Arbiter/recv_image/st[1]} {R_Arbiter/recv_image/st[2]} {R_Arbiter/recv_image/st[3]} {R_Arbiter/recv_image/st[4]} {R_Arbiter/recv_image/st[5]} {R_Arbiter/recv_image/st[6]} {R_Arbiter/recv_image/st[7]}]]
+connect_debug_port u_ila_0/probe3 [get_nets [list {R_Arbiter/trans_image/st[0]} {R_Arbiter/trans_image/st[1]} {R_Arbiter/trans_image/st[2]} {R_Arbiter/trans_image/st[3]} {R_Arbiter/trans_image/st[4]} {R_Arbiter/trans_image/st[5]} {R_Arbiter/trans_image/st[6]} {R_Arbiter/trans_image/st[7]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe4]
-set_property port_width 8 [get_debug_ports u_ila_0/probe4]
-connect_debug_port u_ila_0/probe4 [get_nets [list {R_Arbiter/trans_image/st[0]} {R_Arbiter/trans_image/st[1]} {R_Arbiter/trans_image/st[2]} {R_Arbiter/trans_image/st[3]} {R_Arbiter/trans_image/st[4]} {R_Arbiter/trans_image/st[5]} {R_Arbiter/trans_image/st[6]} {R_Arbiter/trans_image/st[7]}]]
+set_property port_width 10 [get_debug_ports u_ila_0/probe4]
+connect_debug_port u_ila_0/probe4 [get_nets [list {R_Arbiter/trans_image/image_cnt[0]} {R_Arbiter/trans_image/image_cnt[1]} {R_Arbiter/trans_image/image_cnt[2]} {R_Arbiter/trans_image/image_cnt[3]} {R_Arbiter/trans_image/image_cnt[4]} {R_Arbiter/trans_image/image_cnt[5]} {R_Arbiter/trans_image/image_cnt[6]} {R_Arbiter/trans_image/image_cnt[7]} {R_Arbiter/trans_image/image_cnt[8]} {R_Arbiter/trans_image/image_cnt[9]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe5]
-set_property port_width 10 [get_debug_ports u_ila_0/probe5]
-connect_debug_port u_ila_0/probe5 [get_nets [list {R_Arbiter/trans_image/image_cnt[0]} {R_Arbiter/trans_image/image_cnt[1]} {R_Arbiter/trans_image/image_cnt[2]} {R_Arbiter/trans_image/image_cnt[3]} {R_Arbiter/trans_image/image_cnt[4]} {R_Arbiter/trans_image/image_cnt[5]} {R_Arbiter/trans_image/image_cnt[6]} {R_Arbiter/trans_image/image_cnt[7]} {R_Arbiter/trans_image/image_cnt[8]} {R_Arbiter/trans_image/image_cnt[9]}]]
+set_property port_width 4 [get_debug_ports u_ila_0/probe5]
+connect_debug_port u_ila_0/probe5 [get_nets [list {R_Arbiter/trans_image/packet_cnt_reg__0[0]} {R_Arbiter/trans_image/packet_cnt_reg__0[1]} {R_Arbiter/trans_image/packet_cnt_reg__0[2]} {R_Arbiter/trans_image/packet_cnt_reg__0[3]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe6]
-set_property port_width 4 [get_debug_ports u_ila_0/probe6]
-connect_debug_port u_ila_0/probe6 [get_nets [list {R_Arbiter/trans_image/packet_cnt_reg__0[0]} {R_Arbiter/trans_image/packet_cnt_reg__0[1]} {R_Arbiter/trans_image/packet_cnt_reg__0[2]} {R_Arbiter/trans_image/packet_cnt_reg__0[3]}]]
+set_property port_width 11 [get_debug_ports u_ila_0/probe6]
+connect_debug_port u_ila_0/probe6 [get_nets [list {R_Arbiter/trans_image/csum_cnt[0]} {R_Arbiter/trans_image/csum_cnt[1]} {R_Arbiter/trans_image/csum_cnt[2]} {R_Arbiter/trans_image/csum_cnt[3]} {R_Arbiter/trans_image/csum_cnt[4]} {R_Arbiter/trans_image/csum_cnt[5]} {R_Arbiter/trans_image/csum_cnt[6]} {R_Arbiter/trans_image/csum_cnt[7]} {R_Arbiter/trans_image/csum_cnt[8]} {R_Arbiter/trans_image/csum_cnt[9]} {R_Arbiter/trans_image/csum_cnt[10]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe7]
-set_property port_width 11 [get_debug_ports u_ila_0/probe7]
-connect_debug_port u_ila_0/probe7 [get_nets [list {R_Arbiter/trans_image/csum_cnt[0]} {R_Arbiter/trans_image/csum_cnt[1]} {R_Arbiter/trans_image/csum_cnt[2]} {R_Arbiter/trans_image/csum_cnt[3]} {R_Arbiter/trans_image/csum_cnt[4]} {R_Arbiter/trans_image/csum_cnt[5]} {R_Arbiter/trans_image/csum_cnt[6]} {R_Arbiter/trans_image/csum_cnt[7]} {R_Arbiter/trans_image/csum_cnt[8]} {R_Arbiter/trans_image/csum_cnt[9]} {R_Arbiter/trans_image/csum_cnt[10]}]]
+set_property port_width 8 [get_debug_ports u_ila_0/probe7]
+connect_debug_port u_ila_0/probe7 [get_nets [list {R_Arbiter/q_rxd[0][0]} {R_Arbiter/q_rxd[0][1]} {R_Arbiter/q_rxd[0][2]} {R_Arbiter/q_rxd[0][3]} {R_Arbiter/q_rxd[0][4]} {R_Arbiter/q_rxd[0][5]} {R_Arbiter/q_rxd[0][6]} {R_Arbiter/q_rxd[0][7]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe8]
 set_property port_width 8 [get_debug_ports u_ila_0/probe8]
-connect_debug_port u_ila_0/probe8 [get_nets [list {R_Arbiter/q_rxd[0][0]} {R_Arbiter/q_rxd[0][1]} {R_Arbiter/q_rxd[0][2]} {R_Arbiter/q_rxd[0][3]} {R_Arbiter/q_rxd[0][4]} {R_Arbiter/q_rxd[0][5]} {R_Arbiter/q_rxd[0][6]} {R_Arbiter/q_rxd[0][7]}]]
+connect_debug_port u_ila_0/probe8 [get_nets [list {R_Arbiter/imdata[0]} {R_Arbiter/imdata[1]} {R_Arbiter/imdata[2]} {R_Arbiter/imdata[3]} {R_Arbiter/imdata[4]} {R_Arbiter/imdata[5]} {R_Arbiter/imdata[6]} {R_Arbiter/imdata[7]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe9]
-set_property port_width 8 [get_debug_ports u_ila_0/probe9]
-connect_debug_port u_ila_0/probe9 [get_nets [list {R_Arbiter/imdata[0]} {R_Arbiter/imdata[1]} {R_Arbiter/imdata[2]} {R_Arbiter/imdata[3]} {R_Arbiter/imdata[4]} {R_Arbiter/imdata[5]} {R_Arbiter/imdata[6]} {R_Arbiter/imdata[7]}]]
+set_property port_width 4 [get_debug_ports u_ila_0/probe9]
+connect_debug_port u_ila_0/probe9 [get_nets [list {R_Arbiter/addr_cnt[0]} {R_Arbiter/addr_cnt[1]} {R_Arbiter/addr_cnt[2]} {R_Arbiter/addr_cnt[3]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe10]
-set_property port_width 4 [get_debug_ports u_ila_0/probe10]
-connect_debug_port u_ila_0/probe10 [get_nets [list {R_Arbiter/addr_cnt[0]} {R_Arbiter/addr_cnt[1]} {R_Arbiter/addr_cnt[2]} {R_Arbiter/addr_cnt[3]}]]
+set_property port_width 8 [get_debug_ports u_ila_0/probe10]
+connect_debug_port u_ila_0/probe10 [get_nets [list {gmii_rxd[0]} {gmii_rxd[1]} {gmii_rxd[2]} {gmii_rxd[3]} {gmii_rxd[4]} {gmii_rxd[5]} {gmii_rxd[6]} {gmii_rxd[7]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe11]
-set_property port_width 8 [get_debug_ports u_ila_0/probe11]
-connect_debug_port u_ila_0/probe11 [get_nets [list {gmii_rxd[0]} {gmii_rxd[1]} {gmii_rxd[2]} {gmii_rxd[3]} {gmii_rxd[4]} {gmii_rxd[5]} {gmii_rxd[6]} {gmii_rxd[7]}]]
+set_property port_width 1 [get_debug_ports u_ila_0/probe11]
+connect_debug_port u_ila_0/probe11 [get_nets [list R_Arbiter/recv_image/csum_ok]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe12]
 set_property port_width 1 [get_debug_ports u_ila_0/probe12]
-connect_debug_port u_ila_0/probe12 [get_nets [list R_Arbiter/recv_image/csum_ok]]
+connect_debug_port u_ila_0/probe12 [get_nets [list gmii_rxctl]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe13]
 set_property port_width 1 [get_debug_ports u_ila_0/probe13]
-connect_debug_port u_ila_0/probe13 [get_nets [list gmii_rxctl]]
+connect_debug_port u_ila_0/probe13 [get_nets [list R_Arbiter/recvend]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe14]
 set_property port_width 1 [get_debug_ports u_ila_0/probe14]
-connect_debug_port u_ila_0/probe14 [get_nets [list R_Arbiter/recvend]]
-create_debug_port u_ila_0 probe
-set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe15]
-set_property port_width 1 [get_debug_ports u_ila_0/probe15]
-connect_debug_port u_ila_0/probe15 [get_nets [list R_Arbiter/trans_err]]
+connect_debug_port u_ila_0/probe14 [get_nets [list R_Arbiter/trans_err]]
 create_debug_core u_ila_1 ila
 set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_1]
 set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_1]

@@ -32,6 +32,8 @@ module trans_image(
     imdata,
     recvend,
     //image_buffer,
+    my_MACadd,
+    my_IPadd,
     DstMAC,
     DstIP,
     SrcPort,
@@ -52,6 +54,8 @@ module trans_image(
     input [7:0] imdata;
     input       recvend;
     //input [7:0] image_buffer [9999:0];
+    input [47:0] my_MACadd;     //<--- add 2018.12.5
+    input [31:0] my_IPadd;      //--->
     input [47:0] DstMAC;
     input [31:0] DstIP;
     input [15:0] SrcPort;
@@ -489,7 +493,8 @@ module trans_image(
         if(ready_clk125)begin
             /*-イーサネットヘッダ-*/
             {TXBUF[0],TXBUF[1],TXBUF[2],TXBUF[3],TXBUF[4],TXBUF[5]} <= DstMAC_i;
-            {TXBUF[6],TXBUF[7],TXBUF[8],TXBUF[9],TXBUF[10],TXBUF[11]} <= `my_MAC;
+            //{TXBUF[6],TXBUF[7],TXBUF[8],TXBUF[9],TXBUF[10],TXBUF[11]} <= `my_MAC;
+            {TXBUF[6],TXBUF[7],TXBUF[8],TXBUF[9],TXBUF[10],TXBUF[11]} <= my_MACadd;
             {TXBUF[12],TXBUF[13]} <= FTYPE;
             /*-IPヘッダ-*/
             TXBUF[14] <= 8'h45;                             // Version/IHL
@@ -500,7 +505,8 @@ module trans_image(
             TXBUF[22] <= TTL;                               // Time To Live
             TXBUF[23] <= 8'h11;                             // Protocol 8'h11==8'd17==UDP
             {TXBUF[24],TXBUF[25]} <= 16'h00_00;             // IP Checksum
-            {TXBUF[26],TXBUF[27],TXBUF[28],TXBUF[29]} <= `my_IP;
+            //{TXBUF[26],TXBUF[27],TXBUF[28],TXBUF[29]} <= `my_IP;
+            {TXBUF[26],TXBUF[27],TXBUF[28],TXBUF[29]} <= my_IPadd;
             {TXBUF[30],TXBUF[31],TXBUF[32],TXBUF[33]} <= DstIP_i;
             /*-UDPヘッダ-*/
             {TXBUF[34],TXBUF[35]} <= DstPort_i;             // 発信元ポート番号
@@ -531,7 +537,8 @@ module trans_image(
     integer v_cnt_B;
     always_ff @(posedge eth_rxck)begin
         if(st==Hc_End)begin
-            {VBUF[0],VBUF[1],VBUF[2],VBUF[3]} <= `my_IP;
+            //{VBUF[0],VBUF[1],VBUF[2],VBUF[3]} <= `my_IP;
+            {VBUF[0],VBUF[1],VBUF[2],VBUF[3]} <= my_IPadd;
             {VBUF[4],VBUF[5],VBUF[6],VBUF[7]} <= DstIP_i;
             {VBUF[8],VBUF[9]} <= 16'h00_11;
             {VBUF[10],VBUF[11]} <= MsgSize+4'd8;

@@ -119,6 +119,7 @@ module TOP(
         .rst125(rst125),
         .clk125(clk125),
         .rst_btn(rst_btn),
+        .SW(SW),
         /*---OUTPUT---*/
         .arp_tx(arp_tx),
         .ping_tx(ping_tx),

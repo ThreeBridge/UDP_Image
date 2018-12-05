@@ -35,6 +35,8 @@ module ping(
     rx_cnt,
     arp_st,
     ping_st,
+    my_MACadd,
+    my_IPadd,
     //DstMAC,
     //DstIP,
     /*---Output---*/
@@ -52,6 +54,8 @@ module ping(
     input [10:0]    rx_cnt;
     input           arp_st;
     input           ping_st;
+    input [47:0]    my_MACadd;
+    input [31:0]    my_IPadd;
     //input [47:0]    DstMAC;
     //input [31:0]    DstIP;
     
@@ -373,7 +377,8 @@ module ping(
     always_ff @(posedge clk125)begin
         if(ready_clk125)begin
             {TXBUF[0],TXBUF[1],TXBUF[2],TXBUF[3],TXBUF[4],TXBUF[5]} <= DstMAC;
-            {TXBUF[6],TXBUF[7],TXBUF[8],TXBUF[9],TXBUF[10],TXBUF[11]} <= `my_MAC;
+            //{TXBUF[6],TXBUF[7],TXBUF[8],TXBUF[9],TXBUF[10],TXBUF[11]} <= `my_MAC;
+            {TXBUF[6],TXBUF[7],TXBUF[8],TXBUF[9],TXBUF[10],TXBUF[11]} <= my_MACadd;     // add 2018.12.5
             {TXBUF[12],TXBUF[13]} <= FTYPE;
             {TXBUF[14],TXBUF[15]} <= V_I_T;         // Version/IHL, TOS
             {TXBUF[16],TXBUF[17]} <= ToLen;         // Total Length         
@@ -383,7 +388,8 @@ module ping(
             //TXBUF[23] <= RXBUF[23];                 // Protocol ICMP=1
             TXBUF[23] <= Protocol;                 // Protocol ICMP=1
             {TXBUF[24],TXBUF[25]} <= 16'h00_00;     // Header Checksum
-            {TXBUF[26],TXBUF[27],TXBUF[28],TXBUF[29]} <= `my_IP;
+            //{TXBUF[26],TXBUF[27],TXBUF[28],TXBUF[29]} <= `my_IP;
+            {TXBUF[26],TXBUF[27],TXBUF[28],TXBUF[29]} <= my_IPadd;                      // add 2018.12.5
             {TXBUF[30],TXBUF[31],TXBUF[32],TXBUF[33]} <= DstIP;
             {TXBUF[34],TXBUF[35]} <= 16'h00_00;     // Echo Reply = {Type=8'h00,Code=8'h00}
             {TXBUF[36],TXBUF[37]} <= 16'h00_00;     // ICMP Checksum      
