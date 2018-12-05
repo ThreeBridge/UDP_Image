@@ -299,6 +299,7 @@ parameter  Recv_End    = 8'h03;
         .addr_cnt(addr_cnt),
         .rst_btn(rst_btn),
         .trans_err(trans_err),
+        .SW(SW),        // add 2018.12.5
         /*---Output---*/
         .imdata(imdata),
         .recvend(recvend),
@@ -324,6 +325,7 @@ parameter  Recv_End    = 8'h03;
         .DstIP(DstIP_UDP),
         .SrcPort(SrcPort),
         .DstPort(DstPort),
+        .SW(SW),        // add 2018.12.5
         /*---Output---*/
         .image_cnt(addr),
         .addr_cnt(addr_cnt),

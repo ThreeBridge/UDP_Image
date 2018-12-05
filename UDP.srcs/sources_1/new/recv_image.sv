@@ -44,6 +44,7 @@ module recv_image(
     addr_cnt,
     rst_btn,            // 任意のタイミングでのリセット
     trans_err,          // 送信エラー
+    SW,
     /*---Output---*/
     imdata,
     recvend,
@@ -71,7 +72,8 @@ module recv_image(
     
     input           rst_btn;
     input           trans_err;
-    
+    input [7:0]     SW;
+        
     (*dont_touch="true"*)output reg [7:0]  imdata;
     output reg        recvend;
     output reg [47:0] DstMAC;
@@ -96,7 +98,7 @@ module recv_image(
     parameter   MsgSize     =   16'd1000;
     
     /*---wire/register---*/
-    
+    wire [3:0] packet_cnt_sel = (SW[7:4]==4'd0) ? SW[7:4] : (SW[7:4] - 4'd1) ;    // add 2018.12.5
     
     reg [7:0]   RXBUF   [1045:0];
     reg [7:0]   VBUF    [1019:0];
@@ -148,7 +150,8 @@ module recv_image(
                 else if(err_cnt==3'b010) nx = ERROR;
             end
             Select : begin
-                if(packet_cnt==4'd9) nx = Recv_End;
+                //if(packet_cnt==4'd9) nx = Recv_End;
+                if(packet_cnt==packet_cnt_sel) nx = Recv_End;   // add 2018.12.5
                 else                 nx = Idle;
             end
             Recv_End : begin

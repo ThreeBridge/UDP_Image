@@ -22,6 +22,8 @@
 /*---trans_image.sv---*/
 // 受け取った画像データを受信時と同じく1,000バイトずつ送信
 // 送信準備 -> 送信終了 の遷移を10回繰り返すことで10,000バイト送信する
+// 送信回数をDIPスライドスイッチの入力から動的に設定できる.
+// MAC/IP address はDIPスライドスイッチの入力から動的に設定できる.
 
 module trans_image(
     /*---Input---*/
@@ -38,6 +40,7 @@ module trans_image(
     DstIP,
     SrcPort,
     DstPort,
+    SW,
     /*---Output---*/
     image_cnt,
     addr_cnt,
@@ -60,6 +63,7 @@ module trans_image(
     input [31:0] DstIP;
     input [15:0] SrcPort;
     input [15:0] DstPort;
+    input [7:0]  SW;
     
     output reg [9:0]   image_cnt;
     output reg [3:0]   addr_cnt;            
@@ -88,6 +92,8 @@ module trans_image(
     parameter   PckSize =   11'd1046;
     
     /*---wire/register---*/
+    wire [3:0] packet_cnt_sel = (SW[7:4]==4'd0) ? SW[7:4] : (SW[7:4] - 4'd1);
+    
     //reg [7:0]   image_buffer_i [9999:0];
     //reg [7:0]   image_buffer [999:0];
     reg [7:0]   image_bufferA [499:0];
@@ -148,7 +154,8 @@ module trans_image(
                 else if (rst_btn) nx = IDLE;
             end
             Select : begin
-                if(packet_cnt==4'd9) nx = Tx_End;
+                //if(packet_cnt==4'd9) nx = Tx_End;
+                if(packet_cnt==packet_cnt_sel) nx = Tx_End;       // add 2018.12.5
                 else                 nx = READY;
             end
             Tx_End : begin
@@ -200,7 +207,8 @@ module trans_image(
 //            if(image_cnt<((packet_cnt+2)*1000))
 //                image_cnt <= image_cnt + 14'b1;
 //        end
-        else if(st==Ucsum&&packet_cnt!=9)begin
+        //else if(st==Ucsum&&packet_cnt!=9)begin
+        else if(st==Ucsum&&packet_cnt!=packet_cnt_sel)begin     // add 2018.12.5
             if(image_cnt<1000)begin
                 image_cnt <= image_cnt + 10'b1;
             end
@@ -250,7 +258,8 @@ module trans_image(
             else
                 image_bufferB[d_img_cnt[1]-500] <= imdata ^ 8'hFF;
         end
-        else if(st==Ucsum&&packet_cnt!=9)begin
+        //else if(st==Ucsum&&packet_cnt!=9)begin
+        else if(st==Ucsum&&packet_cnt!=packet_cnt_sel)begin      // add 2018.12.5
             //image_buffer[image_cnt] <= imdata ^ 8'hFF;
             if(d_img_cnt[1]<500)
                 image_bufferA[d_img_cnt[1]] <= imdata ^ 8'hFF;
