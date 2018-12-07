@@ -66,7 +66,7 @@ module trans_image(
     input [7:0]  SW;
     
     output reg [9:0]   image_cnt;
-    output reg [3:0]   addr_cnt;            
+    output reg [8:0]   addr_cnt;            
     (*dont_touch="true"*)output               UDP_tx;
     (*dont_touch="true"*)output reg [8:0]    UDP_d;
     output reg         trans_err;
@@ -92,8 +92,21 @@ module trans_image(
     parameter   PckSize =   11'd1046;
     
     /*---wire/register---*/
-    wire [3:0] packet_cnt_sel = (SW[7:4]==4'd0) ? SW[7:4] : (SW[7:4] - 4'd1);
-    
+    //wire [3:0] packet_cnt_sel = (SW[7:4]==4'd0) ? SW[7:4] : (SW[7:4] - 4'd1);
+    wire [8:0] packet_cnt_sel = (SW[7:4]==4'd0) ? 4'd0 :                            // add 2018.12.6
+                                 (SW[7:4]==4'd1) ? 4'd1-1'b1 :
+                                 (SW[7:4]==4'd2) ? 4'd2-1'b1 :
+                                 (SW[7:4]==4'd3) ? 4'd4-1'b1 :
+                                 (SW[7:4]==4'd4) ? 4'd8-1'b1 :
+                                 (SW[7:4]==4'd5) ? 5'd16-1'b1 :
+                                 (SW[7:4]==4'd6) ? 6'd32-1'b1 :
+                                 (SW[7:4]==4'd7) ? 7'd64-1'b1 :
+                                 (SW[7:4]==4'd8) ? 8'd128-1'b1 :
+                                 (SW[7:4]==4'd9) ? 9'd256-1'b1 :
+                                 (SW[7:4]==4'd10) ? 4'd10-1'b1 :
+                                 8'd160-1'b1 ;
+
+
     //reg [7:0]   image_buffer_i [9999:0];
     //reg [7:0]   image_buffer [999:0];
     reg [7:0]   image_bufferA [499:0];
@@ -115,7 +128,7 @@ module trans_image(
     (*dont_touch="true"*)reg         csum_ok;
     reg [3:0]   err_cnt;
     (*dont_touch="true"*)reg         tx_end;
-    reg [4:0]   packet_cnt;
+    reg [8:0]   packet_cnt;
     //reg         Hcsum_st;
     reg [3:0]   ready_cnt;
     reg [9:0]   d_img_cnt [1:0];        // BlockRAMの出力が1サイクルずれるため
@@ -223,7 +236,7 @@ module trans_image(
     
     
     always_ff @(posedge eth_rxck)begin              // BRAMのアドレスを表現するためのもの
-        if(st==IDLE)        addr_cnt <= 4'b0;
+        if(st==IDLE)        addr_cnt <= 9'b0;
         else if(st==Hc_End) addr_cnt <= packet_cnt + 1;
     end
     
@@ -281,9 +294,9 @@ module trans_image(
     
     /*---パケット数のカウント---*/
     always_ff @(posedge eth_rxck)begin
-        if (rst_rx)             packet_cnt <= 5'd0;
-        else if (st==IDLE)      packet_cnt <= 5'd0;
-        else if (st==Select)    packet_cnt <= packet_cnt + 1;
+        if (rst_rx)             packet_cnt <= 9'd0;
+        else if (st==IDLE)      packet_cnt <= 9'd0;
+        else if (st==Select)    packet_cnt <= packet_cnt + 9'b1;
         else if (st==Tx_End)    packet_cnt <= 0;
     end    
     

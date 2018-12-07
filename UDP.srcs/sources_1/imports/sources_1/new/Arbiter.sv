@@ -83,7 +83,7 @@ parameter  Recv_End    = 8'h03;
     reg  [31:0] my_IPadd;
     always_comb begin
         my_MACadd   =  {44'h00_0A_35_02_0F_B,sw_sel};
-        my_IPadd    =  {8'd172,8'd31,8'd210,4'd10,sw_sel};  
+        my_IPadd    =  {8'd172,8'd31,8'd210,4'd10,sw_sel};
     end
     
     /* DstMAC */
@@ -273,7 +273,7 @@ parameter  Recv_End    = 8'h03;
     
     wire [7:0] imdata;
     wire [9:0] addr;
-    wire [3:0] addr_cnt;
+    wire [8:0] addr_cnt;
     wire    recvend;
     wire    trans_err;
     //wire [7:0] image_buffer [9999:0];

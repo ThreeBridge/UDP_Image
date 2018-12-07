@@ -68,7 +68,7 @@ module recv_image(
     input           UDP_st;
     input           els_packet;
     input [9:0]     addrb;
-    input [3:0]     addr_cnt;
+    input [8:0]     addr_cnt;
     
     input           rst_btn;
     input           trans_err;
@@ -98,7 +98,19 @@ module recv_image(
     parameter   MsgSize     =   16'd1000;
     
     /*---wire/register---*/
-    wire [3:0] packet_cnt_sel = (SW[7:4]==4'd0) ? SW[7:4] : (SW[7:4] - 4'd1) ;    // add 2018.12.5
+    //wire [3:0] packet_cnt_sel = (SW[7:4]==4'd0) ? SW[7:4] : (SW[7:4] - 4'd1) ;     // add 2018.12.5
+    wire [8:0] packet_cnt_sel = (SW[7:4]==4'd0) ? 4'd0 :                            // add 2018.12.6
+                                 (SW[7:4]==4'd1) ? 4'd1-1'b1 :
+                                 (SW[7:4]==4'd2) ? 4'd2-1'b1 :
+                                 (SW[7:4]==4'd3) ? 4'd4-1'b1 :
+                                 (SW[7:4]==4'd4) ? 4'd8-1'b1 :
+                                 (SW[7:4]==4'd5) ? 5'd16-1'b1 :
+                                 (SW[7:4]==4'd6) ? 6'd32-1'b1 :
+                                 (SW[7:4]==4'd7) ? 7'd64-1'b1 :
+                                 (SW[7:4]==4'd8) ? 8'd128-1'b1 :
+                                 (SW[7:4]==4'd9) ? 9'd256-1'b1 :
+                                 (SW[7:4]==4'd10) ? 4'd10-1'b1 :
+                                 8'd160-1'b1;
     
     reg [7:0]   RXBUF   [1045:0];
     reg [7:0]   VBUF    [1019:0];
@@ -115,7 +127,7 @@ module recv_image(
     (*dont_touch="true"*)reg [10:0]  d_csum_cnt;   
     (*dont_touch="true"*)reg         csum_ok;
     reg [2:0]   err_cnt;
-    reg [4:0]   packet_cnt;
+    reg [8:0]   packet_cnt;
 
     always_ff @(posedge eth_rxck)begin
         if (rst_rx) st <= Idle;
@@ -227,7 +239,7 @@ module recv_image(
     
     /*---RAM用データ---*/
     reg wea;
-    reg [13:0] addra;
+    reg [17:0] addra;
     always_ff @(posedge eth_rxck)begin
         if(st==Presv) begin
             if(rx_cnt==11'd41) wea <= 1'b1;
@@ -252,9 +264,9 @@ module recv_image(
     
     /*---パケット数のカウント---*/
     always_ff @(posedge eth_rxck)begin
-        if (rst_rx)                         packet_cnt <= 5'd0;
-        else if (rst_btn||trans_err)        packet_cnt <= 5'd0;
-        else if (st==Select)                packet_cnt <= packet_cnt + 1;
+        if (rst_rx)                         packet_cnt <= 9'd0;
+        else if (rst_btn||trans_err)        packet_cnt <= 9'd0;
+        else if (st==Select)                packet_cnt <= packet_cnt + 9'b1;
         else if (st==Recv_End||st==ERROR)   packet_cnt <= 0;
     end
     
@@ -450,7 +462,7 @@ module recv_image(
         .rst(rst)
     );
     
-    wire [13:0] addr_r = addrb + (addr_cnt * 1000);
+    wire [17:0] addr_r = addrb + (addr_cnt * 1000);
     
     /*---BlockRAM Generator---*/
     image_RAM image_RAM(
