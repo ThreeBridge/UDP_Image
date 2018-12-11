@@ -163,7 +163,8 @@ module trans_image(
                 if (err_cnt==4'd8) nx = Tx_En; 
             end
             Tx_En : begin
-                if (tx_end[3]) nx = Select;
+                //if (tx_end[3]) nx = Select;
+                if (tx_end_rxck[1]) nx = Select;
                 else if (rst_btn) nx = IDLE;
             end
             Select : begin
@@ -623,6 +624,14 @@ module trans_image(
             clk_cnt <= 0;
         end
     end
+//<-- moikawa add (2018.12.11)
+    (*dont_touch="true"*)reg [1:0] tx_end_rxck;
+    always_ff @(posedge eth_rxck)begin
+        if (rst_rx) tx_end_rxck <= 2'b0;
+        else        tx_end_rxck <= {tx_end_rxck[0], tx_end[3]};   
+    end    
+    
+//--> moikawa add (2018.12.11)
 
 //<-- moikawa add (2018.11.02)
        wire [10:0] txbuf_sel2 = clk_cnt;

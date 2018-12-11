@@ -433,6 +433,8 @@ connect_debug_port u_ila_1/probe2 [get_nets [list {R_Arbiter/trans_image/clk_cnt
 connect_debug_port u_ila_0/probe2 [get_nets [list {R_Arbiter/recv_image/addra[0]} {R_Arbiter/recv_image/addra[1]} {R_Arbiter/recv_image/addra[2]} {R_Arbiter/recv_image/addra[3]} {R_Arbiter/recv_image/addra[4]} {R_Arbiter/recv_image/addra[5]} {R_Arbiter/recv_image/addra[6]} {R_Arbiter/recv_image/addra[7]} {R_Arbiter/recv_image/addra[8]} {R_Arbiter/recv_image/addra[9]} {R_Arbiter/recv_image/addra[10]} {R_Arbiter/recv_image/addra[11]} {R_Arbiter/recv_image/addra[12]} {R_Arbiter/recv_image/addra[13]}]]
 
 
+connect_debug_port u_ila_0/probe5 [get_nets [list R_Arbiter/trans_image/tx_end]]
+
 create_debug_core u_ila_0 ila
 set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
 set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
@@ -443,7 +445,7 @@ set_property C_INPUT_PIPE_STAGES 0 [get_debug_cores u_ila_0]
 set_property C_TRIGIN_EN false [get_debug_cores u_ila_0]
 set_property C_TRIGOUT_EN false [get_debug_cores u_ila_0]
 set_property port_width 1 [get_debug_ports u_ila_0/clk]
-connect_debug_port u_ila_0/clk [get_nets [list clkgen/inst/clk125]]
+connect_debug_port u_ila_0/clk [get_nets [list clk125]]
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe0]
 set_property port_width 11 [get_debug_ports u_ila_0/probe0]
 connect_debug_port u_ila_0/probe0 [get_nets [list {R_Arbiter/trans_image/clk_cnt[0]} {R_Arbiter/trans_image/clk_cnt[1]} {R_Arbiter/trans_image/clk_cnt[2]} {R_Arbiter/trans_image/clk_cnt[3]} {R_Arbiter/trans_image/clk_cnt[4]} {R_Arbiter/trans_image/clk_cnt[5]} {R_Arbiter/trans_image/clk_cnt[6]} {R_Arbiter/trans_image/clk_cnt[7]} {R_Arbiter/trans_image/clk_cnt[8]} {R_Arbiter/trans_image/clk_cnt[9]} {R_Arbiter/trans_image/clk_cnt[10]}]]
@@ -466,11 +468,7 @@ connect_debug_port u_ila_0/probe4 [get_nets [list R_Arbiter/trans_image/ready_cl
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe5]
 set_property port_width 1 [get_debug_ports u_ila_0/probe5]
-connect_debug_port u_ila_0/probe5 [get_nets [list R_Arbiter/trans_image/tx_end]]
-create_debug_port u_ila_0 probe
-set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe6]
-set_property port_width 1 [get_debug_ports u_ila_0/probe6]
-connect_debug_port u_ila_0/probe6 [get_nets [list R_Arbiter/trans_image/ucend_clk125]]
+connect_debug_port u_ila_0/probe5 [get_nets [list R_Arbiter/trans_image/ucend_clk125]]
 create_debug_core u_ila_1 ila
 set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_1]
 set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_1]
