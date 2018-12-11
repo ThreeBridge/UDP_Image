@@ -127,7 +127,7 @@ module trans_image(
     (*dont_touch="true"*)reg [10:0]  csum_cnt;
     (*dont_touch="true"*)reg         csum_ok;
     reg [3:0]   err_cnt;
-    (*dont_touch="true"*)reg         tx_end;
+    (*dont_touch="true"*)reg [3:0]   tx_end;
     reg [8:0]   packet_cnt;
     //reg         Hcsum_st;
     reg [3:0]   ready_cnt;
@@ -163,7 +163,7 @@ module trans_image(
                 if (err_cnt==4'd8) nx = Tx_En; 
             end
             Tx_En : begin
-                if (tx_end) nx = Select;
+                if (tx_end[3]) nx = Select;
                 else if (rst_btn) nx = IDLE;
             end
             Select : begin
@@ -616,10 +616,10 @@ module trans_image(
         end
         else if(tx_en_clk125)begin
             clk_cnt <= clk_cnt + 1;
-            if(clk_cnt==PckSize+1) tx_end <= 1; 
+            if(clk_cnt==PckSize+1) tx_end <= 4'hF; 
         end
         else begin
-            tx_end <= 0;
+            tx_end <= {tx_end[2:0],1'b0};
             clk_cnt <= 0;
         end
     end

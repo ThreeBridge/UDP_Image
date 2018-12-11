@@ -208,7 +208,8 @@ parameter  Recv_End    = 8'h03;
             //if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[20],RXBUF[21]}==`OPR_ARP) arp_st <= 1;
             //if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[38],RXBUF[39],RXBUF[40],RXBUF[41]}==`my_IP) arp_st <= 4'h7;
             if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[38],RXBUF[39],RXBUF[40],RXBUF[41]}==my_IPadd) arp_st <= 4'h7;  // add 2018.12.5
-            else if(RXBUF[23]==8'h01) ping_st <= 3'h7;
+            //else if(RXBUF[23]==8'h01) ping_st <= 3'h7;
+            else if(RXBUF[23]==8'h01&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==my_IPadd) ping_st <= 3'h7;             // add 2018.12.11
             //else if(RXBUF[23]==8'h11&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==`my_IP) UDP_st  <= 3'h7;
             else if(RXBUF[23]==8'h11&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==my_IPadd) UDP_st  <= 3'h7;             // add 2018.12.5
             else els_packet <= 3'h7;
