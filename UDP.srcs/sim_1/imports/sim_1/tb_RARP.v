@@ -246,6 +246,7 @@ module tb_rarp(
       #16
       SW = 8'd4;
       #16
+      SW[3:0] = 4'd0;
       SW[7:4] = 4'd10;
       #16
       
@@ -293,17 +294,17 @@ module tb_rarp(
         // DstMAC
         recvMac(48'h00_00_00_00_00_00);
         // DstIP 172.31.203.236
-        recvIp({8'd172, 8'd31, 8'd210, 8'd130});
+        recvIp({8'd172, 8'd31, 8'd210, 8'd160});
         /* パディング */
         for(i=0;i<18;i=i+1)begin
             recvByte(8'h00);
         end
         
         /* CRC */
-        recvByte(8'h7E);
-        recvByte(8'hF9);
-        recvByte(8'h00);
-        recvByte(8'h9A);
+        recvByte(8'h9B);
+        recvByte(8'h89);
+        recvByte(8'h30);
+        recvByte(8'hC8);
         P_RXDV = 0;
         
         //P_RXCLK = 0;

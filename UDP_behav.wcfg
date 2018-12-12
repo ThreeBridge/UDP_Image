@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="447060478200fs"></ZoomStartTime>
-      <ZoomEndTime time="462587904361fs"></ZoomEndTime>
-      <Cursor1Time time="460000000000fs"></Cursor1Time>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="460000000001fs"></ZoomEndTime>
+      <Cursor1Time time="10958000000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="153"></NameColumnWidth>
+      <NameColumnWidth column_width="145"></NameColumnWidth>
       <ValueColumnWidth column_width="62"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="193" />
+   <WVObjectSize size="201" />
    <wave_markers>
       <marker label="" time="32952830000" />
       <marker label="" time="216326000000" />
@@ -506,6 +506,34 @@
       <obj_property name="ElementShortName">r_crc[31:0]</obj_property>
       <obj_property name="ObjectShortName">r_crc[31:0]</obj_property>
    </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/crc_ok">
+      <obj_property name="ElementShortName">crc_ok</obj_property>
+      <obj_property name="ObjectShortName">crc_ok</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/arp_st[3]">
+      <obj_property name="ElementShortName">[3]</obj_property>
+      <obj_property name="ObjectShortName">[3]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/arp_st">
+      <obj_property name="ElementShortName">arp_st[3:0]</obj_property>
+      <obj_property name="ObjectShortName">arp_st[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ARP/arp_tx">
+      <obj_property name="ElementShortName">arp_tx</obj_property>
+      <obj_property name="ObjectShortName">arp_tx</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ARP/d">
+      <obj_property name="ElementShortName">d[8:0]</obj_property>
+      <obj_property name="ObjectShortName">d[8:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/txd">
+      <obj_property name="ElementShortName">txd[7:0]</obj_property>
+      <obj_property name="ObjectShortName">txd[7:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/gmii_txctl">
+      <obj_property name="ElementShortName">gmii_txctl</obj_property>
+      <obj_property name="ObjectShortName">gmii_txctl</obj_property>
+   </wvobject>
    <wvobject fp_name="divider241" type="divider">
       <obj_property name="label">recv_image</obj_property>
       <obj_property name="DisplayName">label</obj_property>
@@ -575,8 +603,8 @@
       <obj_property name="ObjectShortName">rst_btn</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/packet_cnt">
-      <obj_property name="ElementShortName">packet_cnt[4:0]</obj_property>
-      <obj_property name="ObjectShortName">packet_cnt[4:0]</obj_property>
+      <obj_property name="ElementShortName">packet_cnt[8:0]</obj_property>
+      <obj_property name="ObjectShortName">packet_cnt[8:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/wea">
@@ -584,8 +612,8 @@
       <obj_property name="ObjectShortName">wea</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/addra">
-      <obj_property name="ElementShortName">addra[13:0]</obj_property>
-      <obj_property name="ObjectShortName">addra[13:0]</obj_property>
+      <obj_property name="ElementShortName">addra[17:0]</obj_property>
+      <obj_property name="ObjectShortName">addra[17:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/rxd">
@@ -733,8 +761,8 @@
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/addr_r">
-      <obj_property name="ElementShortName">addr_r[13:0]</obj_property>
-      <obj_property name="ObjectShortName">addr_r[13:0]</obj_property>
+      <obj_property name="ElementShortName">addr_r[17:0]</obj_property>
+      <obj_property name="ObjectShortName">addr_r[17:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/imdata">
@@ -753,9 +781,14 @@
       <obj_property name="ObjectShortName">[1][9:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/d_img_cnt[2]">
+      <obj_property name="ElementShortName">[2][9:0]</obj_property>
+      <obj_property name="ObjectShortName">[2][9:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/d_img_cnt">
-      <obj_property name="ElementShortName">d_img_cnt[1:0][9:0]</obj_property>
-      <obj_property name="ObjectShortName">d_img_cnt[1:0][9:0]</obj_property>
+      <obj_property name="ElementShortName">d_img_cnt[2:0][9:0]</obj_property>
+      <obj_property name="ObjectShortName">d_img_cnt[2:0][9:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/txbuf_sel2">
@@ -808,8 +841,8 @@
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/packet_cnt">
-      <obj_property name="ElementShortName">packet_cnt[4:0]</obj_property>
-      <obj_property name="ObjectShortName">packet_cnt[4:0]</obj_property>
+      <obj_property name="ElementShortName">packet_cnt[8:0]</obj_property>
+      <obj_property name="ObjectShortName">packet_cnt[8:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/data_en">

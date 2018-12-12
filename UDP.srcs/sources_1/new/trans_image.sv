@@ -262,36 +262,79 @@ module trans_image(
         d_img_cnt <= {d_img_cnt[1:0],image_cnt};
     end
     
+    //<-- add 2018.12.12
+    reg [8:0] d_packet_cnt;
+    always_ff @(posedge eth_rxck)begin
+        d_packet_cnt <= packet_cnt;
+    end
+    //-->
+    
+    
     integer bufferA;
     integer bufferB;    
+//    always_ff @(posedge eth_rxck)begin
+//        if(st==Presv)begin
+//            //image_buffer[image_cnt] <= imdata ^ 8'hFF;
+//            if(d_img_cnt[2]<500)
+//                image_bufferA[d_img_cnt[2]] <= imdata ^ 8'hFF;
+//            else
+//                image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
+//        end
+//        //else if(st==Ucsum&&packet_cnt!=9)begin
+//        //else if(st==Ucsum&&packet_cnt!=packet_cnt_sel)begin      // add 2018.12.5
+//        else if(st==Ucsum&&d_packet_cnt!=packet_cnt_sel)begin
+//            //image_buffer[image_cnt] <= imdata ^ 8'hFF;
+//            if(d_img_cnt[2]<500)
+//                image_bufferA[d_img_cnt[2]] <= imdata ^ 8'hFF;
+//            else
+//                image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
+//        end
+//        else if(st==IDLE)begin
+////            for(buffer=0;buffer<1000;buffer=buffer+1)begin
+////                image_buffer[buffer] <= 8'b0;
+////            end
+//            for(bufferA=0;bufferA<500;bufferA=bufferA+1)begin
+//                image_bufferA[bufferA] <= 8'b0;
+//            end
+//            for(bufferB=0;bufferB<500;bufferB=bufferB+1)begin
+//                image_bufferB[bufferB] <= 8'h55;    // dummy
+//            end
+//        end
+//    end
+    //<-- add 2018.12.12
     always_ff @(posedge eth_rxck)begin
         if(st==Presv)begin
-            //image_buffer[image_cnt] <= imdata ^ 8'hFF;
             if(d_img_cnt[2]<500)
                 image_bufferA[d_img_cnt[2]] <= imdata ^ 8'hFF;
-            else
-                image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
         end
-        //else if(st==Ucsum&&packet_cnt!=9)begin
-        else if(st==Ucsum&&packet_cnt!=packet_cnt_sel)begin      // add 2018.12.5
-            //image_buffer[image_cnt] <= imdata ^ 8'hFF;
+        else if(st==Ucsum&&d_packet_cnt!=packet_cnt_sel)begin
             if(d_img_cnt[2]<500)
                 image_bufferA[d_img_cnt[2]] <= imdata ^ 8'hFF;
-            else
-                image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
         end
         else if(st==IDLE)begin
-//            for(buffer=0;buffer<1000;buffer=buffer+1)begin
-//                image_buffer[buffer] <= 8'b0;
-//            end
             for(bufferA=0;bufferA<500;bufferA=bufferA+1)begin
                 image_bufferA[bufferA] <= 8'b0;
             end
+        end
+    end
+    
+    always_ff @(posedge eth_rxck)begin
+        if(st==Presv)begin
+            if(d_img_cnt[2]>=500)
+                image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
+        end
+        else if(st==Ucsum&&d_packet_cnt!=packet_cnt_sel)begin
+            if(d_img_cnt[2]>=500)
+                image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
+        end
+        else if(st==IDLE)begin
             for(bufferB=0;bufferB<500;bufferB=bufferB+1)begin
                 image_bufferB[bufferB] <= 8'h55;    // dummy
             end
         end
     end
+    //-->
+    
     
     /*---パケット数のカウント---*/
     always_ff @(posedge eth_rxck)begin

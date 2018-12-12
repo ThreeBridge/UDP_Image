@@ -294,7 +294,7 @@ parameter  Recv_End    = 8'h03;
         .rx_cnt(rx_cnt),
         .arp_st(arp_st[0]),
         .ping_st(ping_st[0]),
-        .UDP_st(UDP_st[0]),
+        .UDP_st(UDP_st[2]),
         .els_packet(els_packet[0]),
         .addrb(addr),
         .addr_cnt(addr_cnt),
