@@ -245,7 +245,9 @@ module tb_rarp(
       SW = 8'd3;
       #16
       SW = 8'd4;
-      #16      
+      #16
+      SW[7:4] = 4'd10;
+      #16
       
       #5000
       // プリアンブル
@@ -759,7 +761,7 @@ module tb_rarp(
         recvIp({8'd172, 8'd31, 8'd210, 8'd129});
         
         // DstIP 172.31.210.130
-        recvIp({8'd172, 8'd31, 8'd210, 8'd164});         
+        recvIp({8'd172, 8'd31, 8'd210, 8'd130});         
         
         /*--UDPHeader--*/
         // SrcPort
@@ -787,10 +789,10 @@ module tb_rarp(
         repeat(100) recvByte(8'hFF);    // 1000
         
         // CRC
-        recvByte(8'h21);
-        recvByte(8'hE2);
-        recvByte(8'hA1);
-        recvByte(8'hB9);
+        recvByte(8'hA2);
+        recvByte(8'hF8);
+        recvByte(8'hC1);
+        recvByte(8'h54);
         P_RXDV = 0;
         
         //P_RXCLK = 0;

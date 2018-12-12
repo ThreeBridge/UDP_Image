@@ -461,8 +461,13 @@ module recv_image(
         .csum_o(csum),
         .rst(rst)
     );
-    
+    /*
     wire [17:0] addr_r = addrb + (addr_cnt * 1000);
+    */
+    reg [17:0] addr_r;
+    always_ff @(posedge eth_rxck)begin
+        addr_r <= addrb + (addr_cnt * 1000);
+    end
     
     /*---BlockRAM Generator---*/
     image_RAM image_RAM(

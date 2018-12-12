@@ -131,7 +131,7 @@ module trans_image(
     reg [8:0]   packet_cnt;
     //reg         Hcsum_st;
     reg [3:0]   ready_cnt;
-    reg [9:0]   d_img_cnt [1:0];        // BlockRAMの出力が1サイクルずれるため
+    reg [9:0]   d_img_cnt [2:0];        // BlockRAMの出力が1サイクルずれるため & recv_image側でimage_cntにFFを挟むため
     
     always_ff @(posedge eth_rxck)begin
         if (rst_rx) st <= IDLE;
@@ -145,7 +145,7 @@ module trans_image(
                 if (recvend) nx = Presv;
             end
             Presv : begin
-                if (d_img_cnt[1]>10'd999) nx = READY;
+                if (d_img_cnt[2]>10'd999) nx = READY;
             end
             READY : begin
                 if (ready_cnt==4'd8) nx = Hcsum;
@@ -259,7 +259,7 @@ module trans_image(
     
     
     always_ff @(posedge eth_rxck)begin
-        d_img_cnt <= {d_img_cnt[0],image_cnt};
+        d_img_cnt <= {d_img_cnt[1:0],image_cnt};
     end
     
     integer bufferA;
@@ -267,18 +267,18 @@ module trans_image(
     always_ff @(posedge eth_rxck)begin
         if(st==Presv)begin
             //image_buffer[image_cnt] <= imdata ^ 8'hFF;
-            if(d_img_cnt[1]<500)
-                image_bufferA[d_img_cnt[1]] <= imdata ^ 8'hFF;
+            if(d_img_cnt[2]<500)
+                image_bufferA[d_img_cnt[2]] <= imdata ^ 8'hFF;
             else
-                image_bufferB[d_img_cnt[1]-500] <= imdata ^ 8'hFF;
+                image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
         end
         //else if(st==Ucsum&&packet_cnt!=9)begin
         else if(st==Ucsum&&packet_cnt!=packet_cnt_sel)begin      // add 2018.12.5
             //image_buffer[image_cnt] <= imdata ^ 8'hFF;
-            if(d_img_cnt[1]<500)
-                image_bufferA[d_img_cnt[1]] <= imdata ^ 8'hFF;
+            if(d_img_cnt[2]<500)
+                image_bufferA[d_img_cnt[2]] <= imdata ^ 8'hFF;
             else
-                image_bufferB[d_img_cnt[1]-500] <= imdata ^ 8'hFF;
+                image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
         end
         else if(st==IDLE)begin
 //            for(buffer=0;buffer<1000;buffer=buffer+1)begin
