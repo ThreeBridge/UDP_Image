@@ -79,8 +79,8 @@ parameter  Recv_End    = 8'h03;
     
     /*---MAC/IP addressをDIPスイッチを使って任意に決める(add 2018.12.5)---*/
     wire [3:0] sw_sel = {SW[3],SW[2],SW[1],SW[0]};
-    reg  [47:0] my_MACadd;
-    reg  [31:0] my_IPadd;
+    (*dont_touch="true"*)reg  [47:0] my_MACadd;
+    (*dont_touch="true"*)reg  [31:0] my_IPadd;
     always_comb begin
         my_MACadd   =  {44'h00_0A_35_02_0F_B,sw_sel};
         my_IPadd    =  {8'd172,8'd31,8'd210,4'd10,sw_sel};
@@ -199,10 +199,10 @@ parameter  Recv_End    = 8'h03;
     end
      
     /*---パケットの種類振り分け---*/
-    reg [3:0] arp_st;       // ARP Packet
-    reg [2:0] ping_st;      // ICMP Echo Packet(ping)
-    reg [2:0] UDP_st;       // UDP Packet
-    reg [2:0] els_packet;   // else Packet
+    (*dont_touch="true"*)reg [3:0] arp_st;       // ARP Packet
+    (*dont_touch="true"*)reg [2:0] ping_st;      // ICMP Echo Packet(ping)
+    (*dont_touch="true"*)reg [2:0] UDP_st;       // UDP Packet
+    (*dont_touch="true"*)reg [2:0] els_packet;   // else Packet
     always_ff @(posedge eth_rxck)begin
         if(crc_ok)begin
             //if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[20],RXBUF[21]}==`OPR_ARP) arp_st <= 1;
