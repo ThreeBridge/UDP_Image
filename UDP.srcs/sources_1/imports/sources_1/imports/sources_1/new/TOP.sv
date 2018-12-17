@@ -101,6 +101,9 @@ module TOP(
     );
     
     wire rst_btn = BTN_C;
+    wire arp_tx_en;
+    wire ping_tx_en;
+    wire UDP_tx_en;
     wire arp_tx;
     wire ping_tx;
     wire UDP_btn_tx;        // ボタン入力によるUDP送信
@@ -121,6 +124,9 @@ module TOP(
         .rst_btn(rst_btn),
         .SW(SW),
         /*---OUTPUT---*/
+        .arp_tx_en(arp_tx_en),
+        .ping_tx_en(ping_tx_en),
+        .UDP_tx_en(UDP_tx_en),
         .arp_tx(arp_tx),
         .ping_tx(ping_tx),
         .UDP_tx(UDP_tx),
@@ -135,12 +141,16 @@ module TOP(
         .ping_d(ping_d),
         .UDP_btn_d(UDP_btn_d),
         .UDP_d(UDP_d),
+        .arp_tx_en(arp_tx_en),
+        .ping_tx_en(ping_tx_en),
+        .UDP_tx_en(UDP_tx_en),
         .arp_tx(arp_tx),
         .ping_tx(ping_tx),
         .UDP_btn_tx(UDP_btn_tx),
         .UDP_tx(UDP_tx),
+        .eth_rxck(eth_rxck),
         .clk125(clk125),
-        .clk125_90(clk125_90),
+        //.clk125_90(clk125_90),
         .rst125(rst125),
         .txd(gmii_txd),
         .gmii_txctl(gmii_txctl),

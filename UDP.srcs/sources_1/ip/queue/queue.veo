@@ -55,18 +55,22 @@
 
 //----------- Begin Cut here for INSTANTIATION Template ---// INST_TAG
 queue your_instance_name (
-  .clk(clk),                // input wire clk
-  .srst(srst),              // input wire srst
-  .din(din),                // input wire [8 : 0] din
-  .wr_en(wr_en),            // input wire wr_en
-  .rd_en(rd_en),            // input wire rd_en
-  .dout(dout),              // output wire [8 : 0] dout
-  .full(full),              // output wire full
-  .overflow(overflow),      // output wire overflow
-  .empty(empty),            // output wire empty
-  .valid(valid),            // output wire valid
-  .underflow(underflow),    // output wire underflow
-  .data_count(data_count)  // output wire [10 : 0] data_count
+  .rst(rst),                      // input wire rst
+  .wr_clk(wr_clk),                // input wire wr_clk
+  .rd_clk(rd_clk),                // input wire rd_clk
+  .din(din),                      // input wire [8 : 0] din
+  .wr_en(wr_en),                  // input wire wr_en
+  .rd_en(rd_en),                  // input wire rd_en
+  .dout(dout),                    // output wire [8 : 0] dout
+  .full(full),                    // output wire full
+  .overflow(overflow),            // output wire overflow
+  .empty(empty),                  // output wire empty
+  .valid(valid),                  // output wire valid
+  .underflow(underflow),          // output wire underflow
+  .rd_data_count(rd_data_count),  // output wire [10 : 0] rd_data_count
+  .wr_data_count(wr_data_count),  // output wire [10 : 0] wr_data_count
+  .wr_rst_busy(wr_rst_busy),      // output wire wr_rst_busy
+  .rd_rst_busy(rd_rst_busy)      // output wire rd_rst_busy
 );
 // INST_TAG_END ------ End INSTANTIATION Template ---------
 

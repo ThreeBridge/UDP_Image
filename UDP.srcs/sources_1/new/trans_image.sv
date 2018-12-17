@@ -44,6 +44,7 @@ module trans_image(
     /*---Output---*/
     image_cnt,
     addr_cnt,
+    tx_en,
     UDP_tx,
     UDP_d,
     trans_err       // 送信エラー
@@ -66,7 +67,8 @@ module trans_image(
     input [7:0]  SW;
     
     output reg [9:0]   image_cnt;
-    output reg [8:0]   addr_cnt;            
+    output reg [8:0]   addr_cnt;   
+    output reg         tx_en;         
     (*dont_touch="true"*)output               UDP_tx;
     (*dont_touch="true"*)output reg [8:0]    UDP_d;
     output reg         trans_err;
@@ -127,10 +129,10 @@ module trans_image(
     (*dont_touch="true"*)reg [10:0]  csum_cnt;
     (*dont_touch="true"*)reg         csum_ok;
     reg [3:0]   err_cnt;
-    (*dont_touch="true"*)reg [3:0]   tx_end;
+    (*dont_touch="true"*)reg         tx_end;
     reg [8:0]   packet_cnt;
     //reg         Hcsum_st;
-    reg [3:0]   ready_cnt;
+    //reg [3:0]   ready_cnt;
     reg [9:0]   d_img_cnt [2:0];        // BlockRAMの出力が1サイクルずれるため & recv_image側でimage_cntにFFを挟むため
     
     always_ff @(posedge eth_rxck)begin
@@ -148,7 +150,8 @@ module trans_image(
                 if (d_img_cnt[2]>10'd999) nx = READY;
             end
             READY : begin
-                if (ready_cnt==4'd8) nx = Hcsum;
+                //if (ready_cnt==4'd8) nx = Hcsum;
+                nx = Hcsum;
             end
             Hcsum : begin
                 if (csum_cnt==11'd22) nx = Hc_End;
@@ -164,7 +167,8 @@ module trans_image(
             end
             Tx_En : begin
                 //if (tx_end[3]) nx = Select;
-                if (tx_end_rxck[1]) nx = Select;
+                //if (tx_end_rxck[1]) nx = Select;
+                if(tx_end)        nx = Select;
                 else if (rst_btn) nx = IDLE;
             end
             Select : begin
@@ -484,60 +488,60 @@ module trans_image(
     end    
     
     /*---READY Extend---*/
-    always_ff @(posedge eth_rxck)begin
-        if(st==READY)begin
-            ready_cnt <= ready_cnt + 1'b1;
-        end
-        else begin
-            ready_cnt <= 4'b0;
-        end
-    end
+//    always_ff @(posedge eth_rxck)begin
+//        if(st==READY)begin
+//            ready_cnt <= ready_cnt + 1'b1;
+//        end
+//        else begin
+//            ready_cnt <= 4'b0;
+//        end
+//    end
     
-    reg ready_rxck;                
-    always_ff @(posedge eth_rxck)begin
-        if(ready_cnt>=1&&ready_cnt<=3)begin
-            ready_rxck <= 1;
-        end
-        else begin
-            ready_rxck <= 0;
-        end
-    end
+//    reg ready_rxck;                
+//    always_ff @(posedge eth_rxck)begin
+//        if(ready_cnt>=1&&ready_cnt<=3)begin
+//            ready_rxck <= 1;
+//        end
+//        else begin
+//            ready_rxck <= 0;
+//        end
+//    end
 
-    reg ready_clk125;
-    reg ready_clk125_d;
-    always_ff @(posedge clk125)begin
-        ready_clk125_d <= ready_rxck;
-        ready_clk125 <= ready_clk125_d;
-    end
+//    reg ready_clk125;
+//    reg ready_clk125_d;
+//    always_ff @(posedge clk125)begin
+//        ready_clk125_d <= ready_rxck;
+//        ready_clk125 <= ready_clk125_d;
+//    end
     
     /*---tx_Hcend Extend---*/
-    reg hcend_rxck;      
-    reg ucend_rxck;  
-    always_ff @(posedge eth_rxck)begin
-        if(st==Hc_End) begin
-            if(err_cnt>=1&&err_cnt<=3)   hcend_rxck <= 1;
-            else                         hcend_rxck <= 0;
-        end 
-        else if(st==Uc_End)begin
-            if(err_cnt>=1&&err_cnt<=3)   ucend_rxck <= 1;
-            else                         ucend_rxck <= 0;
-        end
-        else begin
-            hcend_rxck <= 0;
-            ucend_rxck <= 0;
-        end
-    end
+//    reg hcend_rxck;      
+//    reg ucend_rxck;  
+//    always_ff @(posedge eth_rxck)begin
+//        if(st==Hc_End) begin
+//            if(err_cnt>=1&&err_cnt<=3)   hcend_rxck <= 1;
+//            else                         hcend_rxck <= 0;
+//        end 
+//        else if(st==Uc_End)begin
+//            if(err_cnt>=1&&err_cnt<=3)   ucend_rxck <= 1;
+//            else                         ucend_rxck <= 0;
+//        end
+//        else begin
+//            hcend_rxck <= 0;
+//            ucend_rxck <= 0;
+//        end
+//    end
     
-    reg hcend_clk125;
-    reg hcend_clk125_d;
-    reg ucend_clk125;
-    reg ucend_clk125_d;
-    always_ff @(posedge clk125)begin
-        hcend_clk125_d <= hcend_rxck;
-        hcend_clk125 <= hcend_clk125_d;
-        ucend_clk125_d <= ucend_rxck;
-        ucend_clk125 <= ucend_clk125_d;
-    end  
+//    reg hcend_clk125;
+//    reg hcend_clk125_d;
+//    reg ucend_clk125;
+//    reg ucend_clk125_d;
+//    always_ff @(posedge clk125)begin
+//        hcend_clk125_d <= hcend_rxck;
+//        hcend_clk125 <= hcend_clk125_d;
+//        ucend_clk125_d <= ucend_rxck;
+//        ucend_clk125 <= ucend_clk125_d;
+//    end  
     
     reg [15:0] csum_extend;
     always_ff @(posedge eth_rxck)begin 
@@ -555,8 +559,10 @@ module trans_image(
     /*---UDPパケット準備---*/
     integer tx_A;
     integer tx_B;
-    always_ff @(posedge clk125)begin
-        if(ready_clk125)begin
+    //always_ff @(posedge clk125)begin
+    always_ff @(posedge eth_rxck)begin
+        //if(ready_clk125)begin
+        if(st==READY)begin
             /*-イーサネットヘッダ-*/
             {TXBUF[0],TXBUF[1],TXBUF[2],TXBUF[3],TXBUF[4],TXBUF[5]} <= DstMAC_i;
             //{TXBUF[6],TXBUF[7],TXBUF[8],TXBUF[9],TXBUF[10],TXBUF[11]} <= `my_MAC;
@@ -586,8 +592,10 @@ module trans_image(
             {TXBUF[1042],TXBUF[1043],TXBUF[1044],TXBUF[1045]} <= 32'h01_02_03_04;   // dummy
             //Hcsum_st <= 1;
         end
-        else if(hcend_clk125)    {TXBUF[24],TXBUF[25]} <= csum_extend;
-        else if(ucend_clk125)    {TXBUF[40],TXBUF[41]} <= csum_extend;
+        //else if(hcend_clk125)    {TXBUF[24],TXBUF[25]} <= csum_extend;
+        //else if(ucend_clk125)    {TXBUF[40],TXBUF[41]} <= csum_extend;
+        else if(st==Hc_End)    {TXBUF[24],TXBUF[25]} <= csum_extend;
+        else if(st==Uc_End)    {TXBUF[40],TXBUF[41]} <= csum_extend;
         /*
         else if(st==IDLE)begin
             for(j=0;j<11'd1046;j=j+1) TXBUF[j] <= 0;
@@ -637,43 +645,47 @@ module trans_image(
     データを出すクロックを"clk125"で行うために,ステートがTx_Enであると"HIGH"になる信号を
     clk125を用いて生成している.
     */
-    reg tx_en;
-    always_ff @(posedge eth_rxck)begin
-       if(st==Tx_En) tx_en <= 1'b1;
-       else          tx_en <= 1'b0;  
-    end
-    reg tx_en_clk125;
-    reg tx_en_clk125_d;
+//    reg tx_en;
+//    always_ff @(posedge eth_rxck)begin
+//       if(st==Tx_En) tx_en <= 1'b1;
+//       else          tx_en <= 1'b0;  
+//    end
     
-    always_ff @(posedge clk125) begin
-       tx_en_clk125_d <= tx_en;
-       tx_en_clk125 <= tx_en_clk125_d; 
-    end
+//    reg tx_en_clk125;
+//    reg tx_en_clk125_d;
+    
+//    always_ff @(posedge clk125) begin
+//       tx_en_clk125_d <= tx_en;
+//       tx_en_clk125 <= tx_en_clk125_d; 
+//    end
     //---------->
     
     /*---送信---*/
     (*dont_touch="true"*)reg [10:0] clk_cnt;
-    always_ff @(posedge clk125)begin
-        if(ready_clk125)begin
+    //always_ff @(posedge clk125)begin
+    always_ff @(posedge eth_rxck)begin
+        //if(ready_clk125)begin
+        if(st==READY)begin
             tx_end <= 0;
             clk_cnt <= 0;
         end
-        else if(tx_en_clk125)begin
+        //else if(tx_en_clk125)begin
+        else if(st==Tx_En)begin
             clk_cnt <= clk_cnt + 1;
-            if(clk_cnt==PckSize+1) tx_end <= 4'hF; 
+            if(clk_cnt==PckSize+1) tx_end <= 1'b1; 
         end
         else begin
-            tx_end <= {tx_end[2:0],1'b0};
+            //tx_end <= {tx_end[2:0],1'b0};
+            tx_end <= 1'b0;
             clk_cnt <= 0;
         end
     end
 //<-- moikawa add (2018.12.11)
-    (*dont_touch="true"*)reg [1:0] tx_end_rxck;
-    always_ff @(posedge eth_rxck)begin
-        if (rst_rx) tx_end_rxck <= 2'b0;
-        else        tx_end_rxck <= {tx_end_rxck[0], tx_end[3]};   
-    end    
-    
+//    (*dont_touch="true"*)reg [1:0] tx_end_rxck;
+//    always_ff @(posedge eth_rxck)begin
+//        if (rst_rx) tx_end_rxck <= 2'b0;
+//        else        tx_end_rxck <= {tx_end_rxck[0], tx_end[3]};   
+//    end    
 //--> moikawa add (2018.12.11)
 
 //<-- moikawa add (2018.11.02)
@@ -683,16 +695,20 @@ module trans_image(
 //--> moikawa add (2018.11.02)
     reg [1:0] delay_tx;;
     reg [2:0] fcs_cnt;
-    always_ff @(posedge clk125)begin
-        if(tx_en_clk125&&clk_cnt<(PckSize-3'd3))begin
+    //always_ff @(posedge clk125)begin
+    always_ff @(posedge eth_rxck)begin
+        //if(tx_en_clk125&&clk_cnt<(PckSize-3'd3))begin
+        if(st==Tx_En&&clk_cnt<(PckSize-3'd3))begin
             UDP_d <= {1'b1,data_pipe2[data_pipe_sel2]};
             delay_tx <= {delay_tx[0],1'b1};     // pipeによる遅延を考慮
         end
-        else if(tx_en_clk125&&fcs_cnt!=3'b100)begin
+        //else if(tx_en_clk125&&fcs_cnt!=3'b100)begin
+        else if(st==Tx_En&&fcs_cnt!=3'b100)begin
             UDP_d <= {1'b0,data_pipe2[data_pipe_sel2]};
             fcs_cnt <= fcs_cnt + 1;
         end
-        else if(tx_en_clk125&&fcs_cnt==3'b100)begin
+        //else if(tx_en_clk125&&fcs_cnt==3'b100)begin
+        else if(st==Tx_En&&fcs_cnt==3'b100)begin
             delay_tx <= 2'b0;
         end
         else begin
@@ -703,18 +719,24 @@ module trans_image(
     end
 
     assign UDP_tx = delay_tx[1];
-
+    
+    always_ff @(posedge clk125)begin
+        if(st==Tx_En)   tx_en <= 1'b1;
+        else            tx_en <= 1'b0;
+    end
 
 //<-- moikawa add (2018.11.02)
     reg [10:0] txbuf_sel_d2;
 
-    always_ff @(posedge clk125) begin
+    //always_ff @(posedge clk125) begin
+    always_ff @(eth_rxck)begin
         txbuf_sel_d2 <= txbuf_sel2;
     end
     assign data_pipe_sel2 = (txbuf_sel_d2[10:6] < 5'd17)? 
                              txbuf_sel_d2[10:6] : 5'd17 ;
 
-    always_ff @(posedge clk125) begin // inserted pipelined stage.
+    //always_ff @(posedge clk125) begin // inserted pipelined stage.
+    always_ff @(posedge eth_rxck)begin
         //for (k=0; k<64; k=k+1) begin
         //  data_pipe[k] <= TXBUF[ (64*k) + txbuf_sel[5:0] ];
         //end

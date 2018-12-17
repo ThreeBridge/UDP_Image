@@ -21,14 +21,17 @@
 `include "user_defines.sv"
 
 module ARP(
+    input eth_rxck,
     input clk125,
-    input rst125,
+    //input rst125,
+    input rst_rx,
     input arp_st,
     input [47:0] my_MACadd,
     input [31:0] my_IPadd,
     input [47:0] DstMAC,
     input [31:0] DstIP,
     
+    output reg tx_en,
     output reg arp_tx,
     output reg [8:0] d
     );
@@ -43,8 +46,8 @@ module ARP(
     reg [3:0] nx;                    //next;
     reg start_tx;
     reg tx_end;
-    always_ff @(posedge clk125) begin
-            if (rst125) st <= Idle;
+    always_ff @(posedge eth_rxck) begin
+            if (rst_rx) st <= Idle;
             else        st <= nx;
     end
     
@@ -69,7 +72,7 @@ module ARP(
     
     reg [7:0] TXBUF [63:0];
     integer i;
-    always_ff @(posedge clk125)begin
+    always_ff @(posedge eth_rxck)begin
         if(st==Tx_Ready)begin
             {TXBUF[0],TXBUF[1],TXBUF[2],TXBUF[3],TXBUF[4],TXBUF[5]} <= DstMAC;
             //{TXBUF[6],TXBUF[7],TXBUF[8],TXBUF[9],TXBUF[10],TXBUF[11]} <= `my_MAC;
@@ -88,6 +91,7 @@ module ARP(
             for(i=42;i<60;i=i+1)begin
                TXBUF[i] <= 0;
             end
+            {TXBUF[60],TXBUF[61],TXBUF[62],TXBUF[63]} <= 32'h01_02_03_04;   // dummy
             start_tx <= 1;
         end
         else if(st==Tx_End) start_tx <= 0;
@@ -98,7 +102,7 @@ module ARP(
     end
     
     reg [6:0] clk_cnt;
-    always_ff @(posedge clk125)begin
+    always_ff @(posedge eth_rxck)begin
         if(st==Tx)begin
             clk_cnt <= clk_cnt + 1;
             if(clk_cnt==7'd63) tx_end <= 1; 
@@ -109,17 +113,17 @@ module ARP(
         end
     end
     
-    reg [1:0] fcs_cnt;
-    always_ff @(posedge clk125)begin
+    reg [2:0] fcs_cnt;
+    always_ff @(posedge eth_rxck)begin
         if(st==Tx&&clk_cnt<7'd60)begin
             d <= {1'b1,TXBUF[clk_cnt]};
             arp_tx <= 1;
         end
-        else if(st==Tx&&fcs_cnt!=2'b11)begin
+        else if(st==Tx&&fcs_cnt!=3'b100)begin
             d <= {1'b0,TXBUF[clk_cnt]};
             fcs_cnt <= fcs_cnt + 1;
         end
-        else if(st==Tx&&fcs_cnt==2'b11)begin
+        else if(st==Tx&&fcs_cnt==3'b100)begin
             arp_tx <= 0;
         end
         else begin
@@ -127,6 +131,11 @@ module ARP(
             d <= 0;
             fcs_cnt <= 0;
         end
+    end
+    
+    always_ff @(posedge clk125)begin
+        if(st==Tx) tx_en <= 1'b1;
+        else       tx_en <= 1'b0;
     end
     
 endmodule

@@ -54,8 +54,9 @@
 ------------- Begin Cut here for COMPONENT Declaration ------ COMP_TAG
 COMPONENT queue
   PORT (
-    clk : IN STD_LOGIC;
-    srst : IN STD_LOGIC;
+    rst : IN STD_LOGIC;
+    wr_clk : IN STD_LOGIC;
+    rd_clk : IN STD_LOGIC;
     din : IN STD_LOGIC_VECTOR(8 DOWNTO 0);
     wr_en : IN STD_LOGIC;
     rd_en : IN STD_LOGIC;
@@ -65,7 +66,10 @@ COMPONENT queue
     empty : OUT STD_LOGIC;
     valid : OUT STD_LOGIC;
     underflow : OUT STD_LOGIC;
-    data_count : OUT STD_LOGIC_VECTOR(10 DOWNTO 0)
+    rd_data_count : OUT STD_LOGIC_VECTOR(10 DOWNTO 0);
+    wr_data_count : OUT STD_LOGIC_VECTOR(10 DOWNTO 0);
+    wr_rst_busy : OUT STD_LOGIC;
+    rd_rst_busy : OUT STD_LOGIC
   );
 END COMPONENT;
 -- COMP_TAG_END ------ End COMPONENT Declaration ------------
@@ -76,8 +80,9 @@ END COMPONENT;
 ------------- Begin Cut here for INSTANTIATION Template ----- INST_TAG
 your_instance_name : queue
   PORT MAP (
-    clk => clk,
-    srst => srst,
+    rst => rst,
+    wr_clk => wr_clk,
+    rd_clk => rd_clk,
     din => din,
     wr_en => wr_en,
     rd_en => rd_en,
@@ -87,7 +92,10 @@ your_instance_name : queue
     empty => empty,
     valid => valid,
     underflow => underflow,
-    data_count => data_count
+    rd_data_count => rd_data_count,
+    wr_data_count => wr_data_count,
+    wr_rst_busy => wr_rst_busy,
+    rd_rst_busy => rd_rst_busy
   );
 -- INST_TAG_END ------ End INSTANTIATION Template ---------
 

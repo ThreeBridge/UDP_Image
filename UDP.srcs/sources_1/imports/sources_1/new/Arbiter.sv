@@ -31,6 +31,9 @@ module Arbiter(
     input                 rst_btn,
     input [7:0]           SW,
     
+    output reg            arp_tx_en,
+    output reg            ping_tx_en,
+    output reg            UDP_tx_en,
     output reg            arp_tx,
     output reg            ping_tx,
     output reg            UDP_tx,
@@ -224,14 +227,17 @@ parameter  Recv_End    = 8'h03;
     
     ARP ARP(
         /*---INPUT---*/
+        .eth_rxck(eth_rxck),
         .clk125(clk125),
-        .rst125(rst125),
+        .rst_rx(rst_rx),
+        //.rst125(rst125),
         .arp_st(arp_st[3]),
         .my_MACadd(my_MACadd),  //<---  add 2018.12.5
         .my_IPadd(my_IPadd),    //--->
         .DstMAC(DstMAC),
         .DstIP(DstIP),
         /*---OUTPUT---*/
+        .tx_en(arp_tx_en),
         .arp_tx(arp_tx),
         .d(arp_d)
     );
@@ -257,6 +263,7 @@ parameter  Recv_End    = 8'h03;
         //.crc_flg_i(crc_flg_i),
         //.DstMAC(DstMAC),
         //.DstIP(DstIP),
+        .tx_en(ping_tx_en),
         .ping_tx(ping_tx),
         .ping_d(ping_d)
     );
@@ -330,6 +337,7 @@ parameter  Recv_End    = 8'h03;
         /*---Output---*/
         .image_cnt(addr),
         .addr_cnt(addr_cnt),
+        .tx_en(UDP_tx_en),
         .UDP_tx(UDP_tx),
         .UDP_d(UDP_d),
         .trans_err(trans_err)

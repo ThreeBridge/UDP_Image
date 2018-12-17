@@ -25,12 +25,16 @@ module T_Arbiter(
     input [8:0] ping_d,
     input [8:0] UDP_btn_d,
     input [8:0] UDP_d,
+    input arp_tx_en,
+    input ping_tx_en,
+    input UDP_tx_en,
     input arp_tx,
     input ping_tx,
     input UDP_btn_tx,
     input UDP_tx,
+    input eth_rxck,
     input clk125,
-    input clk125_90,
+    //input clk125_90,
     input rst125,
     
     output reg [7:0] txd,
@@ -45,7 +49,7 @@ parameter Tx_Data   =  8'h02;   // データ送信
 parameter Tx_End    =  8'h03;   // 送信終了
     
     /* ステートマシン */
-    wire tx_any = (arp_tx || ping_tx || UDP_btn_tx || UDP_tx);
+    wire tx_any = (arp_tx_en || ping_tx_en || UDP_tx_en);
     reg [7:0] st;
     reg [7:0] nx;
     reg       tx_pre;
@@ -76,20 +80,24 @@ parameter Tx_End    =  8'h03;   // 送信終了
     
     
     /*-----Queue-----*/
-    reg  [8:0] q_din;
-    reg        wr_en;
-    reg        rd_en;
-    wire       full;
-    wire       overflow;
-    wire       empty;
-    wire       valid;
-    wire       underflow;
-    wire [10:0] data_count;
-    wire [8:0] q_dout;
+    reg  [8:0]  q_din;
+    reg         wr_en;
+    reg         rd_en;
+    wire        full;
+    wire        overflow;
+    wire        empty;
+    wire        valid;
+    wire        underflow;
+    wire [10:0] rd_data_count;
+    wire [10:0] wr_data_count;
+    wire [8:0]  q_dout;
+    wire        wr_rst_busy;
+    wire        rd_rst_busy;
     
     queue TX_queue(
-        .clk(clk125),
-        .srst(rst125),
+        .rst(rst125),
+        .wr_clk(eth_rxck),      // 書き込み用クロック (write clock)
+        .rd_clk(clk125),        // 読み出し用クロック (read clock)
         .din(q_din),            // 書き込むデータ [8:0]din = {1'data_frame,8'data}
         .wr_en(wr_en),          // 書き込み開始
         .rd_en(rd_en),          // 読み出し開始
@@ -99,7 +107,10 @@ parameter Tx_End    =  8'h03;   // 送信終了
         .empty(empty),          // キュー内が空
         .valid(valid),          // 書き込みflg
         .underflow(underflow),  // キューがアンダーフロー
-        .data_count(data_count) // データの数
+        .rd_data_count(rd_data_count), // データの数
+        .wr_data_count(wr_data_count),
+        .wr_rst_busy(wr_rst_busy),
+        .rd_rst_busy(rd_rst_busy)
     );
     /*--書き込み--*/  
     always_comb begin
@@ -125,6 +136,7 @@ parameter Tx_End    =  8'h03;   // 送信終了
     /*--CRC用データ--*/
     reg [7:0] crc_d;
     reg       crc_en;
+    /*
     always_ff @(posedge clk125)begin
         if(arp_tx)begin
             crc_d <= arp_d[7:0];
@@ -147,6 +159,13 @@ parameter Tx_End    =  8'h03;   // 送信終了
             crc_en<=0;
         end
     end
+    */
+    /*---CRC計算---*/
+//    always_ff @(posedge clk125)begin
+//        crc_d   <= q_dout[7:0];
+//        crc_en  <= q_dout[8];
+//    end
+    
     
     /*----- 送信 -----*/
     reg [7:0] d;       // CRC用
@@ -170,6 +189,7 @@ parameter Tx_End    =  8'h03;   // 送信終了
     
     /*--送信--*/
     (*dont_touch="true"*) reg [31:0] CRC32;
+    reg [31:0] r_crc;
     always_ff @(posedge clk125)begin
         if(st==Idle) begin
             txd <= `PREAMB;
@@ -184,11 +204,16 @@ parameter Tx_End    =  8'h03;   // 送信終了
             if(q_dout[8])
                 txd <= q_dout[7:0];
             else if(!q_dout[8])begin
-                txd <= (fcs_cnt==3'b000) ? CRC32[31:24] : (
-                            (fcs_cnt==3'b001) ? CRC32[25:16] : (
-                                (fcs_cnt==3'b010) ? CRC32[15:8] : CRC32[7:0]
+//                txd <= (fcs_cnt==3'b000) ? CRC32[31:24] : (
+//                            (fcs_cnt==3'b001) ? CRC32[25:16] : (
+//                                (fcs_cnt==3'b010) ? CRC32[15:8] : CRC32[7:0]
+//                            )
+//                       );
+                  txd <= (fcs_cnt==3'b000) ? r_crc[31:24] : (
+                            (fcs_cnt==3'b001) ? r_crc[25:16] : (
+                                (fcs_cnt==3'b010) ? r_crc[15:8] : r_crc[7:0]
                             )
-                       );
+                          );
         /*--debug--*/
 //                txd <= (fcs_cnt==3'b000) ? 8'h01 : (
 //                                   (fcs_cnt==3'b001) ? 8'h02 : (
@@ -240,17 +265,23 @@ parameter Tx_End    =  8'h03;   // 送信終了
         .reset(1'b0)
     );
     
+    reg reset;
+    always_ff @(posedge clk125)begin
+        if(st==Idle)    reset <= 1'b0;
+        else            reset <= 1'b1;
+    end
+    
     /*--CRC計算2--*/
     reg [31:0] CRC;
     CRC_ge T_crc_ge(
-        .d(crc_d),
+        .d(q_dout[7:0]),
         .CLK(clk125),
-        .reset(crc_en),
-        .flg(crc_en),
+        .reset(reset),
+        .flg(q_dout[8]),
         .CRC(CRC)
     );
     
-    reg [31:0] r_crc;
+    
     always_ff @(posedge clk125) begin
         if(q_dout[8])begin
             r_crc <= ~{CRC[24],CRC[25],CRC[26],CRC[27],CRC[28],CRC[29],CRC[30],CRC[31],

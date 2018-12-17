@@ -19,11 +19,6 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
-
 module ping(
     /*---Input---*/
     eth_rxck,
@@ -40,6 +35,7 @@ module ping(
     //DstMAC,
     //DstIP,
     /*---Output---*/
+    tx_en,
     ping_tx,
     ping_d
     );
@@ -59,6 +55,7 @@ module ping(
     //input [47:0]    DstMAC;
     //input [31:0]    DstIP;
     
+    output reg          tx_en;
     output reg          ping_tx;
     output reg [8:0]    ping_d;
     
@@ -101,13 +98,12 @@ module ping(
     reg [7:0]   nx;
     reg [10:0]  rx_cnt_i;     // データ数
     reg         Hcsum_st;
-    reg         tx_en;
     reg         tx_end;
     reg [2:0]   end_cnt;
     (*dont_touch="true"*)reg [9:0]   csum_cnt;
     (*dont_touch="true"*)reg         csum_ok;
     reg [2:0]   err_cnt;
-    reg [2:0]   ready_cnt;
+    //reg [2:0]   ready_cnt;
     
     always_ff @(posedge eth_rxck) begin
         if (rst_rx) st <= Idle;
@@ -141,7 +137,8 @@ module ping(
                 else if(err_cnt==2'b10) nx = Idle;
             end
             Ready : begin
-                if(ready_cnt==3'd7) nx = Tx_Hc;
+                //if(ready_cnt==3'd7) nx = Tx_Hc;
+                nx = Tx_Hc;
             end
             Tx_Hc : begin
                 if(csum_cnt==6'd20) nx = Tx_HEnd;
@@ -293,11 +290,12 @@ module ping(
     
     /*---Tx_Data Ready---*/
     reg [9:0] tx_cnt;
-    always_ff @(posedge clk125)begin
+    always_ff @(posedge eth_rxck)begin
         tx_cnt <= rx_cnt_i;
     end
 
     /*---Ready Extend---*/
+    /*
     always_ff @(posedge eth_rxck)begin
         if(st==Ready)begin
             ready_cnt <= ready_cnt + 1;
@@ -306,7 +304,7 @@ module ping(
             ready_cnt <= 0;
         end
     end
-    
+
     reg ready_rxck;                
     always_ff @(posedge eth_rxck)begin
         if(ready_cnt>=1&&ready_cnt<=3)begin
@@ -316,23 +314,19 @@ module ping(
             ready_rxck <= 0;
         end
     end
+    */
     
+    /*
     reg ready_clk125;
     reg ready_clk125_d;
      always_ff @(posedge clk125)begin
-        /*
-        if(ready_cnt>=2&&ready_cnt<=5)begin
-            ready_clk125 <= 1;
-        end
-        else begin
-            ready_clk125 <= 0;
-        end
-        */
         ready_clk125_d <= ready_rxck;
         ready_clk125 <= ready_clk125_d;
     end
+    */
     
     /*---tx_Hcend Extend---*/
+    /*
     reg tx_hend_rxck;      
     reg tx_iend_rxck;  
     always_ff @(posedge eth_rxck)begin
@@ -349,7 +343,9 @@ module ping(
             tx_iend_rxck <= 0;
         end
     end
+    */
     
+    /*
     reg tx_hend_clk125;
     reg tx_hend_clk125_d;
     reg tx_iend_clk125;
@@ -360,6 +356,7 @@ module ping(
         tx_iend_clk125_d <= tx_iend_rxck;
         tx_iend_clk125 <= tx_iend_clk125_d;
     end  
+    */
     
     reg [15:0] csum_extend;
     always_ff @(posedge eth_rxck)begin 
@@ -374,8 +371,10 @@ module ping(
     
     /*---送信用データ---*/
     integer i;
-    always_ff @(posedge clk125)begin
-        if(ready_clk125)begin
+    //always_ff @(posedge clk125)begin
+    always_ff @(posedge eth_rxck)begin
+        //if(ready_clk125)begin
+        if(st==Ready)begin
             {TXBUF[0],TXBUF[1],TXBUF[2],TXBUF[3],TXBUF[4],TXBUF[5]} <= DstMAC;
             //{TXBUF[6],TXBUF[7],TXBUF[8],TXBUF[9],TXBUF[10],TXBUF[11]} <= `my_MAC;
             {TXBUF[6],TXBUF[7],TXBUF[8],TXBUF[9],TXBUF[10],TXBUF[11]} <= my_MACadd;     // add 2018.12.5
@@ -404,11 +403,13 @@ module ping(
                 TXBUF[6'd42+i] <= i;
             end
             //{TXBUF[rx_cnt_i-1],TXBUF[rx_cnt_i-2],TXBUF[rx_cnt_i-3],TXBUF[rx_cnt_i-4]} <= 32'h01_02_03_04;
-            {TXBUF[ByteLen-4],TXBUF[ByteLen-3],TXBUF[ByteLen-2],TXBUF[ByteLen-1]} <= 32'h01_02_03_04;
+            {TXBUF[ByteLen-4],TXBUF[ByteLen-3],TXBUF[ByteLen-2],TXBUF[ByteLen-1]} <= 32'h01_02_03_04;   // dummy
             //Hcsum_st <= 1;
         end
-        else if(tx_hend_clk125) {TXBUF[24],TXBUF[25]} <= csum_extend; // err_cnt==2'b01はTXBUFの中身が
-        else if(tx_iend_clk125) {TXBUF[36],TXBUF[37]} <= csum_extend; // 1回のみ変わるためにつけている
+        //else if(tx_hend_clk125) {TXBUF[24],TXBUF[25]} <= csum_extend; // err_cnt==2'b01はTXBUFの中身が
+        else if(st==Tx_HEnd) {TXBUF[24],TXBUF[25]} <= csum_extend;
+        //else if(tx_iend_clk125) {TXBUF[36],TXBUF[37]} <= csum_extend; // 1回のみ変わるためにつけている
+        else if(st==Tx_IEnd) {TXBUF[36],TXBUF[37]} <= csum_extend;
         /*
         else if(st==Idle)begin   //-- Leave as is.
             for(i=0;i<9'd256;i=i+1) TXBUF[i] <= 0;
@@ -444,23 +445,21 @@ module ping(
         .csum_o(csum),
         .rst(rst)
     );
-    
-    always_ff @(posedge eth_rxck)begin
-       if(st==Tx_En) tx_en <= 1'b1;
-       else          tx_en <= 1'b0;  
-    end
+
+    /*
     reg tx_en_clk125;
     reg tx_en_clk125_d;
-    
     always_ff @(posedge clk125) begin
        tx_en_clk125_d <= tx_en;
        tx_en_clk125 <= tx_en_clk125_d; 
     end
+    */
     
     reg [7:0] clk_cnt;
-    always_ff @(posedge clk125)begin
-        //if(st==Tx_En)begin
-        if (tx_en_clk125) begin
+    //always_ff @(posedge clk125)begin
+    always_ff @(posedge eth_rxck)begin
+        if(st==Tx_En)begin
+        //if (tx_en_clk125) begin
             clk_cnt <= clk_cnt + 1;
             //if(clk_cnt==rx_cnt_i) tx_end <= 1;
             if(clk_cnt==tx_cnt) tx_end <= 1; 
@@ -472,19 +471,20 @@ module ping(
     end
     
     reg [2:0] fcs_cnt;
-    always_ff @(posedge clk125)begin
-        //if(st==Tx_En&&clk_cnt<(rx_cnt_i-3'd4))begin
-        if(tx_en_clk125&&clk_cnt<(tx_cnt-3'd4))begin
+    //always_ff @(posedge clk125)begin
+    always_ff @(posedge eth_rxck)begin
+        if(st==Tx_En&&clk_cnt<(rx_cnt_i-3'd4))begin
+        //if(tx_en_clk125&&clk_cnt<(tx_cnt-3'd4))begin
             ping_d <= {1'b1,TXBUF[clk_cnt]};
             ping_tx <= 1;
         end
-        //else if(st==Tx_En&&fcs_cnt!=2'b11)begin
-        else if(tx_en_clk125&&fcs_cnt!=3'b100)begin
+        else if(st==Tx_En&&fcs_cnt!=3'b100)begin
+        //else if(tx_en_clk125&&fcs_cnt!=3'b100)begin
             ping_d <= {1'b0,TXBUF[clk_cnt]};
             fcs_cnt <= fcs_cnt + 1;
         end
-        //else if(st==Tx_En&&fcs_cnt==2'b11)begin
-        else if(tx_en_clk125&&fcs_cnt==3'b100)begin
+        else if(st==Tx_En&&fcs_cnt==3'b100)begin
+        //else if(tx_en_clk125&&fcs_cnt==3'b100)begin
             ping_tx <= 0;
         end
         else begin
@@ -492,6 +492,11 @@ module ping(
             ping_d <= 0;
             fcs_cnt <= 0;
         end
+    end
+    
+    always_ff @(posedge clk125)begin
+        if(st==Tx_En)   tx_en <= 1'b1;
+        else            tx_en <= 1'b0;
     end
     
 endmodule
