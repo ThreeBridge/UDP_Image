@@ -68,7 +68,7 @@ parameter Tx_End    =  8'h03;   // 送信終了
                 if(tx_any) nx = Tx_Pre;
             end
             Tx_Pre : begin
-                if(pre_cnt==4'd7) nx = Tx_Data;
+                if(pre_cnt==4'd8) nx = Tx_Data;
             end
             Tx_Data : begin
                 if(tx_end) nx = Tx_End;
@@ -187,23 +187,30 @@ parameter Tx_End    =  8'h03;   // 送信終了
         else if(st==Idle) rd_en <= 0;
     end
     
+    /*---delay q_dout[8]---*/
+    reg [8:0] q_dout_d;
+    always_ff @(posedge clk125)begin
+        q_dout_d <= q_dout;
+    end
+    
     /*--送信--*/
-    (*dont_touch="true"*) reg [31:0] CRC32;
-    reg [31:0] r_crc;
+    (*dont_touch="true"*)reg [31:0] CRC32;
+    (*dont_touch="true"*)reg [31:0] r_crc;
     always_ff @(posedge clk125)begin
         if(st==Idle) begin
             txd <= `PREAMB;
         end
         else if(st==Tx_Pre)begin
-            if(pre_cnt==4'd7) txd<=`SFD;
+            if(pre_cnt==4'd8) txd<=`SFD;
             else begin
                 txd <= `PREAMB;
             end
         end
         else if(st==Tx_Data)begin
-            if(q_dout[8])
-                txd <= q_dout[7:0];
-            else if(!q_dout[8])begin
+            if(q_dout_d[8])begin
+                txd <= q_dout_d[7:0];
+            end
+            else if(!q_dout_d[8])begin
 //                txd <= (fcs_cnt==3'b000) ? CRC32[31:24] : (
 //                            (fcs_cnt==3'b001) ? CRC32[25:16] : (
 //                                (fcs_cnt==3'b010) ? CRC32[15:8] : CRC32[7:0]
@@ -225,20 +232,23 @@ parameter Tx_End    =  8'h03;   // 送信終了
     end
     
     /*--txen管理--*/
+    reg tx_ctl;
     always_ff @(posedge clk125)begin
         if(st==Idle)begin
+            tx_ctl <= 0;
             gmii_txctl <= 0;
             fcs_cnt <= 0;
             tx_end <= 0;
         end
         else if(st==Tx_Pre) begin
-            gmii_txctl <= 1;
+            tx_ctl <= 1;
+            gmii_txctl <= tx_ctl;
         end
         else if(st==Tx_Data)begin
-            if(!q_dout[8]&&fcs_cnt!=3'b100)begin
+            if(!q_dout_d[8]&&fcs_cnt!=3'b100)begin
                 fcs_cnt <= fcs_cnt + 1;
             end
-            else if(!q_dout[8]&&fcs_cnt==3'b100)begin
+            else if(!q_dout_d[8]&&fcs_cnt==3'b100)begin
                 gmii_txctl <= 0;
                 tx_end <= 1;
             end
@@ -272,7 +282,7 @@ parameter Tx_End    =  8'h03;   // 送信終了
     end
     
     /*--CRC計算2--*/
-    reg [31:0] CRC;
+    (*dont_touch="true"*)reg [31:0] CRC;
     CRC_ge T_crc_ge(
         .d(q_dout[7:0]),
         .CLK(clk125),
@@ -283,7 +293,8 @@ parameter Tx_End    =  8'h03;   // 送信終了
     
     
     always_ff @(posedge clk125) begin
-        if(q_dout[8])begin
+        //if(q_dout[8])begin
+        if(st==Tx_Data)begin
             r_crc <= ~{CRC[24],CRC[25],CRC[26],CRC[27],CRC[28],CRC[29],CRC[30],CRC[31],
                       CRC[16],CRC[17],CRC[18],CRC[19],CRC[20],CRC[21],CRC[22],CRC[23],
                       CRC[8],CRC[9],CRC[10],CRC[11],CRC[12],CRC[13],CRC[14],CRC[15],

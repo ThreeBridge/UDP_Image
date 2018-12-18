@@ -35,7 +35,7 @@ module ping(
     //DstMAC,
     //DstIP,
     /*---Output---*/
-    tx_en,
+    tx_en_clk125,
     ping_tx,
     ping_d
     );
@@ -55,7 +55,7 @@ module ping(
     //input [47:0]    DstMAC;
     //input [31:0]    DstIP;
     
-    output reg          tx_en;
+    output reg          tx_en_clk125;;
     output reg          ping_tx;
     output reg [8:0]    ping_d;
     
@@ -446,14 +446,18 @@ module ping(
         .rst(rst)
     );
 
-    /*
-    reg tx_en_clk125;
+    reg tx_en;
     reg tx_en_clk125_d;
+    always_ff @(posedge eth_rxck)begin
+        if(st==Tx_En)   tx_en <= 1'b1;
+        else            tx_en <= 1'b0;
+    end
+    
     always_ff @(posedge clk125) begin
        tx_en_clk125_d <= tx_en;
        tx_en_clk125 <= tx_en_clk125_d; 
     end
-    */
+    
     
     reg [7:0] clk_cnt;
     //always_ff @(posedge clk125)begin
@@ -494,9 +498,6 @@ module ping(
         end
     end
     
-    always_ff @(posedge clk125)begin
-        if(st==Tx_En)   tx_en <= 1'b1;
-        else            tx_en <= 1'b0;
-    end
+
     
 endmodule

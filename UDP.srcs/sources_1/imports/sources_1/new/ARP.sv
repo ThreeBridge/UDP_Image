@@ -31,7 +31,7 @@ module ARP(
     input [47:0] DstMAC,
     input [31:0] DstIP,
     
-    output reg tx_en,
+    output reg tx_en_clk125,
     output reg arp_tx,
     output reg [8:0] d
     );
@@ -133,9 +133,16 @@ module ARP(
         end
     end
     
-    always_ff @(posedge clk125)begin
+    reg tx_en;
+    reg tx_en_clk125_d;
+    always_ff @(posedge eth_rxck)begin
         if(st==Tx) tx_en <= 1'b1;
         else       tx_en <= 1'b0;
+    end
+    
+    always_ff @(posedge clk125)begin
+        tx_en_clk125_d <= tx_en;
+        tx_en_clk125 <= tx_en_clk125_d;
     end
     
 endmodule

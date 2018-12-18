@@ -202,7 +202,7 @@ parameter  Recv_End    = 8'h03;
     end
      
     /*---パケットの種類振り分け---*/
-    (*dont_touch="true"*)reg [3:0] arp_st;       // ARP Packet
+    (*dont_touch="true"*)reg [2:0] arp_st;       // ARP Packet
     (*dont_touch="true"*)reg [2:0] ping_st;      // ICMP Echo Packet(ping)
     (*dont_touch="true"*)reg [2:0] UDP_st;       // UDP Packet
     (*dont_touch="true"*)reg [2:0] els_packet;   // else Packet
@@ -210,7 +210,7 @@ parameter  Recv_End    = 8'h03;
         if(crc_ok)begin
             //if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[20],RXBUF[21]}==`OPR_ARP) arp_st <= 1;
             //if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[38],RXBUF[39],RXBUF[40],RXBUF[41]}==`my_IP) arp_st <= 4'h7;
-            if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[38],RXBUF[39],RXBUF[40],RXBUF[41]}==my_IPadd) arp_st <= 4'h7;  // add 2018.12.5
+            if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[38],RXBUF[39],RXBUF[40],RXBUF[41]}==my_IPadd) arp_st <= 3'h7;  // add 2018.12.5
             //else if(RXBUF[23]==8'h01) ping_st <= 3'h7;
             else if(RXBUF[23]==8'h01&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==my_IPadd) ping_st <= 3'h7;             // add 2018.12.11
             //else if(RXBUF[23]==8'h11&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==`my_IP) UDP_st  <= 3'h7;
@@ -218,7 +218,7 @@ parameter  Recv_End    = 8'h03;
             else els_packet <= 3'h7;
         end
         else begin
-            arp_st  <= {arp_st[2:0], 1'b0};
+            arp_st  <= {arp_st[1:0], 1'b0};
             ping_st <= {ping_st[1:0], 1'b0};
             UDP_st  <= {UDP_st[1:0], 1'b0};
             els_packet <= {els_packet[1:0], 1'b0};
@@ -231,13 +231,13 @@ parameter  Recv_End    = 8'h03;
         .clk125(clk125),
         .rst_rx(rst_rx),
         //.rst125(rst125),
-        .arp_st(arp_st[3]),
+        .arp_st(arp_st[2]),
         .my_MACadd(my_MACadd),  //<---  add 2018.12.5
         .my_IPadd(my_IPadd),    //--->
         .DstMAC(DstMAC),
         .DstIP(DstIP),
         /*---OUTPUT---*/
-        .tx_en(arp_tx_en),
+        .tx_en_clk125(arp_tx_en),
         .arp_tx(arp_tx),
         .d(arp_d)
     );
@@ -263,7 +263,7 @@ parameter  Recv_End    = 8'h03;
         //.crc_flg_i(crc_flg_i),
         //.DstMAC(DstMAC),
         //.DstIP(DstIP),
-        .tx_en(ping_tx_en),
+        .tx_en_clk125(ping_tx_en),
         .ping_tx(ping_tx),
         .ping_d(ping_d)
     );
@@ -337,7 +337,7 @@ parameter  Recv_End    = 8'h03;
         /*---Output---*/
         .image_cnt(addr),
         .addr_cnt(addr_cnt),
-        .tx_en(UDP_tx_en),
+        .tx_en_clk125(UDP_tx_en),
         .UDP_tx(UDP_tx),
         .UDP_d(UDP_d),
         .trans_err(trans_err)

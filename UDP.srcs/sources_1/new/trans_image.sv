@@ -44,7 +44,7 @@ module trans_image(
     /*---Output---*/
     image_cnt,
     addr_cnt,
-    tx_en,
+    tx_en_clk125,
     UDP_tx,
     UDP_d,
     trans_err       // 送信エラー
@@ -68,7 +68,7 @@ module trans_image(
     
     output reg [9:0]   image_cnt;
     output reg [8:0]   addr_cnt;   
-    output reg         tx_en;         
+    output reg         tx_en_clk125;         
     (*dont_touch="true"*)output               UDP_tx;
     (*dont_touch="true"*)output reg [8:0]    UDP_d;
     output reg         trans_err;
@@ -645,19 +645,17 @@ module trans_image(
     データを出すクロックを"clk125"で行うために,ステートがTx_Enであると"HIGH"になる信号を
     clk125を用いて生成している.
     */
-//    reg tx_en;
-//    always_ff @(posedge eth_rxck)begin
-//       if(st==Tx_En) tx_en <= 1'b1;
-//       else          tx_en <= 1'b0;  
-//    end
+    reg tx_en;
+    reg tx_en_clk125_d;
+    always_ff @(posedge eth_rxck)begin
+       if(st==Tx_En) tx_en <= 1'b1;
+       else          tx_en <= 1'b0;  
+    end
     
-//    reg tx_en_clk125;
-//    reg tx_en_clk125_d;
-    
-//    always_ff @(posedge clk125) begin
-//       tx_en_clk125_d <= tx_en;
-//       tx_en_clk125 <= tx_en_clk125_d; 
-//    end
+    always_ff @(posedge clk125) begin
+       tx_en_clk125_d <= tx_en;
+       tx_en_clk125 <= tx_en_clk125_d; 
+    end
     //---------->
     
     /*---送信---*/
@@ -720,10 +718,6 @@ module trans_image(
 
     assign UDP_tx = delay_tx[1];
     
-    always_ff @(posedge clk125)begin
-        if(st==Tx_En)   tx_en <= 1'b1;
-        else            tx_en <= 1'b0;
-    end
 
 //<-- moikawa add (2018.11.02)
     reg [10:0] txbuf_sel_d2;
