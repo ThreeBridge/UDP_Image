@@ -322,7 +322,7 @@ module tb_rarp(
          repeat(7) recvByte(8'h55);
          recvByte(8'hd5);
          // 宛先MAC
-         recvMac(48'h00_0A_35_02_0F_B9);
+         recvMac(48'h00_0A_35_02_0F_B0);
          // 送信元MAC
          recvMac(48'hF8_32_E4_BA_0D_57);
          //フレームタイプ
@@ -340,8 +340,8 @@ module tb_rarp(
          recvByte(8'h54);
          
          // Identification
-         recvByte(8'hD0);
-         recvByte(8'hA7);
+         recvByte(8'hFA);
+         recvByte(8'hA9);
          
          // Flags[15:13]/Flagment Offset[12:0]
          recvByte(8'h40);
@@ -354,14 +354,14 @@ module tb_rarp(
          recvByte(8'h01);
          
          // Header Checksum
-         recvByte(8'h6C);
-         recvByte(8'hBE);
+         recvByte(8'h42);
+         recvByte(8'h9E);
          
          // SrcIP 172.31.210.129
          recvIp({8'd172, 8'd31, 8'd210, 8'd129});
          
          // DstIP 172.31.210.130
-         recvIp({8'd172, 8'd31, 8'd210, 8'd130});
+         recvIp({8'd172, 8'd31, 8'd210, 8'd160});
          /*--ICMP--*/
          // Type
          recvByte(8'h08);
@@ -370,29 +370,29 @@ module tb_rarp(
          recvByte(8'h00);
          
          // Checksum
-         recvByte(8'h5B);
-         recvByte(8'h02);
+         recvByte(8'hB5);
+         recvByte(8'h88);
          
          // Identifier
-         recvByte(8'h10);
-         recvByte(8'h0B);
+         recvByte(8'h15);
+         recvByte(8'h18);
          
          // Sequence number
          recvByte(8'h00);
          recvByte(8'h18);
          
          // Data
-         recvByte(8'h6E);
-         recvByte(8'h9C);
-         recvByte(8'h34);
-         recvByte(8'h5B);
+         recvByte(8'hF9);
+         recvByte(8'h30);
+         recvByte(8'h1B);
+         recvByte(8'h5C);
          recvByte(8'h00);
          recvByte(8'h00);
          recvByte(8'h00);
          recvByte(8'h00);
-         recvByte(8'h2A);
-         recvByte(8'h10);
-         recvByte(8'h01);
+         recvByte(8'h59);
+         recvByte(8'hE7);
+         recvByte(8'h00);
          recvByte(8'h00);
          recvByte(8'h00);
          recvByte(8'h00);
@@ -440,10 +440,10 @@ module tb_rarp(
          recvByte(8'h37);
          
          /* CRC */
-         recvByte(8'h13);
-         recvByte(8'h22);
-         recvByte(8'h81);
-         recvByte(8'hEB);
+         recvByte(8'h66);
+         recvByte(8'hBC);
+         recvByte(8'h4A);
+         recvByte(8'h53);
          P_RXDV = 0;
          
          /*---UDP_btn---*/

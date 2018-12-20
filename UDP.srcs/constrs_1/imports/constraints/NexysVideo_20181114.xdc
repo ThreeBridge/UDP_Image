@@ -4,13 +4,27 @@
 ### - rename the used ports (in each line, after get_ports) according to the top level signal names in the project
 
 
-## Clock Signal
-set_property -dict {PACKAGE_PIN R4 IOSTANDARD LVCMOS33} [get_ports SYSCLK]
+### Clock Signal
+#set_property -dict {PACKAGE_PIN R4 IOSTANDARD LVCMOS33} [get_ports SYSCLK]
 
-create_clock -period 10.000 -name sys_clk_pin -waveform {0.000 5.000} -add [get_ports SYSCLK]
+#create_clock -period 10.000 -name sys_clk_pin -waveform {0.000 5.000} -add [get_ports SYSCLK]
 
-create_clock -period 8.000 -name phyrx_ddr -waveform {0.000 4.000}
-create_clock -period 8.000 -name PHY_RXCLK -waveform {2.000 6.000} [get_ports eth_rxck]
+#create_clock -period 8.000 -name phyrx_ddr -waveform {0.000 4.000}
+#create_clock -period 8.000 -name PHY_RXCLK -waveform {2.000 6.000} [get_ports eth_rxck]
+
+#set_input_jitter [get_clocks -of_objects [get_ports PHY_RXCLK]] 0.080
+#set_input_delay -clock phyrx_ddr -max 1.000 [get_ports {eth_rxd[*]}]
+#set_input_delay -clock phyrx_ddr -clock_fall -max -add_delay 1.000 [get_ports {eth_rxd[*]}]
+#set_input_delay -clock phyrx_ddr -min -1.000 [get_ports {eth_rxd[*]}]
+#set_input_delay -clock phyrx_ddr -clock_fall -min -add_delay -1.000 [get_ports {eth_rxd[*]}]
+
+#set_false_path -setup -rise_from phyrx_ddr -fall_to PHY_RXCLK
+#set_false_path -setup -fall_from phyrx_ddr -rise_to PHY_RXCLK
+#set_false_path -hold -rise_from phyrx_ddr -fall_to PHY_RXCLK
+#set_false_path -hold -fall_from phyrx_ddr -rise_to PHY_RXCLK
+
+#set_input_delay -clock phyrx_ddr -max 1.000 [get_ports eth_rxctl]
+#set_input_delay -clock phyrx_ddr -clock_fall -min -1.000 [get_ports eth_rxctl]
 
 #set_property CLOCK_DEDICATED_ROUTE BACKBONE [get_nets pllsys/inst/SYSCLK_i_PLLSYS];
 ## FMC Transceiver clocks (Must be set to value provided by Mezzanine card, currently set to 156.25 MHz)
@@ -450,6 +464,7 @@ connect_debug_port u_ila_1/probe37 [get_nets [list R_Arbiter/trans_image/ucend_c
 
 
 
+
 create_debug_core u_ila_0 ila
 set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
 set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
@@ -466,68 +481,84 @@ set_property port_width 2 [get_debug_ports u_ila_0/probe0]
 connect_debug_port u_ila_0/probe0 [get_nets [list {R_Arbiter/ARP/st[0]} {R_Arbiter/ARP/st[1]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe1]
-set_property port_width 3 [get_debug_ports u_ila_0/probe1]
-connect_debug_port u_ila_0/probe1 [get_nets [list {R_Arbiter/UDP_st[0]} {R_Arbiter/UDP_st[1]} {R_Arbiter/UDP_st[2]}]]
+set_property port_width 32 [get_debug_ports u_ila_0/probe1]
+connect_debug_port u_ila_0/probe1 [get_nets [list {R_Arbiter/crc_ge/CRC[0]} {R_Arbiter/crc_ge/CRC[1]} {R_Arbiter/crc_ge/CRC[2]} {R_Arbiter/crc_ge/CRC[3]} {R_Arbiter/crc_ge/CRC[4]} {R_Arbiter/crc_ge/CRC[5]} {R_Arbiter/crc_ge/CRC[6]} {R_Arbiter/crc_ge/CRC[7]} {R_Arbiter/crc_ge/CRC[8]} {R_Arbiter/crc_ge/CRC[9]} {R_Arbiter/crc_ge/CRC[10]} {R_Arbiter/crc_ge/CRC[11]} {R_Arbiter/crc_ge/CRC[12]} {R_Arbiter/crc_ge/CRC[13]} {R_Arbiter/crc_ge/CRC[14]} {R_Arbiter/crc_ge/CRC[15]} {R_Arbiter/crc_ge/CRC[16]} {R_Arbiter/crc_ge/CRC[17]} {R_Arbiter/crc_ge/CRC[18]} {R_Arbiter/crc_ge/CRC[19]} {R_Arbiter/crc_ge/CRC[20]} {R_Arbiter/crc_ge/CRC[21]} {R_Arbiter/crc_ge/CRC[22]} {R_Arbiter/crc_ge/CRC[23]} {R_Arbiter/crc_ge/CRC[24]} {R_Arbiter/crc_ge/CRC[25]} {R_Arbiter/crc_ge/CRC[26]} {R_Arbiter/crc_ge/CRC[27]} {R_Arbiter/crc_ge/CRC[28]} {R_Arbiter/crc_ge/CRC[29]} {R_Arbiter/crc_ge/CRC[30]} {R_Arbiter/crc_ge/CRC[31]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe2]
-set_property port_width 3 [get_debug_ports u_ila_0/probe2]
-connect_debug_port u_ila_0/probe2 [get_nets [list {R_Arbiter/arp_st[0]} {R_Arbiter/arp_st[1]} {R_Arbiter/arp_st[2]}]]
+set_property port_width 32 [get_debug_ports u_ila_0/probe2]
+connect_debug_port u_ila_0/probe2 [get_nets [list {R_Arbiter/FCS[0]} {R_Arbiter/FCS[1]} {R_Arbiter/FCS[2]} {R_Arbiter/FCS[3]} {R_Arbiter/FCS[4]} {R_Arbiter/FCS[5]} {R_Arbiter/FCS[6]} {R_Arbiter/FCS[7]} {R_Arbiter/FCS[8]} {R_Arbiter/FCS[9]} {R_Arbiter/FCS[10]} {R_Arbiter/FCS[11]} {R_Arbiter/FCS[12]} {R_Arbiter/FCS[13]} {R_Arbiter/FCS[14]} {R_Arbiter/FCS[15]} {R_Arbiter/FCS[16]} {R_Arbiter/FCS[17]} {R_Arbiter/FCS[18]} {R_Arbiter/FCS[19]} {R_Arbiter/FCS[20]} {R_Arbiter/FCS[21]} {R_Arbiter/FCS[22]} {R_Arbiter/FCS[23]} {R_Arbiter/FCS[24]} {R_Arbiter/FCS[25]} {R_Arbiter/FCS[26]} {R_Arbiter/FCS[27]} {R_Arbiter/FCS[28]} {R_Arbiter/FCS[29]} {R_Arbiter/FCS[30]} {R_Arbiter/FCS[31]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe3]
 set_property port_width 3 [get_debug_ports u_ila_0/probe3]
-connect_debug_port u_ila_0/probe3 [get_nets [list {R_Arbiter/els_packet[0]} {R_Arbiter/els_packet[1]} {R_Arbiter/els_packet[2]}]]
+connect_debug_port u_ila_0/probe3 [get_nets [list {R_Arbiter/UDP_st[0]} {R_Arbiter/UDP_st[1]} {R_Arbiter/UDP_st[2]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe4]
-set_property port_width 32 [get_debug_ports u_ila_0/probe4]
-connect_debug_port u_ila_0/probe4 [get_nets [list {R_Arbiter/my_IPadd[0]} {R_Arbiter/my_IPadd[1]} {R_Arbiter/my_IPadd[2]} {R_Arbiter/my_IPadd[3]} {R_Arbiter/my_IPadd[4]} {R_Arbiter/my_IPadd[5]} {R_Arbiter/my_IPadd[6]} {R_Arbiter/my_IPadd[7]} {R_Arbiter/my_IPadd[8]} {R_Arbiter/my_IPadd[9]} {R_Arbiter/my_IPadd[10]} {R_Arbiter/my_IPadd[11]} {R_Arbiter/my_IPadd[12]} {R_Arbiter/my_IPadd[13]} {R_Arbiter/my_IPadd[14]} {R_Arbiter/my_IPadd[15]} {R_Arbiter/my_IPadd[16]} {R_Arbiter/my_IPadd[17]} {R_Arbiter/my_IPadd[18]} {R_Arbiter/my_IPadd[19]} {R_Arbiter/my_IPadd[20]} {R_Arbiter/my_IPadd[21]} {R_Arbiter/my_IPadd[22]} {R_Arbiter/my_IPadd[23]} {R_Arbiter/my_IPadd[24]} {R_Arbiter/my_IPadd[25]} {R_Arbiter/my_IPadd[26]} {R_Arbiter/my_IPadd[27]} {R_Arbiter/my_IPadd[28]} {R_Arbiter/my_IPadd[29]} {R_Arbiter/my_IPadd[30]} {R_Arbiter/my_IPadd[31]}]]
+set_property port_width 3 [get_debug_ports u_ila_0/probe4]
+connect_debug_port u_ila_0/probe4 [get_nets [list {R_Arbiter/arp_st[0]} {R_Arbiter/arp_st[1]} {R_Arbiter/arp_st[2]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe5]
-set_property port_width 48 [get_debug_ports u_ila_0/probe5]
-connect_debug_port u_ila_0/probe5 [get_nets [list {R_Arbiter/my_MACadd[0]} {R_Arbiter/my_MACadd[1]} {R_Arbiter/my_MACadd[2]} {R_Arbiter/my_MACadd[3]} {R_Arbiter/my_MACadd[4]} {R_Arbiter/my_MACadd[5]} {R_Arbiter/my_MACadd[6]} {R_Arbiter/my_MACadd[7]} {R_Arbiter/my_MACadd[8]} {R_Arbiter/my_MACadd[9]} {R_Arbiter/my_MACadd[10]} {R_Arbiter/my_MACadd[11]} {R_Arbiter/my_MACadd[12]} {R_Arbiter/my_MACadd[13]} {R_Arbiter/my_MACadd[14]} {R_Arbiter/my_MACadd[15]} {R_Arbiter/my_MACadd[16]} {R_Arbiter/my_MACadd[17]} {R_Arbiter/my_MACadd[18]} {R_Arbiter/my_MACadd[19]} {R_Arbiter/my_MACadd[20]} {R_Arbiter/my_MACadd[21]} {R_Arbiter/my_MACadd[22]} {R_Arbiter/my_MACadd[23]} {R_Arbiter/my_MACadd[24]} {R_Arbiter/my_MACadd[25]} {R_Arbiter/my_MACadd[26]} {R_Arbiter/my_MACadd[27]} {R_Arbiter/my_MACadd[28]} {R_Arbiter/my_MACadd[29]} {R_Arbiter/my_MACadd[30]} {R_Arbiter/my_MACadd[31]} {R_Arbiter/my_MACadd[32]} {R_Arbiter/my_MACadd[33]} {R_Arbiter/my_MACadd[34]} {R_Arbiter/my_MACadd[35]} {R_Arbiter/my_MACadd[36]} {R_Arbiter/my_MACadd[37]} {R_Arbiter/my_MACadd[38]} {R_Arbiter/my_MACadd[39]} {R_Arbiter/my_MACadd[40]} {R_Arbiter/my_MACadd[41]} {R_Arbiter/my_MACadd[42]} {R_Arbiter/my_MACadd[43]} {R_Arbiter/my_MACadd[44]} {R_Arbiter/my_MACadd[45]} {R_Arbiter/my_MACadd[46]} {R_Arbiter/my_MACadd[47]}]]
+set_property port_width 3 [get_debug_ports u_ila_0/probe5]
+connect_debug_port u_ila_0/probe5 [get_nets [list {R_Arbiter/els_packet[0]} {R_Arbiter/els_packet[1]} {R_Arbiter/els_packet[2]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe6]
-set_property port_width 3 [get_debug_ports u_ila_0/probe6]
-connect_debug_port u_ila_0/probe6 [get_nets [list {R_Arbiter/ping_st[0]} {R_Arbiter/ping_st[1]} {R_Arbiter/ping_st[2]}]]
+set_property port_width 32 [get_debug_ports u_ila_0/probe6]
+connect_debug_port u_ila_0/probe6 [get_nets [list {R_Arbiter/my_IPadd[0]} {R_Arbiter/my_IPadd[1]} {R_Arbiter/my_IPadd[2]} {R_Arbiter/my_IPadd[3]} {R_Arbiter/my_IPadd[4]} {R_Arbiter/my_IPadd[5]} {R_Arbiter/my_IPadd[6]} {R_Arbiter/my_IPadd[7]} {R_Arbiter/my_IPadd[8]} {R_Arbiter/my_IPadd[9]} {R_Arbiter/my_IPadd[10]} {R_Arbiter/my_IPadd[11]} {R_Arbiter/my_IPadd[12]} {R_Arbiter/my_IPadd[13]} {R_Arbiter/my_IPadd[14]} {R_Arbiter/my_IPadd[15]} {R_Arbiter/my_IPadd[16]} {R_Arbiter/my_IPadd[17]} {R_Arbiter/my_IPadd[18]} {R_Arbiter/my_IPadd[19]} {R_Arbiter/my_IPadd[20]} {R_Arbiter/my_IPadd[21]} {R_Arbiter/my_IPadd[22]} {R_Arbiter/my_IPadd[23]} {R_Arbiter/my_IPadd[24]} {R_Arbiter/my_IPadd[25]} {R_Arbiter/my_IPadd[26]} {R_Arbiter/my_IPadd[27]} {R_Arbiter/my_IPadd[28]} {R_Arbiter/my_IPadd[29]} {R_Arbiter/my_IPadd[30]} {R_Arbiter/my_IPadd[31]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe7]
-set_property port_width 9 [get_debug_ports u_ila_0/probe7]
-connect_debug_port u_ila_0/probe7 [get_nets [list {T_Arbiter/q_din[0]} {T_Arbiter/q_din[1]} {T_Arbiter/q_din[2]} {T_Arbiter/q_din[3]} {T_Arbiter/q_din[4]} {T_Arbiter/q_din[5]} {T_Arbiter/q_din[6]} {T_Arbiter/q_din[7]} {T_Arbiter/q_din[8]}]]
+set_property port_width 48 [get_debug_ports u_ila_0/probe7]
+connect_debug_port u_ila_0/probe7 [get_nets [list {R_Arbiter/my_MACadd[0]} {R_Arbiter/my_MACadd[1]} {R_Arbiter/my_MACadd[2]} {R_Arbiter/my_MACadd[3]} {R_Arbiter/my_MACadd[4]} {R_Arbiter/my_MACadd[5]} {R_Arbiter/my_MACadd[6]} {R_Arbiter/my_MACadd[7]} {R_Arbiter/my_MACadd[8]} {R_Arbiter/my_MACadd[9]} {R_Arbiter/my_MACadd[10]} {R_Arbiter/my_MACadd[11]} {R_Arbiter/my_MACadd[12]} {R_Arbiter/my_MACadd[13]} {R_Arbiter/my_MACadd[14]} {R_Arbiter/my_MACadd[15]} {R_Arbiter/my_MACadd[16]} {R_Arbiter/my_MACadd[17]} {R_Arbiter/my_MACadd[18]} {R_Arbiter/my_MACadd[19]} {R_Arbiter/my_MACadd[20]} {R_Arbiter/my_MACadd[21]} {R_Arbiter/my_MACadd[22]} {R_Arbiter/my_MACadd[23]} {R_Arbiter/my_MACadd[24]} {R_Arbiter/my_MACadd[25]} {R_Arbiter/my_MACadd[26]} {R_Arbiter/my_MACadd[27]} {R_Arbiter/my_MACadd[28]} {R_Arbiter/my_MACadd[29]} {R_Arbiter/my_MACadd[30]} {R_Arbiter/my_MACadd[31]} {R_Arbiter/my_MACadd[32]} {R_Arbiter/my_MACadd[33]} {R_Arbiter/my_MACadd[34]} {R_Arbiter/my_MACadd[35]} {R_Arbiter/my_MACadd[36]} {R_Arbiter/my_MACadd[37]} {R_Arbiter/my_MACadd[38]} {R_Arbiter/my_MACadd[39]} {R_Arbiter/my_MACadd[40]} {R_Arbiter/my_MACadd[41]} {R_Arbiter/my_MACadd[42]} {R_Arbiter/my_MACadd[43]} {R_Arbiter/my_MACadd[44]} {R_Arbiter/my_MACadd[45]} {R_Arbiter/my_MACadd[46]} {R_Arbiter/my_MACadd[47]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe8]
-set_property port_width 9 [get_debug_ports u_ila_0/probe8]
-connect_debug_port u_ila_0/probe8 [get_nets [list {UDP_d[0]} {UDP_d[1]} {UDP_d[2]} {UDP_d[3]} {UDP_d[4]} {UDP_d[5]} {UDP_d[6]} {UDP_d[7]} {UDP_d[8]}]]
+set_property port_width 3 [get_debug_ports u_ila_0/probe8]
+connect_debug_port u_ila_0/probe8 [get_nets [list {R_Arbiter/ping_st[0]} {R_Arbiter/ping_st[1]} {R_Arbiter/ping_st[2]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe9]
-set_property port_width 9 [get_debug_ports u_ila_0/probe9]
-connect_debug_port u_ila_0/probe9 [get_nets [list {arp_d[0]} {arp_d[1]} {arp_d[2]} {arp_d[3]} {arp_d[4]} {arp_d[5]} {arp_d[6]} {arp_d[7]} {arp_d[8]}]]
+set_property port_width 32 [get_debug_ports u_ila_0/probe9]
+connect_debug_port u_ila_0/probe9 [get_nets [list {R_Arbiter/r_crc[0]} {R_Arbiter/r_crc[1]} {R_Arbiter/r_crc[2]} {R_Arbiter/r_crc[3]} {R_Arbiter/r_crc[4]} {R_Arbiter/r_crc[5]} {R_Arbiter/r_crc[6]} {R_Arbiter/r_crc[7]} {R_Arbiter/r_crc[8]} {R_Arbiter/r_crc[9]} {R_Arbiter/r_crc[10]} {R_Arbiter/r_crc[11]} {R_Arbiter/r_crc[12]} {R_Arbiter/r_crc[13]} {R_Arbiter/r_crc[14]} {R_Arbiter/r_crc[15]} {R_Arbiter/r_crc[16]} {R_Arbiter/r_crc[17]} {R_Arbiter/r_crc[18]} {R_Arbiter/r_crc[19]} {R_Arbiter/r_crc[20]} {R_Arbiter/r_crc[21]} {R_Arbiter/r_crc[22]} {R_Arbiter/r_crc[23]} {R_Arbiter/r_crc[24]} {R_Arbiter/r_crc[25]} {R_Arbiter/r_crc[26]} {R_Arbiter/r_crc[27]} {R_Arbiter/r_crc[28]} {R_Arbiter/r_crc[29]} {R_Arbiter/r_crc[30]} {R_Arbiter/r_crc[31]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe10]
-set_property port_width 8 [get_debug_ports u_ila_0/probe10]
-connect_debug_port u_ila_0/probe10 [get_nets [list {gmii_rxd[0]} {gmii_rxd[1]} {gmii_rxd[2]} {gmii_rxd[3]} {gmii_rxd[4]} {gmii_rxd[5]} {gmii_rxd[6]} {gmii_rxd[7]}]]
+set_property port_width 9 [get_debug_ports u_ila_0/probe10]
+connect_debug_port u_ila_0/probe10 [get_nets [list {T_Arbiter/q_din[0]} {T_Arbiter/q_din[1]} {T_Arbiter/q_din[2]} {T_Arbiter/q_din[3]} {T_Arbiter/q_din[4]} {T_Arbiter/q_din[5]} {T_Arbiter/q_din[6]} {T_Arbiter/q_din[7]} {T_Arbiter/q_din[8]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe11]
 set_property port_width 9 [get_debug_ports u_ila_0/probe11]
-connect_debug_port u_ila_0/probe11 [get_nets [list {ping_d[0]} {ping_d[1]} {ping_d[2]} {ping_d[3]} {ping_d[4]} {ping_d[5]} {ping_d[6]} {ping_d[7]} {ping_d[8]}]]
+connect_debug_port u_ila_0/probe11 [get_nets [list {UDP_d[0]} {UDP_d[1]} {UDP_d[2]} {UDP_d[3]} {UDP_d[4]} {UDP_d[5]} {UDP_d[6]} {UDP_d[7]} {UDP_d[8]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe12]
-set_property port_width 1 [get_debug_ports u_ila_0/probe12]
-connect_debug_port u_ila_0/probe12 [get_nets [list arp_tx]]
+set_property port_width 9 [get_debug_ports u_ila_0/probe12]
+connect_debug_port u_ila_0/probe12 [get_nets [list {arp_d[0]} {arp_d[1]} {arp_d[2]} {arp_d[3]} {arp_d[4]} {arp_d[5]} {arp_d[6]} {arp_d[7]} {arp_d[8]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe13]
-set_property port_width 1 [get_debug_ports u_ila_0/probe13]
-connect_debug_port u_ila_0/probe13 [get_nets [list R_Arbiter/crc_ok_reg_n_0]]
+set_property port_width 8 [get_debug_ports u_ila_0/probe13]
+connect_debug_port u_ila_0/probe13 [get_nets [list {gmii_rxd[0]} {gmii_rxd[1]} {gmii_rxd[2]} {gmii_rxd[3]} {gmii_rxd[4]} {gmii_rxd[5]} {gmii_rxd[6]} {gmii_rxd[7]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe14]
-set_property port_width 1 [get_debug_ports u_ila_0/probe14]
-connect_debug_port u_ila_0/probe14 [get_nets [list ping_tx]]
+set_property port_width 9 [get_debug_ports u_ila_0/probe14]
+connect_debug_port u_ila_0/probe14 [get_nets [list {ping_d[0]} {ping_d[1]} {ping_d[2]} {ping_d[3]} {ping_d[4]} {ping_d[5]} {ping_d[6]} {ping_d[7]} {ping_d[8]}]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe15]
 set_property port_width 1 [get_debug_ports u_ila_0/probe15]
-connect_debug_port u_ila_0/probe15 [get_nets [list UDP_tx]]
+connect_debug_port u_ila_0/probe15 [get_nets [list arp_tx]]
 create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe16]
 set_property port_width 1 [get_debug_ports u_ila_0/probe16]
-connect_debug_port u_ila_0/probe16 [get_nets [list T_Arbiter/wr_en]]
+connect_debug_port u_ila_0/probe16 [get_nets [list R_Arbiter/crc_ok_reg_n_0]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe17]
+set_property port_width 1 [get_debug_ports u_ila_0/probe17]
+connect_debug_port u_ila_0/probe17 [get_nets [list ping_tx]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe18]
+set_property port_width 1 [get_debug_ports u_ila_0/probe18]
+connect_debug_port u_ila_0/probe18 [get_nets [list UDP_tx]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe19]
+set_property port_width 1 [get_debug_ports u_ila_0/probe19]
+connect_debug_port u_ila_0/probe19 [get_nets [list T_Arbiter/wr_en]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe20]
+set_property port_width 1 [get_debug_ports u_ila_0/probe20]
+connect_debug_port u_ila_0/probe20 [get_nets [list gmii_rxctl]]
 create_debug_core u_ila_1 ila
 set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_1]
 set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_1]
