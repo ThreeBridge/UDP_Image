@@ -5,26 +5,30 @@
 
 
 ### Clock Signal
-#set_property -dict {PACKAGE_PIN R4 IOSTANDARD LVCMOS33} [get_ports SYSCLK]
+create_clock -period 10.000 -name sys_clk_pin -waveform {0.000 5.000} -add [get_ports SYSCLK]
+create_clock -period 8.000 -name phyrx_ddr -waveform {0.000 4.000}
+create_clock -period 8.000 -name PHY_RXCLK -waveform {2.000 6.000} [get_ports eth_rxck]
 
-#create_clock -period 10.000 -name sys_clk_pin -waveform {0.000 5.000} -add [get_ports SYSCLK]
+create_clock -period 8.000 -name PHY_TXCLK -waveform {0.000 4.000} [get_pins gmii2rgmii/ODDR_ck/Q]
 
-#create_clock -period 8.000 -name phyrx_ddr -waveform {0.000 4.000}
-#create_clock -period 8.000 -name PHY_RXCLK -waveform {2.000 6.000} [get_ports eth_rxck]
+set_input_jitter [get_clocks -of_objects [get_ports eth_rxck]] 0.080
 
-#set_input_jitter [get_clocks -of_objects [get_ports PHY_RXCLK]] 0.080
-#set_input_delay -clock phyrx_ddr -max 1.000 [get_ports {eth_rxd[*]}]
-#set_input_delay -clock phyrx_ddr -clock_fall -max -add_delay 1.000 [get_ports {eth_rxd[*]}]
-#set_input_delay -clock phyrx_ddr -min -1.000 [get_ports {eth_rxd[*]}]
-#set_input_delay -clock phyrx_ddr -clock_fall -min -add_delay -1.000 [get_ports {eth_rxd[*]}]
+set_input_delay -clock phyrx_ddr -max 1.000 [get_ports {eth_rxd[*]}]
+set_input_delay -clock phyrx_ddr -clock_fall -max -add_delay 1.000 [get_ports {eth_rxd[*]}]
+set_input_delay -clock phyrx_ddr -min -1.000 [get_ports {eth_rxd[*]}]
+set_input_delay -clock phyrx_ddr -clock_fall -min -add_delay -1.000 [get_ports {eth_rxd[*]}]
+set_input_delay -clock phyrx_ddr -max 1.000 [get_ports eth_rxctl]
+set_input_delay -clock phyrx_ddr -clock_fall -min -1.000 [get_ports eth_rxctl]
 
-#set_false_path -setup -rise_from phyrx_ddr -fall_to PHY_RXCLK
-#set_false_path -setup -fall_from phyrx_ddr -rise_to PHY_RXCLK
-#set_false_path -hold -rise_from phyrx_ddr -fall_to PHY_RXCLK
-#set_false_path -hold -fall_from phyrx_ddr -rise_to PHY_RXCLK
+## false_path
+set_false_path -setup -rise_from phyrx_ddr -fall_to PHY_RXCLK
+set_false_path -setup -fall_from phyrx_ddr -rise_to PHY_RXCLK
+set_false_path -hold -rise_from phyrx_ddr -fall_to PHY_RXCLK
+set_false_path -hold -fall_from phyrx_ddr -rise_to PHY_RXCLK
 
-#set_input_delay -clock phyrx_ddr -max 1.000 [get_ports eth_rxctl]
-#set_input_delay -clock phyrx_ddr -clock_fall -min -1.000 [get_ports eth_rxctl]
+set_false_path -from [get_cells R_Arbiter/ARP/tx_en_reg*] -to [get_cells R_Arbiter/ARP/tx_en_clk125_d_reg*]
+set_false_path -from [get_cells R_Arbiter/ping/tx_en_reg*] -to [get_cells R_Arbiter/ping/tx_en_clk125_d_reg*]
+set_false_path -from [get_cells R_Arbiter/trans_image/tx_en_reg*] -to [get_cells R_Arbiter/trans_image/tx_en_clk125_d_reg*]
 
 #set_property CLOCK_DEDICATED_ROUTE BACKBONE [get_nets pllsys/inst/SYSCLK_i_PLLSYS];
 ## FMC Transceiver clocks (Must be set to value provided by Mezzanine card, currently set to 156.25 MHz)
@@ -36,6 +40,8 @@
 #set_property -dict { PACKAGE_PIN F10 } [get_ports { FMC_MGT_CLK_P }];
 #create_clock -add -name mgtclk1_pin -period 6.400 -waveform {0 3.200} [get_ports {FMC_MGT_CLK_P}];
 
+## CLOCK 
+set_property -dict {PACKAGE_PIN R4 IOSTANDARD LVCMOS33} [get_ports SYSCLK]
 
 ## LEDs
 set_property -dict {PACKAGE_PIN T14 IOSTANDARD LVCMOS25} [get_ports {LED[0]}]
@@ -229,61 +235,6 @@ set_property -dict {PACKAGE_PIN Y11 IOSTANDARD LVCMOS25} [get_ports {eth_txd[3]}
 #connect_debug_port dbg_hub/clk [get_nets clk200]
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-set_input_delay -clock phyrx_ddr -max 1.000 [get_ports {eth_rxd[*]}]
-set_input_delay -clock phyrx_ddr -clock_fall -max -add_delay 1.000 [get_ports {eth_rxd[*]}]
-set_input_delay -clock phyrx_ddr -min -1.000 [get_ports {eth_rxd[*]}]
-set_input_delay -clock phyrx_ddr -clock_fall -min -add_delay -1.000 [get_ports {eth_rxd[*]}]
-set_false_path -setup -rise_from phyrx_ddr -fall_to PHY_RXCLK
-set_false_path -setup -fall_from phyrx_ddr -rise_to PHY_RXCLK
-set_false_path -hold -rise_from phyrx_ddr -fall_to PHY_RXCLK
-set_false_path -hold -fall_from phyrx_ddr -rise_to PHY_RXCLK
-set_input_delay -clock phyrx_ddr -max 1.000 [get_ports eth_rxctl]
-set_input_delay -clock phyrx_ddr -clock_fall -min -1.000 [get_ports eth_rxctl]
-
-set_false_path -from [get_ports CPU_RSTN]
-
 #set_false_path -rise_from [get_pins {R_Arbiter/ping/csum_extend_reg[*]/C}] -rise_to [get_pins {R_Arbiter/ping/TXBUF_reg[*][*]/D}]
 #set_false_path -rise_from [get_pins {R_Arbiter/ping/DstMAC_reg[*]/C}] -rise_to [get_pins {R_Arbiter/ping/TXBUF_reg[*][*]/D}]
 #set_false_path -rise_from [get_pins {R_Arbiter/ping/rx_cnt_i_reg[*]/C}] -rise_to [get_pins {R_Arbiter/ping/tx_cnt_reg[*]*/D}]
@@ -311,9 +262,6 @@ set_false_path -from [get_ports CPU_RSTN]
 #set_false_path -from [get_cells R_Arbiter/ping/tx_iend_rxck_reg*] -to [get_cells R_Arbiter/ping/tx_iend_clk125_d_reg*]
 #set_false_path -from [get_cells R_Arbiter/ping/tx_hend_rxck_reg*] -to [get_cells R_Arbiter/ping/tx_hend_clk125_d_reg*]
 #set_false_path -from [get_cells R_Arbiter/ping/ready_rxck_reg*] -to [get_cells R_Arbiter/ping/ready_clk125_d_reg*]
-set_false_path -from [get_cells R_Arbiter/ARP/tx_en_reg*] -to [get_cells R_Arbiter/ARP/tx_en_clk125_d_reg*]
-set_false_path -from [get_cells R_Arbiter/ping/tx_en_reg*] -to [get_cells R_Arbiter/ping/tx_en_clk125_d_reg*]
-set_false_path -from [get_cells R_Arbiter/trans_image/tx_en_reg*] -to [get_cells R_Arbiter/trans_image/tx_en_clk125_d_reg*]
 
 #set_false_path -from [get_cells R_Arbiter/trans_image/DstMAC_i_reg*] -to [get_cells R_Arbiter/trans_image/TXBUF_reg*]
 #set_false_path -from [get_cells R_Arbiter/trans_image/DstIP_i_reg*] -to [get_cells R_Arbiter/trans_image/TXBUF_reg*]
