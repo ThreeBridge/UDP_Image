@@ -164,12 +164,9 @@ module TOP(
         .UDP_i        (UDP_o),
         .UDP_btn_tx(UDP_btn_tx),
         .eth_rxck(eth_rxck),
-        //.clk125(clk125),
-        //.clk125_90(clk125_90),
         .rst       (rst_rx),
         .txd_o        (gmii_txd),
         .gmii_txctl_o (gmii_txctl),
-        //.LED(LED)
         .LED          (tx_led)
     );
     

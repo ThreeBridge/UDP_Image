@@ -35,12 +35,12 @@ module tb_rarp(
      reg [7:0] SW;
 
    TOP top_i(
-        .eth_rxctl(P_RXDV),
-        .eth_rxck(P_RXCLK),
-        .eth_rxd(P_RXD),
-        .eth_txctl(P_TXEN),
-        .eth_txck(P_TXCLK),
-        .eth_txd(P_TXD),
+        .ETH_RXCTL(P_RXDV),
+        .ETH_RXCK(P_RXCLK),
+        .ETH_RXD(P_RXD),
+        .ETH_TXCTL(P_TXEN),
+        .ETH_TXCK(P_TXCLK),
+        .ETH_TXD(P_TXD),
         .SYSCLK(SYSCLK),
         .CPU_RSTN(CPU_RSTN),
         .reset_i(reset),
@@ -48,31 +48,40 @@ module tb_rarp(
         .SW(SW)
     );
     
+   /*---R_Arbiter---*/
    parameter Idle       =  8'h00;   // 待機状態
    parameter SFD_Wait   =  8'h01;   // プリアンブル検知中
    parameter Recv_Data  =  8'h02;   // データ処理
    parameter Recv_End   =  8'h03;   // 処理終了
-   parameter Tx_Pre     =  8'h01;   // プリアンブル送信
-   parameter Tx_Data    =  8'h02;   // データ送信
-   parameter Tx_End     =  8'h03;   // 送信終了
-   parameter Hcsum      =  8'h02;
-   parameter Hc_End     =  8'h03;
-   parameter Icsum      =  8'h04;
-   parameter Ic_End     =  8'h05;
-   parameter Ready      =  8'h06;
-   parameter Tx_Hc      =  8'h07;
-   parameter Tx_HEnd    =  8'h08;
-   parameter Tx_Ic      =  8'h09;
-   parameter Tx_IEnd    =  8'h0A;
-   parameter Tx_En      =  8'h0B;
-   parameter Tx_End_p   =  8'h0C;            
-   parameter IP_cs      =  8'h01;
-   parameter IP_End     =  8'h02;
-   parameter UDP_cs     =  8'h03;
-   parameter UDP_End    =  8'h04;
-   parameter TX_En      =  8'h06;
-   parameter TX_End     =  8'h07;
    
+   /*---T_Arbiter---*/
+   parameter Stby      =  4'h1;
+   parameter Tx_Pre    =  4'h2;   // プリアンブル送信
+   parameter Tx_Data   =  4'h3;   // データ送信
+   parameter Tx_End    =  4'h4;   // 送信終了
+   
+   /*---ARP---*/
+   parameter Idle_A      =  4'h0;   // 待機
+   parameter Tx_Ready_A  =  4'h1;   // 送信準備
+   parameter Tx_A        =  4'h2;   // 送信中
+   parameter Tx_End_A    =  4'h3;   // 送信終了   
+   
+   /*---ping---*/
+   parameter   Idle_p    =   4'h0;
+   parameter   Stby_p    =   4'hD;
+   parameter   Presv_p   =   4'h1;
+   parameter   Hcsum_p   =   4'h2;
+   parameter   Hc_End_p  =   4'h3;
+   parameter   Icsum_p   =   4'h4;
+   parameter   Ic_End_p  =   4'h5;
+   parameter   Ready_p   =   4'h6;
+   parameter   Tx_Hc_p   =   4'h7;
+   parameter   Tx_HEnd_p =   4'h8;
+   parameter   Tx_Ic_p   =   4'h9;
+   parameter   Tx_IEnd_p =   4'hA;
+   parameter   Tx_En_p   =   4'hB;
+   parameter   Tx_End_p  =   4'hC; 
+      
    /*---recv_image---*/
    parameter   Idle_im     =   8'h00;
    parameter   Presv       =   8'h01;
@@ -94,16 +103,12 @@ module tb_rarp(
    parameter   Uc_End_t =   8'h06;
    parameter   Tx_En_t  =   8'h07;
    parameter   Select_t =   8'h08;
-   parameter   Tx_End_t =   8'h09;   
-   
-   
-   
+   parameter   Tx_End_t =   8'h09;
    
    reg [79:0] str_st_rx;
    reg [79:0] str_st_tx;
+   reg [79:0] str_st_arp;
    reg [79:0] str_st_ping;
-   reg [79:0] str_st_udp;
-   reg [79:0] str_st_udp2;
    reg [79:0] str_st_udp_image;
    reg [79:0] str_st_trans_image;
    always_comb begin
@@ -118,6 +123,7 @@ module tb_rarp(
    always_comb begin
       case (top_i.T_Arbiter.st)
          Idle: str_st_tx = "idle";
+         Stby : str_st_tx = "stby";
          Tx_Pre: str_st_tx = "tx_pre";
          Tx_Data: str_st_tx = "tx_data";
          Tx_End: str_st_tx = "tx_end";
@@ -125,19 +131,29 @@ module tb_rarp(
    end
    
    always_comb begin
+      case (top_i.R_Arbiter.arp.st)
+         Idle_A : str_st_arp = "idle";
+         Tx_Ready_A : str_st_arp = "tx_ready";
+         Tx_A : str_st_arp = "tx";
+         Tx_End_A : str_st_arp = "tx_end";
+      endcase
+   end
+   
+   always_comb begin
       case (top_i.R_Arbiter.ping.st)
-         Idle: str_st_ping = "idle";   
-         Presv: str_st_ping = "presv";
-         Hcsum: str_st_ping = "hcsum";
-         Hc_End: str_st_ping = "hc_end";
-         Icsum: str_st_ping = "icsum";
-         Ic_End: str_st_ping = "ic_end";
-         Ready: str_st_ping = "ready";
-         Tx_Hc: str_st_ping = "tx_hc";
-         Tx_HEnd: str_st_ping = "tx_hend";
-         Tx_Ic: str_st_ping = "tx_ic";
-         Tx_IEnd: str_st_ping = "tx_iend";
-         Tx_En: str_st_ping = "tx_en";
+         Idle_p : str_st_ping = "idle";
+         Stby_p : str_st_ping = "stby";
+         Presv_p : str_st_ping = "presv";
+         Hcsum_p : str_st_ping = "hcsum";
+         Hc_End_p : str_st_ping = "hc_end";
+         Icsum_p : str_st_ping = "icsum";
+         Ic_End_p : str_st_ping = "ic_end";
+         Ready_p : str_st_ping = "ready";
+         Tx_Hc_p : str_st_ping = "tx_hc";
+         Tx_HEnd_p : str_st_ping = "tx_hend";
+         Tx_Ic_p : str_st_ping = "tx_ic";
+         Tx_IEnd_p : str_st_ping = "tx_iend";
+         Tx_En_p : str_st_ping = "tx_en";
          Tx_End_p: str_st_ping = "tx_end";
       endcase
    end
@@ -305,7 +321,8 @@ module tb_rarp(
         recvByte(8'h89);
         recvByte(8'h30);
         recvByte(8'hC8);
-        P_RXDV = 0;
+        //P_RXDV = 0;
+        recv_end();
         
         //P_RXCLK = 0;
         @(posedge P_RXCLK)
@@ -444,7 +461,8 @@ module tb_rarp(
          recvByte(8'hBC);
          recvByte(8'h4A);
          recvByte(8'h53);
-         P_RXDV = 0;
+         
+         recv_end();
          
          /*---UDP_btn---*/
          #3000;
@@ -684,10 +702,10 @@ module tb_rarp(
    //**
    task recvByte(input [7:0] c);
       begin
-         @(negedge P_RXCLK) #2;
+         @(posedge P_RXCLK) ;
          P_RXD = c[3:0];
          P_RXDV = 1'b1;
-         @(posedge P_RXCLK) #2;
+         @(negedge P_RXCLK) ;
          P_RXD = c[7:4];
       end
    endtask //
@@ -794,7 +812,7 @@ module tb_rarp(
         recvByte(8'hF8);
         recvByte(8'hC1);
         recvByte(8'h54);
-        P_RXDV = 0;
+        recv_end();
         
         //P_RXCLK = 0;
         @(posedge P_RXCLK)
@@ -834,6 +852,11 @@ module tb_rarp(
        #10000;
        UDP_image();
        end
+   endtask
+   
+   task recv_end();
+       @(posedge P_RXCLK);
+       P_RXDV = 0;
    endtask
    
 endmodule

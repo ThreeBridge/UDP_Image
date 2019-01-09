@@ -184,7 +184,7 @@ module ping(
     
     always_ff @(posedge eth_rxck)begin
         if(st==Presv)begin
-            rx_cnt <= rx_cnt + 8'd1;
+            if(rxd_i[8]) rx_cnt <= rx_cnt + 8'd1;
         end
         else if(st==Idle)begin
             rx_cnt <= 0;
@@ -276,7 +276,7 @@ module ping(
             {TXBUF[38],TXBUF[39]} <= Ident;         // Identifier
             {TXBUF[40],TXBUF[41]} <= SeqNum;        // Sequence number
             /*--Random Data--*/
-            for(i=0;i<(rx_cnt-6'd46);i=i+1)begin
+            for(i=0;i<(rx_cnt-6'd46);i=i+1)begin    
                 TXBUF[6'd42+i] <= i;
             end
             {TXBUF[rx_cnt-4],TXBUF[rx_cnt-3],TXBUF[rx_cnt-2],TXBUF[rx_cnt-1]} <= 32'h01_02_03_04;   // dummy
@@ -323,12 +323,13 @@ module ping(
     
     reg [2:0] fcs_cnt;
     always_ff @(posedge eth_rxck)begin
-        if(st==Tx_En && fcs_cnt!=3'b100) fcs_cnt <= fcs_cnt + 1;
-        else                             fcs_cnt <= 0;
+        if(st==Tx_En && tx_cnt>=rx_cnt-2'd3) fcs_cnt <= fcs_cnt + 1;
+        else if(fcs_cnt==3'd4)               fcs_cnt <= 0;
+        else                                 fcs_cnt <= 0;
     end 
     always_ff @(posedge eth_rxck)begin
         if(st==Tx_En && tx_cnt<(rx_cnt-8'd4)) ping_o <= {`HI,TXBUF[tx_cnt]};
-        else if(st==Tx_En && fcs_cnt!=3'd4)  ping_o <= {`LO,TXBUF[tx_cnt]};
+        else if(st==Tx_En && fcs_cnt!=3'd3)  ping_o <= {`LO,TXBUF[tx_cnt]};
         else             ping_o <= 0;
     end
     
