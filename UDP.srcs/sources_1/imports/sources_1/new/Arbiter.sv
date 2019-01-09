@@ -31,16 +31,10 @@ module Arbiter(
     input                 rst_btn,
     input [7:0]           SW,
     
-    output reg            arp_tx_en,
-    output reg            ping_tx_en,
-    output reg            UDP_tx_en,
-    output reg            arp_tx,
-    output reg            ping_tx,
-    output reg            UDP_tx,
-    output reg [8:0]      arp_d,
-    output reg [8:0]      ping_d,
-    output reg [8:0]      UDP_d,
-    output reg [7:0]      LED
+    output [8:0]          rarp_o,
+    output [8:0]          ping_o,
+    output [8:0]          UDP_o
+    //output reg [7:0]      LED
     );
     
 parameter  Idle        = 8'h00;
@@ -52,13 +46,13 @@ parameter  Recv_End    = 8'h03;
     reg [7:0] RXBUF [1045:0];
     
     /* ステートマシン */
-    (*dont_touch="true"*)reg [7:0] st;
-    reg [7:0] nx;
+    (*dont_touch="true"*)reg [3:0] st;
+    reg [3:0] nx;
     
     //<-- test by oikawa
-    reg [4:0] rxend_cnt;
+    reg [3:0] rxend_cnt;
     always_ff @(posedge eth_rxck)begin
-       if (st==Idle) rxend_cnt <= 5'h0;
+       if (st==Idle) rxend_cnt <= 4'h0;
        else if (st==Recv_End) rxend_cnt <= rxend_cnt + 5'h1;
     end
     //--> test by oikawa
@@ -74,34 +68,44 @@ parameter  Recv_End    = 8'h03;
             Idle:       if (gmii_rxctl)  nx = SFD_Wait;
             SFD_Wait:   if (pre)         nx = Recv_Data;
             Recv_Data:  if (!gmii_rxctl) nx = Recv_End;
-            //Recv_End:                    nx = Idle;
-            Recv_End:   if (rxend_cnt==5'h2F)  nx = Idle;
+            Recv_End:   if (rxend_cnt==4'hF)  nx = Idle;
             default:begin end
         endcase
     end
     
     /*---MAC/IP addressをDIPスイッチを使って任意に決める(add 2018.12.5)---*/
-    wire [3:0] sw_sel = {SW[3],SW[2],SW[1],SW[0]};
-    (*dont_touch="true"*)reg  [47:0] my_MACadd;
-    (*dont_touch="true"*)reg  [31:0] my_IPadd;
-    always_comb begin
-        my_MACadd   =  {44'h00_0A_35_02_0F_B,sw_sel};
-        my_IPadd    =  {8'd172,8'd31,8'd210,4'd10,sw_sel};
-    end
+    (*dont_touch="true"*) wire [47:0] my_MACadd = `my_MAC | {44'b0, SW[3:0]};   // 2019.1.9
+    (*dont_touch="true"*) wire [31:0] my_IPadd  = `my_IP  | {28'b0, SW[3:0]};
+//    wire [3:0] sw_sel = {SW[3],SW[2],SW[1],SW[0]};
+//    (*dont_touch="true"*)reg  [47:0] my_MACadd;
+//    (*dont_touch="true"*)reg  [31:0] my_IPadd;
+//    always_comb begin
+//        my_MACadd   =  {44'h00_0A_35_02_0F_B,sw_sel};
+//        my_IPadd    =  {8'd172,8'd31,8'd210,4'd10,sw_sel};
+//    end
     
-    /* DstMAC */
-    wire [47:0] host_MAC = {RXBUF[0],RXBUF[1],RXBUF[2],RXBUF[3],RXBUF[4],RXBUF[5]};
+    /*---パケットから情報を抜き出す---*/
     (*dont_touch="true"*)reg [47:0] DstMAC;
     (*dont_touch="true"*)reg [31:0] DstIP;
+    wire [47:0] rx_dstMAC    = {RXBUF[0],RXBUF[1],RXBUF[2],RXBUF[3],RXBUF[4],RXBUF[5]};
+    wire [47:0] rx_srcMAC    = {RXBUF[6],RXBUF[7],RXBUF[8],RXBUF[9],RXBUF[10],RXBUF[11]};
+    wire [15:0] rx_FTYPE     = {RXBUF[12],RXBUF[13]};
+    wire [31:0] rx_srcIP     = {RXBUF[28],RXBUF[29],RXBUF[30],RXBUF[31]};
+    wire [31:0] rx_arp_dstIP = {RXBUF[38],RXBUF[39],RXBUF[40],RXBUF[41]};
+    wire [31:0] rx_ip4_dstIP = {RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]};
+
+    wire is_arp = (rx_FTYPE==`FTYPE_ARP); //-- moikawa add.
+    wire dstmac_is_bcast = (rx_dstMAC == `bcast_MAC); //-- dest MAC address is broadcast.
+    wire dstmac_is_me    = (rx_dstMAC == my_MACadd);  //-- dest MAC address is me.
+    
     always_ff @(posedge eth_rxck) begin
-        if(st==Recv_End&&{RXBUF[12],RXBUF[13]}==`FTYPE_ARP)begin
-            //if(host_MAC== `bcast_MAC || host_MAC==`my_MAC)begin
-            if(host_MAC== `bcast_MAC || host_MAC==my_MACadd)begin   // add 2018.12.5
-                DstMAC <= {RXBUF[6],RXBUF[7],RXBUF[8],RXBUF[9],RXBUF[10],RXBUF[11]};
-                DstIP <= {RXBUF[28],RXBUF[29],RXBUF[30],RXBUF[31]};
+        if(st==Recv_End && is_arp) begin
+            if(dstmac_is_bcast || dstmac_is_me) begin   // add 2018.12.5
+                DstMAC <= rx_srcMAC;
+                DstIP <= rx_srcIP;
             end
         end
-        else if(st==Idle)begin
+        else if(st==Idle) begin
             DstMAC <= 48'b0;
             DstIP <= 32'b0;
         end
@@ -119,22 +123,22 @@ parameter  Recv_End    = 8'h03;
        end
     end    
     
-    /* 受信 */
-    /* 受信データ数 */
+    /*---受信---*/
+    /*--受信データ数--*/
     (*dont_touch="true"*) reg [10:0] rx_cnt;
     always_ff @(posedge eth_rxck)begin
         if(st==Recv_Data)       rx_cnt <= rx_cnt + 11'd1;
         else if(st==Idle)       rx_cnt <= 0;
     end
     
-    /* 受信データロード */
-    integer i;
+    /*--受信データロード--*/
+    //integer i;
     always_ff @(posedge eth_rxck)begin
         if(st==Recv_Data) RXBUF[rx_cnt] <= q_rxd[0];
-        else if(st==Idle) for(i=0;i<1046;i=i+1) RXBUF[i] <= 8'h00;
+        //else if(st==Idle) for(i=0;i<1046;i=i+1) RXBUF[i] <= 8'h00;
     end
     
-    /* SFD検出 */
+    /*--SFD検出--*/
     always_comb begin
         if(st==SFD_Wait&&q_rxd[0]==`SFD) pre = 1'b1;
         else pre = 1'b0;
@@ -160,6 +164,9 @@ parameter  Recv_End    = 8'h03;
         end
     end
     
+    //==========================================
+    // CRC generator
+    //==========================================    
     reg [31:0] CRC;
     CRC_ge crc_ge(
                 .d(q_rxd[3]),
@@ -190,82 +197,80 @@ parameter  Recv_End    = 8'h03;
         end
     end
     
-    reg crc_ok;
+    (*dont_touch="true"*)reg crc_ok;
+    wire FCS_correct = (st==Recv_End && FCS==r_crc);
     always_ff @(posedge eth_rxck)begin
-        //if(st==Recv_End)begin
-        if(st==Recv_End && rxend_cnt==4'h0)begin
-            if(FCS==r_crc)begin
-                crc_ok <= 1;
-            end
-        end
-        else crc_ok <= 0;
+        if(st==Recv_End && rxend_cnt==4'h0 && FCS_correct) crc_ok <= `HI;
+        else if(st==Idle) crc_ok <= `LO;
     end
      
     /*---パケットの種類振り分け---*/
+//    (*dont_touch="true"*)reg [2:0] arp_st;       // ARP Packet
+//    (*dont_touch="true"*)reg [2:0] ping_st;      // ICMP Echo Packet(ping)
+//    (*dont_touch="true"*)reg [2:0] UDP_st;       // UDP Packet
+//    (*dont_touch="true"*)reg [2:0] els_packet;   // else Packet
+//    always_ff @(posedge eth_rxck)begin
+//        if(crc_ok)begin
+//            //if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[20],RXBUF[21]}==`OPR_ARP) arp_st <= 1;
+//            //if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[38],RXBUF[39],RXBUF[40],RXBUF[41]}==`my_IP) arp_st <= 4'h7;
+//            if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[38],RXBUF[39],RXBUF[40],RXBUF[41]}==my_IPadd) arp_st <= 3'h7;  // add 2018.12.5
+//            //else if(RXBUF[23]==8'h01) ping_st <= 3'h7;
+//            else if(RXBUF[23]==8'h01&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==my_IPadd) ping_st <= 3'h7;             // add 2018.12.11
+//            //else if(RXBUF[23]==8'h11&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==`my_IP) UDP_st  <= 3'h7;
+//            else if(RXBUF[23]==8'h11&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==my_IPadd) UDP_st  <= 3'h7;             // add 2018.12.5
+//            else els_packet <= 3'h7;
+//        end
+//        else begin
+//            arp_st  <= {arp_st[1:0], 1'b0};
+//            ping_st <= {ping_st[1:0], 1'b0};
+//            UDP_st  <= {UDP_st[1:0], 1'b0};
+//            els_packet <= {els_packet[1:0], 1'b0};
+//        end
+//    end
+
     (*dont_touch="true"*)reg [2:0] arp_st;       // ARP Packet
-    (*dont_touch="true"*)reg [2:0] ping_st;      // ICMP Echo Packet(ping)
+    (*dont_touch="true"*)reg ping_st;      // ICMP Echo Packet(ping)
     (*dont_touch="true"*)reg [2:0] UDP_st;       // UDP Packet
     (*dont_touch="true"*)reg [2:0] els_packet;   // else Packet
     always_ff @(posedge eth_rxck)begin
         if(crc_ok)begin
-            //if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[20],RXBUF[21]}==`OPR_ARP) arp_st <= 1;
-            //if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[38],RXBUF[39],RXBUF[40],RXBUF[41]}==`my_IP) arp_st <= 4'h7;
-            if({RXBUF[12],RXBUF[13]}==`FTYPE_ARP&&{RXBUF[38],RXBUF[39],RXBUF[40],RXBUF[41]}==my_IPadd) arp_st <= 3'h7;  // add 2018.12.5
-            //else if(RXBUF[23]==8'h01) ping_st <= 3'h7;
-            else if(RXBUF[23]==8'h01&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==my_IPadd) ping_st <= 3'h7;             // add 2018.12.11
-            //else if(RXBUF[23]==8'h11&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==`my_IP) UDP_st  <= 3'h7;
-            else if(RXBUF[23]==8'h11&&{RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]}==my_IPadd) UDP_st  <= 3'h7;             // add 2018.12.5
+            if((dstmac_is_bcast ||dstmac_is_me) && is_arp && rx_arp_dstIP==my_IPadd) arp_st <= 3'b111;  // add 2018.12.5
+            else if(dstmac_is_me && RXBUF[23]==8'h01 && rx_ip4_dstIP==my_IPadd) ping_st <= `HI; // add 2018.12.11
+            else if(dstmac_is_me && RXBUF[23]==8'h11 && rx_ip4_dstIP==my_IPadd) UDP_st  <= 3'h7; // add 2018.12.5
             else els_packet <= 3'h7;
         end
         else begin
-            arp_st  <= {arp_st[1:0], 1'b0};
-            ping_st <= {ping_st[1:0], 1'b0};
-            UDP_st  <= {UDP_st[1:0], 1'b0};
-            els_packet <= {els_packet[1:0], 1'b0};
+            arp_st  <= {arp_st[1:0], `LO};
+            ping_st <= `LO;
+            UDP_st  <= {UDP_st[1:0], `LO};
+            els_packet <= {els_packet[1:0], `LO};
         end
     end
     
-    ARP ARP(
+    ARP arp(
         /*---INPUT---*/
-        .eth_rxck(eth_rxck),
-        .clk125(clk125),
-        .rst_rx(rst_rx),
-        //.rst125(rst125),
-        .arp_st(arp_st[2]),
-        .my_MACadd(my_MACadd),  //<---  add 2018.12.5
-        .my_IPadd(my_IPadd),    //--->
-        .DstMAC(DstMAC),
-        .DstIP(DstIP),
+        .eth_rxck     (eth_rxck),
+        .rst_rx       (rst_rx),
+        .start_i      (arp_st[2]),
+        .myMAC_i      (my_MACadd),  //<---  add 2018.12.5
+        .myIP_i       (my_IPadd),   //--->
+        .DstMAC_i     (DstMAC),
+        .DstIP_i      (DstIP),
         /*---OUTPUT---*/
-        .tx_en_clk125(arp_tx_en),
-        .arp_tx(arp_tx),
-        .d(arp_d)
+        .rarp_o       (rarp_o)
     );
     
-    wire crc_flg_i = CRC_flg;
-    //reg [9:0] b_rx_cnt [3:0] ;
-    //always_ff @(posedge eth_rxck)begin
-    //    b_rx_cnt <= {b_rx_cnt[2:0],rx_cnt};
-    //end
     ping ping(
-        .eth_rxck(eth_rxck),
-        .clk125(clk125),
-        .rst_rx(rst_rx),
-        //.RXBUF(RXBUF[255:0]),
-        .pre(pre),
-        .rxd(q_rxd[0]),
-    //    .rx_cnt(b_rx_cnt[3]),
-        .rx_cnt(rx_cnt),
+        /*---INPUT---*/
+        .eth_rxck     (eth_rxck),
+        .rst_rx       (rst_rx),
+        .rxd_i        ({q_rxctl[0], q_rxd[0]}),
         .arp_st(arp_st[2]),
-        .ping_st(ping_st[2]),
-        .my_MACadd(my_MACadd),
-        .my_IPadd(my_IPadd),
-        //.crc_flg_i(crc_flg_i),
-        //.DstMAC(DstMAC),
-        //.DstIP(DstIP),
-        .tx_en_clk125(ping_tx_en),
-        .ping_tx(ping_tx),
-        .ping_d(ping_d)
+        .ping_st      (ping_st),
+        .my_MAC_i     (my_MACadd),
+        .my_IP_i      (my_IPadd),
+        /*---OUTPUT---*/
+        .ping_o       (ping_o)
     );
     /*
     UDP_reply UDP_reply(
@@ -300,7 +305,7 @@ parameter  Recv_End    = 8'h03;
         //.RXBUF(RXBUF),
         .rx_cnt(rx_cnt),
         .arp_st(arp_st[0]),
-        .ping_st(ping_st[0]),
+        .ping_st(ping_st),
         .UDP_st(UDP_st[2]),
         .els_packet(els_packet[0]),
         .addrb(addr),

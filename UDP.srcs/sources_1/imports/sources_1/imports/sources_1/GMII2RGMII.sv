@@ -16,7 +16,7 @@ module GMII2RGMII (
 
    output [3:0] txd_o,
    output       txck_o,
-   output reg   txctl_o
+   output       txctl_o
 ) ;
    // ODDR: Output Double Data Rate Output Register with Set, Reset and Clock Enable.
    // Xilinx HDL Language Template, version 2017.4,  Artix-7
@@ -73,6 +73,19 @@ module GMII2RGMII (
    ODDR #( .DDR_CLK_EDGE("OPPOSITE_EDGE"), // "OPPOSITE_EDGE" or "SAME_EDGE" 
            .INIT(1'b0),    // Initial value of Q: 1'b0 or 1'b1
            .SRTYPE("SYNC") // Set/Reset type: "SYNC" or "ASYNC" 
+   ) ODDR_ctl (
+      .Q(txctl_o),   // 1-bit DDR output
+      .C(txck_i),   // 1-bit clock input
+      .CE(1'b1), // 1-bit clock enable input
+      .D1(txctl_i), // 1-bit data input (positive edge)
+      .D2(txctl_i), // 1-bit data input (negative edge)
+      .R(1'b0),   // 1-bit reset
+      .S(1'b0)    // 1-bit set
+   );
+   
+   ODDR #( .DDR_CLK_EDGE("OPPOSITE_EDGE"), // "OPPOSITE_EDGE" or "SAME_EDGE" 
+           .INIT(1'b0),    // Initial value of Q: 1'b0 or 1'b1
+           .SRTYPE("SYNC") // Set/Reset type: "SYNC" or "ASYNC" 
    ) ODDR_ck (
       .Q(txck_o),   // 1-bit DDR output
       .C(txck_90_i),   // 1-bit clock input
@@ -82,10 +95,5 @@ module GMII2RGMII (
       .R(1'b0),   // 1-bit reset
       .S(1'b0)    // 1-bit set
    ); 
-   always_ff @(negedge txck_i) begin
-      txctl_o <= txctl_i;
-   end
    
 endmodule // GMII2RDMII
-
-

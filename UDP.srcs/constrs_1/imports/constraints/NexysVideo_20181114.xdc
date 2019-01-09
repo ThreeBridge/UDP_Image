@@ -6,19 +6,29 @@
 
 ### Clock Signal
 create_clock -period 10.000 -name sys_clk_pin -waveform {0.000 5.000} -add [get_ports SYSCLK]
-create_clock -period 8.000 -name phyrx_ddr -waveform {0.000 4.000}
-create_clock -period 8.000 -name PHY_RXCLK -waveform {2.000 6.000} [get_ports eth_rxck]
-
+#create_clock -period 8.000 -name phyrx_ddr -waveform {0.000 4.000}
+#create_clock -period 8.000 -name PHY_RXCLK -waveform {2.000 6.000} [get_ports eth_rxck]
+create_clock -period 8.000 -name PHY_RXCLK -waveform {0.000 4.000} [get_ports ETH_RXCK]
 create_clock -period 8.000 -name PHY_TXCLK -waveform {0.000 4.000} [get_pins gmii2rgmii/ODDR_ck/Q]
 
-set_input_jitter [get_clocks -of_objects [get_ports eth_rxck]] 0.080
+set_input_jitter [get_clocks -of_objects [get_ports ETH_RXCK]] 0.080
 
-set_input_delay -clock phyrx_ddr -max 1.000 [get_ports {eth_rxd[*]}]
-set_input_delay -clock phyrx_ddr -clock_fall -max -add_delay 1.000 [get_ports {eth_rxd[*]}]
-set_input_delay -clock phyrx_ddr -min -1.000 [get_ports {eth_rxd[*]}]
-set_input_delay -clock phyrx_ddr -clock_fall -min -add_delay -1.000 [get_ports {eth_rxd[*]}]
-set_input_delay -clock phyrx_ddr -max 1.000 [get_ports eth_rxctl]
-set_input_delay -clock phyrx_ddr -clock_fall -min -1.000 [get_ports eth_rxctl]
+#set_input_delay -clock phyrx_ddr -max 1.000 [get_ports {ETH_RXD[*]}]
+#set_input_delay -clock phyrx_ddr -clock_fall -max -add_delay 1.000 [get_ports {ETH_RXD[*]}]
+#set_input_delay -clock phyrx_ddr -min -1.000 [get_ports {ETH_RXD[*]}]
+#set_input_delay -clock phyrx_ddr -clock_fall -min -add_delay -1.000 [get_ports {ETH_RXD[*]}]
+#set_input_delay -clock phyrx_ddr -max 1.000 [get_ports ETH_RXCTL]
+#set_input_delay -clock phyrx_ddr -clock_fall -min -1.000 [get_ports ETH_RXCTL]
+
+set_input_delay -clock PHY_RXCLK -max 0.500                         [get_ports {ETH_RXD[*]}]
+set_input_delay -clock PHY_RXCLK -max 0.500 -clock_fall -add_delay  [get_ports {ETH_RXD[*]}]
+set_input_delay -clock PHY_RXCLK -min -0.500                        [get_ports {ETH_RXD[*]}]
+set_input_delay -clock PHY_RXCLK -min -0.500 -clock_fall -add_delay [get_ports {ETH_RXD[*]}]
+
+set_input_delay -clock PHY_RXCLK -max 0.500 [get_ports ETH_RXCTL]
+set_input_delay -clock PHY_RXCLK -max 0.500 -clock_fall -add_delay [get_ports ETH_RXCTL]
+set_input_delay -clock PHY_RXCLK -min -0.500 [get_ports ETH_RXCTL]
+set_input_delay -clock PHY_RXCLK -min -0.500 -clock_fall -add_delay [get_ports ETH_RXCTL]
 
 ## false_path
 set_false_path -setup -rise_from phyrx_ddr -fall_to PHY_RXCLK
@@ -26,9 +36,9 @@ set_false_path -setup -fall_from phyrx_ddr -rise_to PHY_RXCLK
 set_false_path -hold -rise_from phyrx_ddr -fall_to PHY_RXCLK
 set_false_path -hold -fall_from phyrx_ddr -rise_to PHY_RXCLK
 
-set_false_path -from [get_cells R_Arbiter/ARP/tx_en_reg*] -to [get_cells R_Arbiter/ARP/tx_en_clk125_d_reg*]
-set_false_path -from [get_cells R_Arbiter/ping/tx_en_reg*] -to [get_cells R_Arbiter/ping/tx_en_clk125_d_reg*]
-set_false_path -from [get_cells R_Arbiter/trans_image/tx_en_reg*] -to [get_cells R_Arbiter/trans_image/tx_en_clk125_d_reg*]
+#set_false_path -from [get_cells R_Arbiter/ARP/tx_en_reg*] -to [get_cells R_Arbiter/ARP/tx_en_clk125_d_reg*]
+#set_false_path -from [get_cells R_Arbiter/ping/tx_en_reg*] -to [get_cells R_Arbiter/ping/tx_en_clk125_d_reg*]
+#set_false_path -from [get_cells R_Arbiter/trans_image/tx_en_reg*] -to [get_cells R_Arbiter/trans_image/tx_en_clk125_d_reg*]
 
 #set_property CLOCK_DEDICATED_ROUTE BACKBONE [get_nets pllsys/inst/SYSCLK_i_PLLSYS];
 ## FMC Transceiver clocks (Must be set to value provided by Mezzanine card, currently set to 156.25 MHz)
@@ -52,11 +62,13 @@ set_property -dict {PACKAGE_PIN V15 IOSTANDARD LVCMOS25} [get_ports {LED[4]}]
 set_property -dict {PACKAGE_PIN W16 IOSTANDARD LVCMOS25} [get_ports {LED[5]}]
 set_property -dict {PACKAGE_PIN W15 IOSTANDARD LVCMOS25} [get_ports {LED[6]}]
 set_property -dict {PACKAGE_PIN Y13 IOSTANDARD LVCMOS25} [get_ports {LED[7]}]
-
+set_false_path -to [get_ports {LED[*]}]
 
 ## Buttons
 set_property -dict {PACKAGE_PIN B22 IOSTANDARD LVCMOS33} [get_ports BTN_C]
 set_property -dict {PACKAGE_PIN G4 IOSTANDARD LVCMOS15} [get_ports CPU_RSTN]
+set_false_path -from [get_ports BTN_C]
+set_false_path -from [get_ports CPU_RSTN]
 
 ## Switches
 set_property -dict {PACKAGE_PIN E22 IOSTANDARD LVCMOS33} [get_ports {SW[0]}]
@@ -67,7 +79,7 @@ set_property -dict {PACKAGE_PIN H17 IOSTANDARD LVCMOS33} [get_ports {SW[4]}]
 set_property -dict {PACKAGE_PIN J16 IOSTANDARD LVCMOS33} [get_ports {SW[5]}]
 set_property -dict {PACKAGE_PIN K13 IOSTANDARD LVCMOS33} [get_ports {SW[6]}]
 set_property -dict {PACKAGE_PIN M17 IOSTANDARD LVCMOS33} [get_ports {SW[7]}]
-
+set_false_path -from [get_ports {SW[*]}]
 
 ## OLED Display
 #set_property -dict { PACKAGE_PIN W22   IOSTANDARD LVCMOS33 } [get_ports { oled_dc }]; #IO_L7N_T1_D10_14 Sch=oled_dc
@@ -106,12 +118,37 @@ set_property -dict {PACKAGE_PIN M17 IOSTANDARD LVCMOS33} [get_ports {SW[7]}]
 
 
 ## Pmod header JA
+set_property -dict {PACKAGE_PIN AB22 IOSTANDARD LVCMOS33} [get_ports {PMOD_A[0]}]
+set_property -dict {PACKAGE_PIN AB21 IOSTANDARD LVCMOS33} [get_ports {PMOD_A[1]}]
+set_property -dict {PACKAGE_PIN AB20 IOSTANDARD LVCMOS33} [get_ports {PMOD_A[2]}]
+set_property -dict {PACKAGE_PIN AB18 IOSTANDARD LVCMOS33} [get_ports {PMOD_A[3]}]
+set_property -dict {PACKAGE_PIN Y21 IOSTANDARD LVCMOS33} [get_ports {PMOD_A[4]}]
+set_property -dict {PACKAGE_PIN AA21 IOSTANDARD LVCMOS33} [get_ports {PMOD_A[5]}]
+set_property -dict {PACKAGE_PIN AA20 IOSTANDARD LVCMOS33} [get_ports {PMOD_A[6]}]
+set_property -dict {PACKAGE_PIN AA18 IOSTANDARD LVCMOS33} [get_ports {PMOD_A[7]}]
+set_false_path -to [get_ports {PMOD_A[*]}]
 
 ## Pmod header JB
-
+set_property -dict {PACKAGE_PIN V9 IOSTANDARD LVCMOS33} [get_ports {PMOD_B[0]}]
+set_property -dict {PACKAGE_PIN V8 IOSTANDARD LVCMOS33} [get_ports {PMOD_B[1]}]
+set_property -dict {PACKAGE_PIN V7 IOSTANDARD LVCMOS33} [get_ports {PMOD_B[2]}]
+set_property -dict {PACKAGE_PIN W7 IOSTANDARD LVCMOS33} [get_ports {PMOD_B[3]}]
+set_property -dict {PACKAGE_PIN W9 IOSTANDARD LVCMOS33} [get_ports {PMOD_B[4]}]
+set_property -dict {PACKAGE_PIN Y9 IOSTANDARD LVCMOS33} [get_ports {PMOD_B[5]}]
+set_property -dict {PACKAGE_PIN Y8 IOSTANDARD LVCMOS33} [get_ports {PMOD_B[6]}]
+set_property -dict {PACKAGE_PIN Y7 IOSTANDARD LVCMOS33} [get_ports {PMOD_B[7]}]
+set_false_path -to [get_ports {PMOD_B[*]}]
 
 ## Pmod header JC
-
+set_property -dict {PACKAGE_PIN Y6 IOSTANDARD LVCMOS33} [get_ports {PMOD_C[0]}]
+set_property -dict {PACKAGE_PIN AA6 IOSTANDARD LVCMOS33} [get_ports {PMOD_C[1]}]
+set_property -dict {PACKAGE_PIN AA8 IOSTANDARD LVCMOS33} [get_ports {PMOD_C[2]}]
+set_property -dict {PACKAGE_PIN AB8 IOSTANDARD LVCMOS33} [get_ports {PMOD_C[3]}]
+set_property -dict {PACKAGE_PIN R6 IOSTANDARD LVCMOS33} [get_ports {PMOD_C[4]}]
+set_property -dict {PACKAGE_PIN T6 IOSTANDARD LVCMOS33} [get_ports {PMOD_C[5]}]
+set_property -dict {PACKAGE_PIN AB7 IOSTANDARD LVCMOS33} [get_ports {PMOD_C[6]}]
+set_property -dict {PACKAGE_PIN AB6 IOSTANDARD LVCMOS33} [get_ports {PMOD_C[7]}]
+set_false_path -to [get_ports {PMOD_C[*]}]
 
 ## XADC Header
 #set_property -dict { PACKAGE_PIN J14   IOSTANDARD LVCMOS33 } [get_ports { xa_p[0] }]; #IO_L3P_T0_DQS_AD1P_15 Sch=xa_p[1]
@@ -127,19 +164,24 @@ set_property -dict {PACKAGE_PIN M17 IOSTANDARD LVCMOS33} [get_ports {SW[7]}]
 
 
 ## Ethernet
-set_property -dict {PACKAGE_PIN U7 IOSTANDARD LVCMOS33} [get_ports eth_rst_b]
-set_property -dict {PACKAGE_PIN V13 IOSTANDARD LVCMOS25} [get_ports eth_rxck]
-set_property -dict {PACKAGE_PIN W10 IOSTANDARD LVCMOS25} [get_ports eth_rxctl]
-set_property -dict {PACKAGE_PIN AB16 IOSTANDARD LVCMOS25} [get_ports {eth_rxd[0]}]
-set_property -dict {PACKAGE_PIN AA15 IOSTANDARD LVCMOS25} [get_ports {eth_rxd[1]}]
-set_property -dict {PACKAGE_PIN AB15 IOSTANDARD LVCMOS25} [get_ports {eth_rxd[2]}]
-set_property -dict {PACKAGE_PIN AB11 IOSTANDARD LVCMOS25} [get_ports {eth_rxd[3]}]
-set_property -dict {PACKAGE_PIN AA14 IOSTANDARD LVCMOS25} [get_ports eth_txck]
-set_property -dict {PACKAGE_PIN V10 IOSTANDARD LVCMOS25} [get_ports eth_txctl]
-set_property -dict {PACKAGE_PIN Y12 IOSTANDARD LVCMOS25} [get_ports {eth_txd[0]}]
-set_property -dict {PACKAGE_PIN W12 IOSTANDARD LVCMOS25} [get_ports {eth_txd[1]}]
-set_property -dict {PACKAGE_PIN W11 IOSTANDARD LVCMOS25} [get_ports {eth_txd[2]}]
-set_property -dict {PACKAGE_PIN Y11 IOSTANDARD LVCMOS25} [get_ports {eth_txd[3]}]
+set_property -dict { PACKAGE_PIN Y14   IOSTANDARD LVCMOS25 } [get_ports { eth_int_b }]; #IO_L6N_T0_VREF_13 Sch=eth_int_b
+set_property -dict { PACKAGE_PIN AA16  IOSTANDARD LVCMOS25 } [get_ports { eth_mdc }]; #IO_L1N_T0_13 Sch=eth_mdc
+set_property -dict { PACKAGE_PIN Y16   IOSTANDARD LVCMOS25 } [get_ports { eth_mdio }]; #IO_L1P_T0_13 Sch=eth_mdio
+set_property -dict { PACKAGE_PIN W14   IOSTANDARD LVCMOS25 } [get_ports { eth_pme_b }]; #IO_L6P_T0_13 Sch=eth_pme_b
+
+set_property -dict {PACKAGE_PIN U7 IOSTANDARD LVCMOS33} [get_ports ETH_RST_B]
+set_property -dict {PACKAGE_PIN V13 IOSTANDARD LVCMOS25} [get_ports ETH_RXCK]
+set_property -dict {PACKAGE_PIN W10 IOSTANDARD LVCMOS25} [get_ports ETH_RXCTL]
+set_property -dict {PACKAGE_PIN AB16 IOSTANDARD LVCMOS25} [get_ports {ETH_RXD[0]}]
+set_property -dict {PACKAGE_PIN AA15 IOSTANDARD LVCMOS25} [get_ports {ETH_RXD[1]}]
+set_property -dict {PACKAGE_PIN AB15 IOSTANDARD LVCMOS25} [get_ports {ETH_RXD[2]}]
+set_property -dict {PACKAGE_PIN AB11 IOSTANDARD LVCMOS25} [get_ports {ETH_RXD[3]}]
+set_property -dict {PACKAGE_PIN AA14 IOSTANDARD LVCMOS25} [get_ports ETH_TXCK]
+set_property -dict {PACKAGE_PIN V10 IOSTANDARD LVCMOS25} [get_ports ETH_TXCTL]
+set_property -dict {PACKAGE_PIN Y12 IOSTANDARD LVCMOS25} [get_ports {ETH_TXD[0]}]
+set_property -dict {PACKAGE_PIN W12 IOSTANDARD LVCMOS25} [get_ports {ETH_TXD[1]}]
+set_property -dict {PACKAGE_PIN W11 IOSTANDARD LVCMOS25} [get_ports {ETH_TXD[2]}]
+set_property -dict {PACKAGE_PIN Y11 IOSTANDARD LVCMOS25} [get_ports {ETH_TXD[3]}]
 
 ## <-- moikawa add 2018.10.30
 
@@ -277,119 +319,6 @@ set_property -dict {PACKAGE_PIN Y11 IOSTANDARD LVCMOS25} [get_ports {eth_txd[3]}
 #set_false_path -from [get_cells R_Arbiter/trans_image/image_bufferA_reg*] -to [get_cells R_Arbiter/trans_image/TXBUF_reg*]
 #set_false_path -from [get_cells R_Arbiter/trans_image/image_bufferB_reg*] -to [get_cells R_Arbiter/trans_image/TXBUF_reg*]
 #--> add by manual
-
-#create_debug_core u_ila_0 ila
-#set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
-#set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
-#set_property C_ADV_TRIGGER false [get_debug_cores u_ila_0]
-#set_property C_DATA_DEPTH 4096 [get_debug_cores u_ila_0]
-#set_property C_EN_STRG_QUAL false [get_debug_cores u_ila_0]
-#set_property C_INPUT_PIPE_STAGES 0 [get_debug_cores u_ila_0]
-#set_property C_TRIGIN_EN false [get_debug_cores u_ila_0]
-#set_property C_TRIGOUT_EN false [get_debug_cores u_ila_0]
-#set_property port_width 1 [get_debug_ports u_ila_0/clk]
-#connect_debug_port u_ila_0/clk [get_nets [list eth_rxck_IBUF_BUFG]]
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe0]
-#set_property port_width 32 [get_debug_ports u_ila_0/probe0]
-#connect_debug_port u_ila_0/probe0 [get_nets [list {R_Arbiter/DstIP[0]} {R_Arbiter/DstIP[1]} {R_Arbiter/DstIP[2]} {R_Arbiter/DstIP[3]} {R_Arbiter/DstIP[4]} {R_Arbiter/DstIP[5]} {R_Arbiter/DstIP[6]} {R_Arbiter/DstIP[7]} {R_Arbiter/DstIP[8]} {R_Arbiter/DstIP[9]} {R_Arbiter/DstIP[10]} {R_Arbiter/DstIP[11]} {R_Arbiter/DstIP[12]} {R_Arbiter/DstIP[13]} {R_Arbiter/DstIP[14]} {R_Arbiter/DstIP[15]} {R_Arbiter/DstIP[16]} {R_Arbiter/DstIP[17]} {R_Arbiter/DstIP[18]} {R_Arbiter/DstIP[19]} {R_Arbiter/DstIP[20]} {R_Arbiter/DstIP[21]} {R_Arbiter/DstIP[22]} {R_Arbiter/DstIP[23]} {R_Arbiter/DstIP[24]} {R_Arbiter/DstIP[25]} {R_Arbiter/DstIP[26]} {R_Arbiter/DstIP[27]} {R_Arbiter/DstIP[28]} {R_Arbiter/DstIP[29]} {R_Arbiter/DstIP[30]} {R_Arbiter/DstIP[31]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe1]
-#set_property port_width 48 [get_debug_ports u_ila_0/probe1]
-#connect_debug_port u_ila_0/probe1 [get_nets [list {R_Arbiter/DstMAC[0]} {R_Arbiter/DstMAC[1]} {R_Arbiter/DstMAC[2]} {R_Arbiter/DstMAC[3]} {R_Arbiter/DstMAC[4]} {R_Arbiter/DstMAC[5]} {R_Arbiter/DstMAC[6]} {R_Arbiter/DstMAC[7]} {R_Arbiter/DstMAC[8]} {R_Arbiter/DstMAC[9]} {R_Arbiter/DstMAC[10]} {R_Arbiter/DstMAC[11]} {R_Arbiter/DstMAC[12]} {R_Arbiter/DstMAC[13]} {R_Arbiter/DstMAC[14]} {R_Arbiter/DstMAC[15]} {R_Arbiter/DstMAC[16]} {R_Arbiter/DstMAC[17]} {R_Arbiter/DstMAC[18]} {R_Arbiter/DstMAC[19]} {R_Arbiter/DstMAC[20]} {R_Arbiter/DstMAC[21]} {R_Arbiter/DstMAC[22]} {R_Arbiter/DstMAC[23]} {R_Arbiter/DstMAC[24]} {R_Arbiter/DstMAC[25]} {R_Arbiter/DstMAC[26]} {R_Arbiter/DstMAC[27]} {R_Arbiter/DstMAC[28]} {R_Arbiter/DstMAC[29]} {R_Arbiter/DstMAC[30]} {R_Arbiter/DstMAC[31]} {R_Arbiter/DstMAC[32]} {R_Arbiter/DstMAC[33]} {R_Arbiter/DstMAC[34]} {R_Arbiter/DstMAC[35]} {R_Arbiter/DstMAC[36]} {R_Arbiter/DstMAC[37]} {R_Arbiter/DstMAC[38]} {R_Arbiter/DstMAC[39]} {R_Arbiter/DstMAC[40]} {R_Arbiter/DstMAC[41]} {R_Arbiter/DstMAC[42]} {R_Arbiter/DstMAC[43]} {R_Arbiter/DstMAC[44]} {R_Arbiter/DstMAC[45]} {R_Arbiter/DstMAC[46]} {R_Arbiter/DstMAC[47]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe2]
-#set_property port_width 48 [get_debug_ports u_ila_0/probe2]
-#connect_debug_port u_ila_0/probe2 [get_nets [list {R_Arbiter/host_MAC[0]} {R_Arbiter/host_MAC[1]} {R_Arbiter/host_MAC[2]} {R_Arbiter/host_MAC[3]} {R_Arbiter/host_MAC[4]} {R_Arbiter/host_MAC[5]} {R_Arbiter/host_MAC[6]} {R_Arbiter/host_MAC[7]} {R_Arbiter/host_MAC[8]} {R_Arbiter/host_MAC[9]} {R_Arbiter/host_MAC[10]} {R_Arbiter/host_MAC[11]} {R_Arbiter/host_MAC[12]} {R_Arbiter/host_MAC[13]} {R_Arbiter/host_MAC[14]} {R_Arbiter/host_MAC[15]} {R_Arbiter/host_MAC[16]} {R_Arbiter/host_MAC[17]} {R_Arbiter/host_MAC[18]} {R_Arbiter/host_MAC[19]} {R_Arbiter/host_MAC[20]} {R_Arbiter/host_MAC[21]} {R_Arbiter/host_MAC[22]} {R_Arbiter/host_MAC[23]} {R_Arbiter/host_MAC[24]} {R_Arbiter/host_MAC[25]} {R_Arbiter/host_MAC[26]} {R_Arbiter/host_MAC[27]} {R_Arbiter/host_MAC[28]} {R_Arbiter/host_MAC[29]} {R_Arbiter/host_MAC[30]} {R_Arbiter/host_MAC[31]} {R_Arbiter/host_MAC[32]} {R_Arbiter/host_MAC[33]} {R_Arbiter/host_MAC[34]} {R_Arbiter/host_MAC[35]} {R_Arbiter/host_MAC[36]} {R_Arbiter/host_MAC[37]} {R_Arbiter/host_MAC[38]} {R_Arbiter/host_MAC[39]} {R_Arbiter/host_MAC[40]} {R_Arbiter/host_MAC[41]} {R_Arbiter/host_MAC[42]} {R_Arbiter/host_MAC[43]} {R_Arbiter/host_MAC[44]} {R_Arbiter/host_MAC[45]} {R_Arbiter/host_MAC[46]} {R_Arbiter/host_MAC[47]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe3]
-#set_property port_width 32 [get_debug_ports u_ila_0/probe3]
-#connect_debug_port u_ila_0/probe3 [get_nets [list {R_Arbiter/r_crc[0]} {R_Arbiter/r_crc[1]} {R_Arbiter/r_crc[2]} {R_Arbiter/r_crc[3]} {R_Arbiter/r_crc[4]} {R_Arbiter/r_crc[5]} {R_Arbiter/r_crc[6]} {R_Arbiter/r_crc[7]} {R_Arbiter/r_crc[8]} {R_Arbiter/r_crc[9]} {R_Arbiter/r_crc[10]} {R_Arbiter/r_crc[11]} {R_Arbiter/r_crc[12]} {R_Arbiter/r_crc[13]} {R_Arbiter/r_crc[14]} {R_Arbiter/r_crc[15]} {R_Arbiter/r_crc[16]} {R_Arbiter/r_crc[17]} {R_Arbiter/r_crc[18]} {R_Arbiter/r_crc[19]} {R_Arbiter/r_crc[20]} {R_Arbiter/r_crc[21]} {R_Arbiter/r_crc[22]} {R_Arbiter/r_crc[23]} {R_Arbiter/r_crc[24]} {R_Arbiter/r_crc[25]} {R_Arbiter/r_crc[26]} {R_Arbiter/r_crc[27]} {R_Arbiter/r_crc[28]} {R_Arbiter/r_crc[29]} {R_Arbiter/r_crc[30]} {R_Arbiter/r_crc[31]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe4]
-#set_property port_width 10 [get_debug_ports u_ila_0/probe4]
-#connect_debug_port u_ila_0/probe4 [get_nets [list {R_Arbiter/rx_cnt[0]} {R_Arbiter/rx_cnt[1]} {R_Arbiter/rx_cnt[2]} {R_Arbiter/rx_cnt[3]} {R_Arbiter/rx_cnt[4]} {R_Arbiter/rx_cnt[5]} {R_Arbiter/rx_cnt[6]} {R_Arbiter/rx_cnt[7]} {R_Arbiter/rx_cnt[8]} {R_Arbiter/rx_cnt[9]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe5]
-#set_property port_width 8 [get_debug_ports u_ila_0/probe5]
-#connect_debug_port u_ila_0/probe5 [get_nets [list {R_Arbiter/st[0]} {R_Arbiter/st[1]} {R_Arbiter/st[2]} {R_Arbiter/st[3]} {R_Arbiter/st[4]} {R_Arbiter/st[5]} {R_Arbiter/st[6]} {R_Arbiter/st[7]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe6]
-#set_property port_width 8 [get_debug_ports u_ila_0/probe6]
-#connect_debug_port u_ila_0/probe6 [get_nets [list {R_Arbiter/trans_image/data[0]} {R_Arbiter/trans_image/data[1]} {R_Arbiter/trans_image/data[2]} {R_Arbiter/trans_image/data[3]} {R_Arbiter/trans_image/data[4]} {R_Arbiter/trans_image/data[5]} {R_Arbiter/trans_image/data[6]} {R_Arbiter/trans_image/data[7]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe7]
-#set_property port_width 8 [get_debug_ports u_ila_0/probe7]
-#connect_debug_port u_ila_0/probe7 [get_nets [list {R_Arbiter/trans_image/st[0]} {R_Arbiter/trans_image/st[1]} {R_Arbiter/trans_image/st[2]} {R_Arbiter/trans_image/st[3]} {R_Arbiter/trans_image/st[4]} {R_Arbiter/trans_image/st[5]} {R_Arbiter/trans_image/st[6]} {R_Arbiter/trans_image/st[7]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe8]
-#set_property port_width 16 [get_debug_ports u_ila_0/probe8]
-#connect_debug_port u_ila_0/probe8 [get_nets [list {R_Arbiter/recv_image/csum[0]} {R_Arbiter/recv_image/csum[1]} {R_Arbiter/recv_image/csum[2]} {R_Arbiter/recv_image/csum[3]} {R_Arbiter/recv_image/csum[4]} {R_Arbiter/recv_image/csum[5]} {R_Arbiter/recv_image/csum[6]} {R_Arbiter/recv_image/csum[7]} {R_Arbiter/recv_image/csum[8]} {R_Arbiter/recv_image/csum[9]} {R_Arbiter/recv_image/csum[10]} {R_Arbiter/recv_image/csum[11]} {R_Arbiter/recv_image/csum[12]} {R_Arbiter/recv_image/csum[13]} {R_Arbiter/recv_image/csum[14]} {R_Arbiter/recv_image/csum[15]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe9]
-#set_property port_width 11 [get_debug_ports u_ila_0/probe9]
-#connect_debug_port u_ila_0/probe9 [get_nets [list {R_Arbiter/recv_image/csum_cnt[0]} {R_Arbiter/recv_image/csum_cnt[1]} {R_Arbiter/recv_image/csum_cnt[2]} {R_Arbiter/recv_image/csum_cnt[3]} {R_Arbiter/recv_image/csum_cnt[4]} {R_Arbiter/recv_image/csum_cnt[5]} {R_Arbiter/recv_image/csum_cnt[6]} {R_Arbiter/recv_image/csum_cnt[7]} {R_Arbiter/recv_image/csum_cnt[8]} {R_Arbiter/recv_image/csum_cnt[9]} {R_Arbiter/recv_image/csum_cnt[10]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe10]
-#set_property port_width 8 [get_debug_ports u_ila_0/probe10]
-#connect_debug_port u_ila_0/probe10 [get_nets [list {R_Arbiter/recv_image/data[0]} {R_Arbiter/recv_image/data[1]} {R_Arbiter/recv_image/data[2]} {R_Arbiter/recv_image/data[3]} {R_Arbiter/recv_image/data[4]} {R_Arbiter/recv_image/data[5]} {R_Arbiter/recv_image/data[6]} {R_Arbiter/recv_image/data[7]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe11]
-#set_property port_width 5 [get_debug_ports u_ila_0/probe11]
-#connect_debug_port u_ila_0/probe11 [get_nets [list {R_Arbiter/recv_image/packet_cnt_reg__0[0]} {R_Arbiter/recv_image/packet_cnt_reg__0[1]} {R_Arbiter/recv_image/packet_cnt_reg__0[2]} {R_Arbiter/recv_image/packet_cnt_reg__0[3]} {R_Arbiter/recv_image/packet_cnt_reg__0[4]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe12]
-#set_property port_width 8 [get_debug_ports u_ila_0/probe12]
-#connect_debug_port u_ila_0/probe12 [get_nets [list {R_Arbiter/recv_image/st[0]} {R_Arbiter/recv_image/st[1]} {R_Arbiter/recv_image/st[2]} {R_Arbiter/recv_image/st[3]} {R_Arbiter/recv_image/st[4]} {R_Arbiter/recv_image/st[5]} {R_Arbiter/recv_image/st[6]} {R_Arbiter/recv_image/st[7]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe13]
-#set_property port_width 8 [get_debug_ports u_ila_0/probe13]
-#connect_debug_port u_ila_0/probe13 [get_nets [list {gmii_rxd[0]} {gmii_rxd[1]} {gmii_rxd[2]} {gmii_rxd[3]} {gmii_rxd[4]} {gmii_rxd[5]} {gmii_rxd[6]} {gmii_rxd[7]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe14]
-#set_property port_width 1 [get_debug_ports u_ila_0/probe14]
-#connect_debug_port u_ila_0/probe14 [get_nets [list {R_Arbiter/arp_st_reg_n_0_[0]}]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe15]
-#set_property port_width 1 [get_debug_ports u_ila_0/probe15]
-#connect_debug_port u_ila_0/probe15 [get_nets [list R_Arbiter/crc_ok_reg_n_0]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe16]
-#set_property port_width 1 [get_debug_ports u_ila_0/probe16]
-#connect_debug_port u_ila_0/probe16 [get_nets [list gmii_rxctl]]
-#create_debug_port u_ila_0 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe17]
-#set_property port_width 1 [get_debug_ports u_ila_0/probe17]
-#connect_debug_port u_ila_0/probe17 [get_nets [list R_Arbiter/recvend]]
-#create_debug_core u_ila_1 ila
-#set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_1]
-#set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_1]
-#set_property C_ADV_TRIGGER false [get_debug_cores u_ila_1]
-#set_property C_DATA_DEPTH 4096 [get_debug_cores u_ila_1]
-#set_property C_EN_STRG_QUAL false [get_debug_cores u_ila_1]
-#set_property C_INPUT_PIPE_STAGES 0 [get_debug_cores u_ila_1]
-#set_property C_TRIGIN_EN false [get_debug_cores u_ila_1]
-#set_property C_TRIGOUT_EN false [get_debug_cores u_ila_1]
-#set_property port_width 1 [get_debug_ports u_ila_1/clk]
-#connect_debug_port u_ila_1/clk [get_nets [list clk125]]
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_1/probe0]
-#set_property port_width 17 [get_debug_ports u_ila_1/probe0]
-#connect_debug_port u_ila_1/probe0 [get_nets [list {UDP/udp_checksum/sum_17[0]} {UDP/udp_checksum/sum_17[1]} {UDP/udp_checksum/sum_17[2]} {UDP/udp_checksum/sum_17[3]} {UDP/udp_checksum/sum_17[4]} {UDP/udp_checksum/sum_17[5]} {UDP/udp_checksum/sum_17[6]} {UDP/udp_checksum/sum_17[7]} {UDP/udp_checksum/sum_17[8]} {UDP/udp_checksum/sum_17[9]} {UDP/udp_checksum/sum_17[10]} {UDP/udp_checksum/sum_17[11]} {UDP/udp_checksum/sum_17[12]} {UDP/udp_checksum/sum_17[13]} {UDP/udp_checksum/sum_17[14]} {UDP/udp_checksum/sum_17[15]} {UDP/udp_checksum/sum_17[16]}]]
-#create_debug_port u_ila_1 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_1/probe1]
-#set_property port_width 8 [get_debug_ports u_ila_1/probe1]
-#connect_debug_port u_ila_1/probe1 [get_nets [list {gmii_txd[0]} {gmii_txd[1]} {gmii_txd[2]} {gmii_txd[3]} {gmii_txd[4]} {gmii_txd[5]} {gmii_txd[6]} {gmii_txd[7]}]]
-#create_debug_port u_ila_1 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_1/probe2]
-#set_property port_width 1 [get_debug_ports u_ila_1/probe2]
-#connect_debug_port u_ila_1/probe2 [get_nets [list gmii_txctl]]
-#create_debug_port u_ila_1 probe
-#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_1/probe3]
-#set_property port_width 1 [get_debug_ports u_ila_1/probe3]
-#connect_debug_port u_ila_1/probe3 [get_nets [list R_Arbiter/ARP/start_tx_reg_n_0]]
-#set_property C_CLK_INPUT_FREQ_HZ 300000000 [get_debug_cores dbg_hub]
-#set_property C_ENABLE_CLK_DIVIDER false [get_debug_cores dbg_hub]
-#set_property C_USER_SCAN_CHAIN 1 [get_debug_cores dbg_hub]
-#connect_debug_port dbg_hub/clk [get_nets clk125]
 
 connect_debug_port u_ila_0/probe3 [get_nets [list {R_Arbiter/recv_image/addra[0]} {R_Arbiter/recv_image/addra[1]} {R_Arbiter/recv_image/addra[2]} {R_Arbiter/recv_image/addra[3]} {R_Arbiter/recv_image/addra[4]} {R_Arbiter/recv_image/addra[5]} {R_Arbiter/recv_image/addra[6]} {R_Arbiter/recv_image/addra[7]} {R_Arbiter/recv_image/addra[8]} {R_Arbiter/recv_image/addra[9]} {R_Arbiter/recv_image/addra[10]} {R_Arbiter/recv_image/addra[11]} {R_Arbiter/recv_image/addra[12]} {R_Arbiter/recv_image/addra[13]}]]
 connect_debug_port u_ila_1/probe1 [get_nets [list {R_Arbiter/trans_image/clk_cnt_reg__0[0]} {R_Arbiter/trans_image/clk_cnt_reg__0[1]} {R_Arbiter/trans_image/clk_cnt_reg__0[2]} {R_Arbiter/trans_image/clk_cnt_reg__0[3]} {R_Arbiter/trans_image/clk_cnt_reg__0[4]} {R_Arbiter/trans_image/clk_cnt_reg__0[5]}]]
