@@ -135,7 +135,7 @@ parameter Tx_End    =  4'h4;   // 送信終了
     /*--書き込み--*/  
     always_comb begin
         if(rarp_d[8] | rarp_first)begin
-            wr_en <= rarp_d[8] | rarp_first;
+            wr_en      = rarp_d[8] | rarp_first;
             q_din[11]  = rarp_first;
             q_din[10]  = rarp_last;
             q_din[9]   = `LO; // no use.
@@ -148,10 +148,10 @@ parameter Tx_End    =  4'h4;   // 送信終了
             q_din[9]   = `LO; // no use.
             q_din[8:0] = ping_d[8:0];
         end
-        else if(UDP_btn_tx)begin
-            wr_en <= UDP_btn_tx;
-            q_din <= UDP_btn_d;
-        end
+//        else if(UDP_btn_tx)begin
+//            wr_en <= UDP_btn_tx;
+//            q_din <= UDP_btn_d;
+//        end
         else if(UDP_d[8] | UDP_first) begin
             wr_en      = UDP_d[8] | UDP_first;
             q_din[11]  = UDP_first; 
@@ -159,7 +159,10 @@ parameter Tx_End    =  4'h4;   // 送信終了
             q_din[9]   = `LO; // no use.
             q_din[8:0] = UDP_d[8:0];
         end
-        else wr_en <= 1'b0;
+        else begin
+            wr_en = 1'b0;
+            q_din[8:0] = 0; 
+        end
     end
     
     /*--CRC用データ--*/

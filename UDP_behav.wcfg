@@ -12,17 +12,17 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="472000000001fs"></ZoomEndTime>
-      <Cursor1Time time="11406000000fs"></Cursor1Time>
+      <ZoomEndTime time="266917978fs"></ZoomEndTime>
+      <Cursor1Time time="0fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="141"></NameColumnWidth>
+      <NameColumnWidth column_width="137"></NameColumnWidth>
       <ValueColumnWidth column_width="62"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="195" />
+   <WVObjectSize size="183" />
    <wave_markers>
       <marker label="" time="32952830000" />
-      <marker label="" time="216326000000" />
+      <marker label="" time="232605844000" />
    </wave_markers>
    <wvobject type="logic" fp_name="/tb_rarp/P_RXDV">
       <obj_property name="ElementShortName">P_RXDV</obj_property>
@@ -86,21 +86,6 @@
       <obj_property name="label">UDP_btn</obj_property>
       <obj_property name="DisplayName">label</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/arp_tx">
-      <obj_property name="ElementShortName">arp_tx</obj_property>
-      <obj_property name="ObjectShortName">arp_tx</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/ping_tx">
-      <obj_property name="ElementShortName">ping_tx</obj_property>
-      <obj_property name="ObjectShortName">ping_tx</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/str_st_udp">
-      <obj_property name="ElementShortName">str_st_udp[79:0]</obj_property>
-      <obj_property name="ObjectShortName">str_st_udp[79:0]</obj_property>
-      <obj_property name="Radix">ASCIIRADIX</obj_property>
-      <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/BTN_C">
       <obj_property name="ElementShortName">BTN_C</obj_property>
       <obj_property name="ObjectShortName">BTN_C</obj_property>
@@ -120,12 +105,6 @@
       <obj_property name="ElementShortName">clk125</obj_property>
       <obj_property name="ObjectShortName">clk125</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/txd">
-      <obj_property name="ElementShortName">txd[7:0]</obj_property>
-      <obj_property name="ObjectShortName">txd[7:0]</obj_property>
-      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/q_dout[8]">
       <obj_property name="ElementShortName">[8]</obj_property>
       <obj_property name="ObjectShortName">[8]</obj_property>
@@ -133,10 +112,6 @@
    <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/r_crc">
       <obj_property name="ElementShortName">r_crc[31:0]</obj_property>
       <obj_property name="ObjectShortName">r_crc[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/CRC32">
-      <obj_property name="ElementShortName">CRC32[31:0]</obj_property>
-      <obj_property name="ObjectShortName">CRC32[31:0]</obj_property>
    </wvobject>
    <wvobject fp_name="divider42" type="divider">
       <obj_property name="label">TXD</obj_property>
@@ -149,18 +124,21 @@
       <obj_property name="CustomSignalColor">#00FFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/txd">
-      <obj_property name="ElementShortName">txd[7:0]</obj_property>
-      <obj_property name="ObjectShortName">txd[7:0]</obj_property>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/eth_rxck">
+      <obj_property name="ElementShortName">eth_rxck</obj_property>
+      <obj_property name="ObjectShortName">eth_rxck</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/gmii_txctl">
-      <obj_property name="ElementShortName">gmii_txctl</obj_property>
-      <obj_property name="ObjectShortName">gmii_txctl</obj_property>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/gmii_txctl_o">
+      <obj_property name="ElementShortName">gmii_txctl_o</obj_property>
+      <obj_property name="ObjectShortName">gmii_txctl_o</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/txd_o">
+      <obj_property name="ElementShortName">txd_o[7:0]</obj_property>
+      <obj_property name="ObjectShortName">txd_o[7:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/q_dout">
-      <obj_property name="ElementShortName">q_dout[8:0]</obj_property>
-      <obj_property name="ObjectShortName">q_dout[8:0]</obj_property>
-      <obj_property name="isExpanded"></obj_property>
+      <obj_property name="ElementShortName">q_dout[11:0]</obj_property>
+      <obj_property name="ObjectShortName">q_dout[11:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/empty">
       <obj_property name="ElementShortName">empty</obj_property>
@@ -171,17 +149,73 @@
       <obj_property name="ObjectShortName">fcs_cnt[2:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/UDP_tx">
-      <obj_property name="ElementShortName">UDP_tx</obj_property>
-      <obj_property name="ObjectShortName">UDP_tx</obj_property>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/rarp_first">
+      <obj_property name="ElementShortName">rarp_first</obj_property>
+      <obj_property name="ObjectShortName">rarp_first</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/rarp_last">
+      <obj_property name="ElementShortName">rarp_last</obj_property>
+      <obj_property name="ObjectShortName">rarp_last</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/rarp_i">
+      <obj_property name="ElementShortName">rarp_i[8:0]</obj_property>
+      <obj_property name="ObjectShortName">rarp_i[8:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/rarp_d">
+      <obj_property name="ElementShortName">rarp_d[8:0]</obj_property>
+      <obj_property name="ObjectShortName">rarp_d[8:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/ping_first">
+      <obj_property name="ElementShortName">ping_first</obj_property>
+      <obj_property name="ObjectShortName">ping_first</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/ping_last">
+      <obj_property name="ElementShortName">ping_last</obj_property>
+      <obj_property name="ObjectShortName">ping_last</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/ping_i">
+      <obj_property name="ElementShortName">ping_i[8:0]</obj_property>
+      <obj_property name="ObjectShortName">ping_i[8:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/ping_d">
+      <obj_property name="ElementShortName">ping_d[8:0]</obj_property>
+      <obj_property name="ObjectShortName">ping_d[8:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/UDP_first">
+      <obj_property name="ElementShortName">UDP_first</obj_property>
+      <obj_property name="ObjectShortName">UDP_first</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/UDP_last">
+      <obj_property name="ElementShortName">UDP_last</obj_property>
+      <obj_property name="ObjectShortName">UDP_last</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/UDP_i">
+      <obj_property name="ElementShortName">UDP_i[8:0]</obj_property>
+      <obj_property name="ObjectShortName">UDP_i[8:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/UDP_d">
+      <obj_property name="ElementShortName">UDP_d[8:0]</obj_property>
+      <obj_property name="ObjectShortName">UDP_d[8:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/wr_en">
+      <obj_property name="ElementShortName">wr_en</obj_property>
+      <obj_property name="ObjectShortName">wr_en</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/valid">
+      <obj_property name="ElementShortName">valid</obj_property>
+      <obj_property name="ObjectShortName">valid</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/q_din">
+      <obj_property name="ElementShortName">q_din[11:0]</obj_property>
+      <obj_property name="ObjectShortName">q_din[11:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/q_dout">
+      <obj_property name="ElementShortName">q_dout[11:0]</obj_property>
+      <obj_property name="ObjectShortName">q_dout[11:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/rd_en">
       <obj_property name="ElementShortName">rd_en</obj_property>
       <obj_property name="ObjectShortName">rd_en</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/q_dout[8]">
-      <obj_property name="ElementShortName">[8]</obj_property>
-      <obj_property name="ObjectShortName">[8]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/reset">
       <obj_property name="ElementShortName">reset</obj_property>
@@ -195,36 +229,13 @@
       <obj_property name="ElementShortName">r_crc[31:0]</obj_property>
       <obj_property name="ObjectShortName">r_crc[31:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/CRC32">
-      <obj_property name="ElementShortName">CRC32[31:0]</obj_property>
-      <obj_property name="ObjectShortName">CRC32[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/arp_d">
-      <obj_property name="ElementShortName">arp_d[8:0]</obj_property>
-      <obj_property name="ObjectShortName">arp_d[8:0]</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/ping_d">
       <obj_property name="ElementShortName">ping_d[8:0]</obj_property>
       <obj_property name="ObjectShortName">ping_d[8:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/UDP_btn_d">
-      <obj_property name="ElementShortName">UDP_btn_d[8:0]</obj_property>
-      <obj_property name="ObjectShortName">UDP_btn_d[8:0]</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/UDP_d">
       <obj_property name="ElementShortName">UDP_d[8:0]</obj_property>
       <obj_property name="ObjectShortName">UDP_d[8:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="divider47" type="divider">
-      <obj_property name="label">UDP</obj_property>
-      <obj_property name="DisplayName">label</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/str_st_udp2">
-      <obj_property name="ElementShortName">str_st_udp2[79:0]</obj_property>
-      <obj_property name="ObjectShortName">str_st_udp2[79:0]</obj_property>
-      <obj_property name="Radix">ASCIIRADIX</obj_property>
-      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject fp_name="divider172" type="divider">
       <obj_property name="label">RXD</obj_property>
@@ -253,6 +264,22 @@
       <obj_property name="ElementShortName">pre</obj_property>
       <obj_property name="ObjectShortName">pre</obj_property>
    </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/ping_first">
+      <obj_property name="ElementShortName">ping_first</obj_property>
+      <obj_property name="ObjectShortName">ping_first</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/ping_last">
+      <obj_property name="ElementShortName">ping_last</obj_property>
+      <obj_property name="ObjectShortName">ping_last</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/ping_i">
+      <obj_property name="ElementShortName">ping_i[8:0]</obj_property>
+      <obj_property name="ObjectShortName">ping_i[8:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/ping_d">
+      <obj_property name="ElementShortName">ping_d[8:0]</obj_property>
+      <obj_property name="ObjectShortName">ping_d[8:0]</obj_property>
+   </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/RXBUF">
       <obj_property name="ElementShortName">RXBUF[1045:0][7:0]</obj_property>
       <obj_property name="ObjectShortName">RXBUF[1045:0][7:0]</obj_property>
@@ -262,9 +289,9 @@
       <obj_property name="ObjectShortName">arp_st[2:0]</obj_property>
       <obj_property name="isExpanded"></obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping_st">
-      <obj_property name="ElementShortName">ping_st[2:0]</obj_property>
-      <obj_property name="ObjectShortName">ping_st[2:0]</obj_property>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ping_st">
+      <obj_property name="ElementShortName">ping_st</obj_property>
+      <obj_property name="ObjectShortName">ping_st</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/UDP_st">
       <obj_property name="ElementShortName">UDP_st[2:0]</obj_property>
@@ -276,8 +303,8 @@
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/rxend_cnt">
-      <obj_property name="ElementShortName">rxend_cnt[4:0]</obj_property>
-      <obj_property name="ObjectShortName">rxend_cnt[4:0]</obj_property>
+      <obj_property name="ElementShortName">rxend_cnt[3:0]</obj_property>
+      <obj_property name="ObjectShortName">rxend_cnt[3:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/FCS">
       <obj_property name="ElementShortName">FCS[31:0]</obj_property>
@@ -322,10 +349,6 @@
       <obj_property name="CustomSignalColor">#00FFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ping/pre">
-      <obj_property name="ElementShortName">pre</obj_property>
-      <obj_property name="ObjectShortName">pre</obj_property>
-   </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ping/arp_st">
       <obj_property name="ElementShortName">arp_st</obj_property>
       <obj_property name="ObjectShortName">arp_st</obj_property>
@@ -339,23 +362,14 @@
       <obj_property name="ObjectShortName">err_cnt[2:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/rxd">
-      <obj_property name="ElementShortName">rxd[7:0]</obj_property>
-      <obj_property name="ObjectShortName">rxd[7:0]</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/rx_cnt">
-      <obj_property name="ElementShortName">rx_cnt[10:0]</obj_property>
-      <obj_property name="ObjectShortName">rx_cnt[10:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/rx_cnt_i">
-      <obj_property name="ElementShortName">rx_cnt_i[10:0]</obj_property>
-      <obj_property name="ObjectShortName">rx_cnt_i[10:0]</obj_property>
+      <obj_property name="ElementShortName">rx_cnt[7:0]</obj_property>
+      <obj_property name="ObjectShortName">rx_cnt[7:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/tx_cnt">
-      <obj_property name="ElementShortName">tx_cnt[9:0]</obj_property>
-      <obj_property name="ObjectShortName">tx_cnt[9:0]</obj_property>
+      <obj_property name="ElementShortName">tx_cnt[7:0]</obj_property>
+      <obj_property name="ObjectShortName">tx_cnt[7:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ping/csum_ok">
@@ -363,8 +377,8 @@
       <obj_property name="ObjectShortName">csum_ok</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/csum_cnt">
-      <obj_property name="ElementShortName">csum_cnt[9:0]</obj_property>
-      <obj_property name="ObjectShortName">csum_cnt[9:0]</obj_property>
+      <obj_property name="ElementShortName">csum_cnt[7:0]</obj_property>
+      <obj_property name="ObjectShortName">csum_cnt[7:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ping/checksum/data_en">
@@ -382,14 +396,6 @@
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/checksum/d">
       <obj_property name="ElementShortName">d[7:0]</obj_property>
       <obj_property name="ObjectShortName">d[7:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/DstMAC">
-      <obj_property name="ElementShortName">DstMAC[47:0]</obj_property>
-      <obj_property name="ObjectShortName">DstMAC[47:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/DstIP">
-      <obj_property name="ElementShortName">DstIP[31:0]</obj_property>
-      <obj_property name="ObjectShortName">DstIP[31:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/ToLen">
       <obj_property name="ElementShortName">ToLen[15:0]</obj_property>
@@ -411,6 +417,14 @@
       <obj_property name="ElementShortName">ICMP_Msg[255:0][7:0]</obj_property>
       <obj_property name="ObjectShortName">ICMP_Msg[255:0][7:0]</obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/checksum/d">
+      <obj_property name="ElementShortName">d[7:0]</obj_property>
+      <obj_property name="ObjectShortName">d[7:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ping/checksum/d_clk">
+      <obj_property name="ElementShortName">d_clk</obj_property>
+      <obj_property name="ObjectShortName">d_clk</obj_property>
+   </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/checksum/buffer">
       <obj_property name="ElementShortName">buffer[16:0]</obj_property>
       <obj_property name="ObjectShortName">buffer[16:0]</obj_property>
@@ -431,32 +445,15 @@
       <obj_property name="ElementShortName">TXBUF[255:0][7:0]</obj_property>
       <obj_property name="ObjectShortName">TXBUF[255:0][7:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ping/tx_en_clk125">
-      <obj_property name="ElementShortName">tx_en_clk125</obj_property>
-      <obj_property name="ObjectShortName">tx_en_clk125</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/clk_cnt">
-      <obj_property name="ElementShortName">clk_cnt[7:0]</obj_property>
-      <obj_property name="ObjectShortName">clk_cnt[7:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/fcs_cnt">
       <obj_property name="ElementShortName">fcs_cnt[2:0]</obj_property>
       <obj_property name="ObjectShortName">fcs_cnt[2:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/tx_cnt">
-      <obj_property name="ElementShortName">tx_cnt[9:0]</obj_property>
-      <obj_property name="ObjectShortName">tx_cnt[9:0]</obj_property>
+      <obj_property name="ElementShortName">tx_cnt[7:0]</obj_property>
+      <obj_property name="ObjectShortName">tx_cnt[7:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/ping_d">
-      <obj_property name="ElementShortName">ping_d[8:0]</obj_property>
-      <obj_property name="ObjectShortName">ping_d[8:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ping/ping_tx">
-      <obj_property name="ElementShortName">ping_tx</obj_property>
-      <obj_property name="ObjectShortName">ping_tx</obj_property>
    </wvobject>
    <wvobject fp_name="divider668" type="divider">
       <obj_property name="label">ARP</obj_property>
@@ -466,29 +463,9 @@
       <obj_property name="ElementShortName">gmii_rxd[7:0]</obj_property>
       <obj_property name="ObjectShortName">gmii_rxd[7:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ARP/DstMAC">
-      <obj_property name="ElementShortName">DstMAC[47:0]</obj_property>
-      <obj_property name="ObjectShortName">DstMAC[47:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ARP/DstIP">
-      <obj_property name="ElementShortName">DstIP[31:0]</obj_property>
-      <obj_property name="ObjectShortName">DstIP[31:0]</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/RXBUF">
       <obj_property name="ElementShortName">RXBUF[1045:0][7:0]</obj_property>
       <obj_property name="ObjectShortName">RXBUF[1045:0][7:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ARP/arp_st">
-      <obj_property name="ElementShortName">arp_st</obj_property>
-      <obj_property name="ObjectShortName">arp_st</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ARP/st">
-      <obj_property name="ElementShortName">st[3:0]</obj_property>
-      <obj_property name="ObjectShortName">st[3:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ARP/arp_tx">
-      <obj_property name="ElementShortName">arp_tx</obj_property>
-      <obj_property name="ObjectShortName">arp_tx</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/rx_cnt">
       <obj_property name="ElementShortName">rx_cnt[10:0]</obj_property>
@@ -507,22 +484,6 @@
       <obj_property name="ElementShortName">arp_st[2:0]</obj_property>
       <obj_property name="ObjectShortName">arp_st[2:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ARP/arp_tx">
-      <obj_property name="ElementShortName">arp_tx</obj_property>
-      <obj_property name="ObjectShortName">arp_tx</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ARP/d">
-      <obj_property name="ElementShortName">d[8:0]</obj_property>
-      <obj_property name="ObjectShortName">d[8:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/txd">
-      <obj_property name="ElementShortName">txd[7:0]</obj_property>
-      <obj_property name="ObjectShortName">txd[7:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/gmii_txctl">
-      <obj_property name="ElementShortName">gmii_txctl</obj_property>
-      <obj_property name="ObjectShortName">gmii_txctl</obj_property>
-   </wvobject>
    <wvobject fp_name="divider241" type="divider">
       <obj_property name="label">recv_image</obj_property>
       <obj_property name="DisplayName">label</obj_property>
@@ -530,10 +491,6 @@
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/gmii_rxd">
       <obj_property name="ElementShortName">gmii_rxd[7:0]</obj_property>
       <obj_property name="ObjectShortName">gmii_rxd[7:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/rxd">
-      <obj_property name="ElementShortName">rxd[7:0]</obj_property>
-      <obj_property name="ObjectShortName">rxd[7:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/eth_rxck">
       <obj_property name="ElementShortName">eth_rxck</obj_property>
@@ -562,18 +519,6 @@
       <obj_property name="ElementShortName">UDP_st</obj_property>
       <obj_property name="ObjectShortName">UDP_st</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/pre">
-      <obj_property name="ElementShortName">pre</obj_property>
-      <obj_property name="ObjectShortName">pre</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/DstMAC">
-      <obj_property name="ElementShortName">DstMAC[47:0]</obj_property>
-      <obj_property name="ObjectShortName">DstMAC[47:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/DstIP">
-      <obj_property name="ElementShortName">DstIP[31:0]</obj_property>
-      <obj_property name="ObjectShortName">DstIP[31:0]</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/csum_cnt">
       <obj_property name="ElementShortName">csum_cnt[10:0]</obj_property>
       <obj_property name="ObjectShortName">csum_cnt[10:0]</obj_property>
@@ -596,6 +541,15 @@
       <obj_property name="ObjectShortName">packet_cnt[8:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/rxd_i">
+      <obj_property name="ElementShortName">rxd_i[8:0]</obj_property>
+      <obj_property name="ObjectShortName">rxd_i[8:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/rx_cnt">
+      <obj_property name="ElementShortName">rx_cnt[10:0]</obj_property>
+      <obj_property name="ObjectShortName">rx_cnt[10:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/wea">
       <obj_property name="ElementShortName">wea</obj_property>
       <obj_property name="ObjectShortName">wea</obj_property>
@@ -605,9 +559,9 @@
       <obj_property name="ObjectShortName">addra[17:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/rxd">
-      <obj_property name="ElementShortName">rxd[7:0]</obj_property>
-      <obj_property name="ObjectShortName">rxd[7:0]</obj_property>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/data_en">
+      <obj_property name="ElementShortName">data_en</obj_property>
+      <obj_property name="ObjectShortName">data_en</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/recv_checksum/d_data_en[0]">
       <obj_property name="ElementShortName">[0]</obj_property>
@@ -675,10 +629,6 @@
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/eth_rxck">
       <obj_property name="ElementShortName">eth_rxck</obj_property>
       <obj_property name="ObjectShortName">eth_rxck</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/clk125">
-      <obj_property name="ElementShortName">clk125</obj_property>
-      <obj_property name="ObjectShortName">clk125</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/SrcPort_i">
       <obj_property name="ElementShortName">SrcPort_i[15:0]</obj_property>
@@ -786,26 +736,17 @@
       <obj_property name="ElementShortName">[0][7:0]</obj_property>
       <obj_property name="ObjectShortName">[0][7:0]</obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/data_pipe2[1]">
+      <obj_property name="ElementShortName">[1][7:0]</obj_property>
+      <obj_property name="ObjectShortName">[1][7:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/data_pipe2[2]">
+      <obj_property name="ElementShortName">[2][7:0]</obj_property>
+      <obj_property name="ObjectShortName">[2][7:0]</obj_property>
+   </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/data_pipe2[16]">
       <obj_property name="ElementShortName">[16][7:0]</obj_property>
       <obj_property name="ObjectShortName">[16][7:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/UDP_d">
-      <obj_property name="ElementShortName">UDP_d[8:0]</obj_property>
-      <obj_property name="ObjectShortName">UDP_d[8:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/UDP_tx">
-      <obj_property name="ElementShortName">UDP_tx</obj_property>
-      <obj_property name="ObjectShortName">UDP_tx</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/tx_en_clk125">
-      <obj_property name="ElementShortName">tx_en_clk125</obj_property>
-      <obj_property name="ObjectShortName">tx_en_clk125</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/clk_cnt">
-      <obj_property name="ElementShortName">clk_cnt[10:0]</obj_property>
-      <obj_property name="ObjectShortName">clk_cnt[10:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/fcs_cnt">
       <obj_property name="ElementShortName">fcs_cnt[2:0]</obj_property>
@@ -822,9 +763,9 @@
       <obj_property name="ObjectShortName">packet_cnt[8:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/data_en">
-      <obj_property name="ElementShortName">data_en[1:0]</obj_property>
-      <obj_property name="ObjectShortName">data_en[1:0]</obj_property>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/data_en">
+      <obj_property name="ElementShortName">data_en</obj_property>
+      <obj_property name="ObjectShortName">data_en</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/data">
       <obj_property name="ElementShortName">data[7:0]</obj_property>
@@ -852,22 +793,22 @@
       <obj_property name="ElementShortName">sum_17[16:0]</obj_property>
       <obj_property name="ObjectShortName">sum_17[16:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/clk_cnt">
-      <obj_property name="ElementShortName">clk_cnt[10:0]</obj_property>
-      <obj_property name="ObjectShortName">clk_cnt[10:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/fcs_cnt">
       <obj_property name="ElementShortName">fcs_cnt[2:0]</obj_property>
       <obj_property name="ObjectShortName">fcs_cnt[2:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/txd">
-      <obj_property name="ElementShortName">txd[7:0]</obj_property>
-      <obj_property name="ObjectShortName">txd[7:0]</obj_property>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/delay_flg">
+      <obj_property name="ElementShortName">delay_flg</obj_property>
+      <obj_property name="ObjectShortName">delay_flg</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/gmii_txctl">
-      <obj_property name="ElementShortName">gmii_txctl</obj_property>
-      <obj_property name="ObjectShortName">gmii_txctl</obj_property>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/tx_cnt">
+      <obj_property name="ElementShortName">tx_cnt[10:0]</obj_property>
+      <obj_property name="ObjectShortName">tx_cnt[10:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/UDP_o">
+      <obj_property name="ElementShortName">UDP_o[8:0]</obj_property>
+      <obj_property name="ObjectShortName">UDP_o[8:0]</obj_property>
    </wvobject>
 </wave_config>

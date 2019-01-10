@@ -239,7 +239,7 @@ module ping(
         else if(st==Ic_End)begin
             if(chksum_o==16'h00_00) csum_ok <= `HI;
         end
-        else                    csum_ok <= `LO;
+        else                        csum_ok <= `LO;
     end
     
     /*---Tx_Data Ready---*/

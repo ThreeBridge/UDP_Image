@@ -297,55 +297,52 @@ parameter  Recv_End    = 8'h03;
     
     recv_image recv_image(
         /*---Input---*/
-        .eth_rxck(eth_rxck),
-        .clk125(clk125),
-        .rst_rx(rst_rx),
-        .pre(pre),
-        .rxd(q_rxd[0]),
+        .eth_rxck   (eth_rxck),
+        //.clk125(clk125),
+        .rst_rx     (rst_rx),
+        //.pre(pre),
+        .rxd_i      ({q_rxctl[0], q_rxd[0]}),
         //.RXBUF(RXBUF),
-        .rx_cnt(rx_cnt),
-        .arp_st(arp_st[0]),
-        .ping_st(ping_st),
-        .UDP_st(UDP_st[2]),
-        .els_packet(els_packet[0]),
-        .addrb(addr),
-        .addr_cnt(addr_cnt),
-        .rst_btn(rst_btn),
-        .trans_err(trans_err),
-        .SW(SW),        // add 2018.12.5
+        //.rx_cnt     (rx_cnt),
+        .arp_st     (arp_st[0]),
+        .ping_st    (ping_st),
+        .UDP_st     (UDP_st[2]),
+        .els_packet (els_packet[0]),
+        .addrb      (addr),
+        .addr_cnt   (addr_cnt),
+        .rst_btn    (rst_btn),
+        .trans_err  (trans_err),
+        .SW         (SW),        // add 2018.12.5
         /*---Output---*/
-        .imdata(imdata),
-        .recvend(recvend),
+        .imdata     (imdata),
+        .recvend    (recvend),
         //.image_buffer(image_buffer),
-        .DstMAC(DstMAC_UDP),
-        .DstIP(DstIP_UDP),
-        .SrcPort(SrcPort),
-        .DstPort(DstPort)
+        .DstMAC_o   (DstMAC_UDP),
+        .DstIP_o    (DstIP_UDP),
+        .SrcPort_o  (SrcPort),
+        .DstPort_o  (DstPort)
     );
     
     trans_image trans_image(
         /*---Input---*/
-        .eth_rxck(eth_rxck),
-        .clk125(clk125),
-        .rst_rx(rst_rx),
-        .rst_btn(rst_btn),
-        .imdata(imdata),
-        .recvend(recvend),
+        .eth_rxck       (eth_rxck),
+        .rst_rx         (rst_rx),
+        .rst_btn        (rst_btn),
+        .imdata         (imdata),
+        .recvend        (recvend),
         //.image_buffer(image_buffer),
-        .my_MACadd(my_MACadd),
-        .my_IPadd(my_IPadd),
-        .DstMAC(DstMAC_UDP),
-        .DstIP(DstIP_UDP),
-        .SrcPort(SrcPort),
-        .DstPort(DstPort),
-        .SW(SW),        // add 2018.12.5
+        .my_MACadd_i    (my_MACadd),
+        .my_IPadd_i     (my_IPadd),
+        .DstMAC_i       (DstMAC_UDP),
+        .DstIP_i        (DstIP_UDP),
+        .SrcPort_i      (SrcPort),
+        .DstPort_i      (DstPort),
+        .SW             (SW),        // add 2018.12.5
         /*---Output---*/
-        .image_cnt(addr),
-        .addr_cnt(addr_cnt),
-        .tx_en_clk125(UDP_tx_en),
-        .UDP_tx(UDP_tx),
-        .UDP_d(UDP_d),
-        .trans_err(trans_err)
+        .image_cnt      (addr),
+        .addr_cnt       (addr_cnt),
+        .UDP_o          (UDP_o),
+        .trans_err      (trans_err)
     );
 
 //    Image_UDP Image_UDP(

@@ -84,6 +84,7 @@ module tb_rarp(
       
    /*---recv_image---*/
    parameter   Idle_im     =   8'h00;
+   parameter   Stby_im     =   8'h09;
    parameter   Presv       =   8'h01;
    parameter   Hcsum_im    =   8'h02;
    parameter   Hc_End_im   =   8'h03;
@@ -192,6 +193,7 @@ module tb_rarp(
     always_comb begin
         case (top_i.R_Arbiter.recv_image.st)
             Idle_im : str_st_udp_image = "idle";
+            Stby_im : str_st_udp_image = "stby";
             Presv : str_st_udp_image = "presv";
             Hcsum_im : str_st_udp_image = "hcsum";
             Hc_End_im : str_st_udp_image = "hc_end";
@@ -740,7 +742,7 @@ module tb_rarp(
         repeat(7) recvByte(8'h55);
         recvByte(8'hd5);
         // 宛先MAC
-        recvMac(48'h00_0A_35_02_0F_B4);
+        recvMac(48'h00_0A_35_02_0F_B0);
         // 送信元MAC
         recvMac(48'hF8_32_E4_BA_0D_57);
         //フレームタイプ
@@ -774,13 +776,13 @@ module tb_rarp(
         
         // Header Checksum
         recvByte(8'hCE);
-        recvByte(8'hD7);
+        recvByte(8'hB9);
         
         // SrcIP 172.31.210.129
         recvIp({8'd172, 8'd31, 8'd210, 8'd129});
         
         // DstIP 172.31.210.130
-        recvIp({8'd172, 8'd31, 8'd210, 8'd130});         
+        recvIp({8'd172, 8'd31, 8'd210, 8'd160});         
         
         /*--UDPHeader--*/
         // SrcPort
@@ -794,7 +796,7 @@ module tb_rarp(
         recvByte(8'hF0);
         // UDP_Checksum
         recvByte(8'h60);
-        recvByte(8'h8E);         
+        recvByte(8'h70);         
         /*--UDP Data--*/      
         repeat(100) recvByte(8'h00);    // 100
         repeat(100) recvByte(8'hFF);    // 200
@@ -808,10 +810,10 @@ module tb_rarp(
         repeat(100) recvByte(8'hFF);    // 1000
         
         // CRC
-        recvByte(8'hA2);
-        recvByte(8'hF8);
-        recvByte(8'hC1);
-        recvByte(8'h54);
+        recvByte(8'hE6);
+        recvByte(8'h4C);
+        recvByte(8'hCD);
+        recvByte(8'h8B);
         recv_end();
         
         //P_RXCLK = 0;

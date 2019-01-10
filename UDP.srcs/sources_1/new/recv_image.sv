@@ -30,12 +30,12 @@
 module recv_image(
     /*---Input---*/
     eth_rxck,
-    clk125,
+    //clk125,
     rst_rx,
-    pre,
-    rxd,
+    //pre,
+    rxd_i,
     //RXBUF,
-    rx_cnt,
+    //rx_cnt,
     arp_st,
     ping_st,
     UDP_st,
@@ -48,21 +48,20 @@ module recv_image(
     /*---Output---*/
     imdata,
     recvend,
-    //image_buffer,
-    DstMAC,
-    DstIP,
-    SrcPort,
-    DstPort
+    DstMAC_o,
+    DstIP_o,
+    SrcPort_o,
+    DstPort_o
     );
     
     /*---I/O Declare---*/
     input           eth_rxck;
-    input           clk125;
+    //input           clk125;
     input           rst_rx;
-    input           pre;
-    (*dont_touch="true"*)input [7:0]     rxd;
+    //input           pre;
+    (*dont_touch="true"*)input [8:0]     rxd_i;
     //input [7:0]     RXBUF [1045:0];
-    input [10:0]    rx_cnt;
+    //input [10:0]    rx_cnt;
     input           arp_st;
     input           ping_st;
     input           UDP_st;
@@ -76,14 +75,15 @@ module recv_image(
         
     (*dont_touch="true"*)output reg [7:0]  imdata;
     output reg        recvend;
-    output reg [47:0] DstMAC;
-    output reg [31:0] DstIP;
-    output reg [15:0] SrcPort;
-    output reg [15:0] DstPort;
+    output reg [47:0] DstMAC_o;
+    output reg [31:0] DstIP_o;
+    output reg [15:0] SrcPort_o;
+    output reg [15:0] DstPort_o;
     //output reg [7:0]  image_buffer [9999:0];
     
     /*---parameter---*/
     parameter   Idle        =   8'h00;
+    parameter   Stby        =   8'h09;
     parameter   Presv       =   8'h01;
     parameter   Hcsum       =   8'h02;
     parameter   Hc_End      =   8'h03;
@@ -93,8 +93,8 @@ module recv_image(
     parameter   Recv_End    =   8'h07;
     parameter   ERROR       =   8'h08;
     
-    parameter   eth_head    =   4'd14;
-    parameter   udp         =   6'd34;
+    //parameter   eth_head    =   4'd14;
+    //parameter   udp         =   6'd34;
     parameter   MsgSize     =   16'd1000;
     
     /*---wire/register---*/
@@ -114,7 +114,7 @@ module recv_image(
     
     reg [7:0]   RXBUF   [1045:0];
     reg [7:0]   VBUF    [1019:0];
-    reg [10:0]  rx_cnt_i;
+    reg [10:0]  rx_cnt;
     reg         rst;
     reg [10:0]  UDP_cnt;  // 固定長のUDPデータ用カウント
     reg [15:0]  UDP_Checksum;
@@ -128,6 +128,11 @@ module recv_image(
     (*dont_touch="true"*)reg         csum_ok;
     reg [2:0]   err_cnt;
     reg [8:0]   packet_cnt;
+    
+    wire hcsum_end = (csum_cnt==8'd34);
+    wire hcend_end = (err_cnt==3'd7);    
+    wire ucsum_end = (csum_cnt==MsgSize+5'd20);
+    wire ucend_end = (err_cnt==3'd7);    
 
     always_ff @(posedge eth_rxck)begin
         if (rst_rx) st <= Idle;
@@ -138,7 +143,15 @@ module recv_image(
         nx = st;
         case (st)
             Idle : begin
-                if (pre) nx = Presv;
+                if (rxd_i[8]) nx = Stby;
+            end
+            Stby : begin
+                if (rxd_i[8])begin
+                    if (rxd_i[7:0]==`SFD) nx = Presv;
+                    else if (rxd_i[7:0]==`PREAMB) nx = Stby;
+                    else nx = Idle;
+                end
+                else nx = Idle;
             end
             Presv : begin
                 if (arp_st||ping_st||els_packet)            nx = Idle;
@@ -148,26 +161,29 @@ module recv_image(
                 else if (rst_btn)               nx = Idle;
             end
             Hcsum : begin
-                if(csum_cnt==6'd22) nx = Hc_End;
+                if (hcsum_end) nx = Hc_End;
             end
             Hc_End : begin 
-                if(csum_ok) nx = Ucsum;
-                else if(err_cnt==3'b010) nx = ERROR; 
+                if (hcend_end)begin
+                    if (csum_ok) nx = Ucsum;
+                    else nx = ERROR;
+                end
             end
             Ucsum : begin
-                if(csum_cnt==10'd1022) nx = Uc_End;    // 仮想ヘッダの長さ(仮想ヘッダ(12)+UDPデータ長(1008))
+                if (ucsum_end) nx = Uc_End;    // 仮想ヘッダの長さ(仮想ヘッダ(12)+UDPデータ長(1008))
             end
             Uc_End : begin
-                if(csum_ok) nx = Select;
-                else if(err_cnt==3'b010) nx = ERROR;
+                if (ucend_end) begin
+                    if (csum_ok) nx = Select;
+                    else nx = ERROR;
+                end
             end
             Select : begin
-                //if(packet_cnt==4'd9) nx = Recv_End;
-                if(packet_cnt==packet_cnt_sel) nx = Recv_End;   // add 2018.12.5
+                if (packet_cnt==packet_cnt_sel) nx = Recv_End;   // add 2018.12.5
                 else                 nx = Idle;
             end
             Recv_End : begin
-                if(end_cnt==5'h1F) nx = Idle;
+                if (end_cnt==5'h1F) nx = Idle;
             end
             ERROR : begin
                 nx = Idle;
@@ -179,24 +195,19 @@ module recv_image(
     end
     
     /*---データの保持---*/
-    integer i;
-    
-//    always_ff @(posedge eth_rxck)begin
-//        if (st==Presv) begin
-//            rx_cnt_i    <= rx_cnt;
-//            RXBUF_i     <= RXBUF;
-//            MsgSize     <= {RXBUF[38],RXBUF[39]} - 4'd8;    // UDPデータグラム-UDヘッダ(8バイト)=1000バイト
-//        end
-//        else if(st==Idle) begin
-//            rx_cnt_i    <= 11'd0;
-//            for (i=0;i<1046;i=i+1) RXBUF_i[i] <= 8'h00;
-//            MsgSize     <= 16'd0;
-//        end
-//    end
-    
     always_ff @(posedge eth_rxck)begin
         if(st==Presv)begin
-            RXBUF[rx_cnt] <= rxd;
+            if(rxd_i[8]) rx_cnt <= rx_cnt + 11'd1;
+        end
+        else if(st==Idle)begin
+            rx_cnt <= 0;
+        end
+    end
+    
+    integer i;    
+    always_ff @(posedge eth_rxck)begin
+        if(st==Presv)begin
+            RXBUF[rx_cnt] <= rxd_i[7:0];
         end
         else if(st==Idle)begin
             for (i=0;i<1046;i=i+1) RXBUF[i] <= 8'h00;
@@ -205,37 +216,28 @@ module recv_image(
     
     always_ff @(posedge eth_rxck)begin
         if (st==Select) begin
-            DstMAC  <= {RXBUF[6],RXBUF[7],RXBUF[8],RXBUF[9],RXBUF[10],RXBUF[11]};
-            DstIP   <= {RXBUF[26],RXBUF[27],RXBUF[28],RXBUF[29]};
+            DstMAC_o  <= {RXBUF[6],RXBUF[7],RXBUF[8],RXBUF[9],RXBUF[10],RXBUF[11]};
+            DstIP_o   <= {RXBUF[26],RXBUF[27],RXBUF[28],RXBUF[29]};
         end
         else if(st==Idle)begin
-            DstMAC  <= 48'b0;
-            DstIP   <= 32'b0;
+            DstMAC_o  <= 48'b0;
+            DstIP_o   <= 32'b0;
         end
     end
     
     always_ff @(posedge eth_rxck)begin
         if(st==Select)begin
-            SrcPort <= {RXBUF[34],RXBUF[35]};
-            DstPort <= {RXBUF[36],RXBUF[37]};    
+            SrcPort_o <= {RXBUF[34],RXBUF[35]};
+            DstPort_o <= {RXBUF[36],RXBUF[37]};    
             //UDP_Checksum <= {RXBUF[40],RXBUF[41]}; 
         end
         else if(st==Idle)begin
-            SrcPort <= 16'b0;
-            DstPort <= 16'b0;
+            SrcPort_o <= 16'b0;
+            DstPort_o <= 16'b0;
             //UDP_Checksum <= 16'b0;
         end
     end
     
-//    integer msg_cnt;
-//    always_ff @(posedge eth_rxck)begin
-//        if (st==Presv) begin
-//            for(msg_cnt=0;msg_cnt<10'd1000;msg_cnt=msg_cnt+1) image_buffer[(packet_cnt*10'd1000)+msg_cnt] <= RXBUF[6'd42+msg_cnt];
-//        end
-//        else if((st==Idle&&packet_cnt==0)||st==ERROR) begin 
-//            for(msg_cnt=0;msg_cnt<14'd10000;msg_cnt=msg_cnt+1) image_buffer[msg_cnt] <= 8'b0;
-//        end
-//    end
     
     /*---RAM用データ---*/
     reg wea;
@@ -276,7 +278,7 @@ module recv_image(
         else            rst <= 0;
     end  
     
-    /*---チェックサム計算失敗用---*/
+    /*---チェックサム計算失敗用(2019.1.10 現在,この用途では用いていない)---*/
     always_ff @(posedge eth_rxck)begin
         if(st==Hc_End)          err_cnt <= err_cnt + 3'b1;
         else if(st==Uc_End)     err_cnt <= err_cnt + 3'b1;
@@ -285,25 +287,20 @@ module recv_image(
     
     /*---チェックサム用データ---*/
     (*dont_touch="true"*)reg [7:0]       data;
-    reg [1:0]             data_en;
+    reg             data_en;
     (*dont_touch="true"*)reg [15:0]      csum;
        
     always_ff @(posedge eth_rxck)begin         
-        if(st==Idle)                csum_cnt <= 0;
-        else if(st==Hcsum)begin
-            if(csum_cnt==6'd22)     csum_cnt <= 0;
-            else                    csum_cnt <= csum_cnt + 1;
-        end
-        else if(st==Ucsum)begin
-            if(csum_cnt==10'd1022)  csum_cnt <= 0;
-            else                    csum_cnt <= csum_cnt + 1;
-        end
-        else                        csum_cnt <= 0;
+        if(st==Idle)       csum_cnt <= 0;
+        else if(st==Hcsum) csum_cnt <= csum_cnt + 1;
+        else if(st==Ucsum) csum_cnt <= csum_cnt + 1;
+        else               csum_cnt <= 0;
     end
 
 
 //<-- moikawa add (2018.11.02)
-    wire [10:0] rxbuf_sel = csum_cnt + eth_head;
+    //wire [10:0] rxbuf_sel = csum_cnt + eth_head;
+    wire [10:0] rxbuf_sel = csum_cnt;
     reg [7:0]  data_pipe [17:0]; // part of pipelined selector from TXBUF[].
     wire [4:0]  data_pipe_sel;
 
@@ -394,31 +391,26 @@ module recv_image(
     end
     
     /*---チェックサム計算開始用---*/
+    reg data_en_d;
     always_ff @(posedge eth_rxck)begin
-        if(st==Hcsum)begin
-            if(csum_cnt!=6'd22) data_en <= {data_en[0],1'b1};
-            else                data_en <= 0;
-        end
-        else if(st==Ucsum)begin
-            if(csum_cnt!=(5'd22+MsgSize))
-                                data_en <= {data_en[0],1'b1};
-            else                data_en <= 0;
-        end
-        else if(st==Idle)       data_en <= 0;
-        else                    data_en <= 0;
+        if(st==Hcsum)       data_en <= (csum_cnt > 8'd13 && csum_cnt < 8'd34);
+        else if(st==Ucsum)  data_en <= (csum_cnt < MsgSize+5'd20);
+        else if(st==Idle)   data_en <= 0;
     end
-        
+    
+    always_ff @(posedge eth_rxck)begin
+       data_en_d <= data_en; 
+    end
+    
     /*---Checksum OK---*/
     always_ff @(posedge eth_rxck)begin
         if(st==Hc_End)begin
-            if(csum==16'h00_00) csum_ok <= 1;
-            else                csum_ok <= 0;
+            if(csum==16'h00_00) csum_ok <= `HI;
         end
         else if(st==Uc_End)begin
-            if(csum==16'h00_00) csum_ok <= 1;
-            else                csum_ok <= 0;
+            if(csum==16'h00_00) csum_ok <= `HI;
         end
-        else                    csum_ok <= 0;
+        else                    csum_ok <= `LO;
     end
     
     /*---仮想ヘッダ準備---*/
@@ -457,7 +449,7 @@ module recv_image(
     checksum recv_checksum(
         .clk_i(eth_rxck),
         .d(data),
-        .data_en(data_en[1]),
+        .data_en(data_en_d),
         .csum_o(csum),
         .rst(rst)
     );
@@ -471,15 +463,15 @@ module recv_image(
     
     /*---BlockRAM Generator---*/
     image_RAM image_RAM(
-        .clka(eth_rxck),
-        //.ena(1'b1),     // PortA  enable
-        .wea(wea),      // write enable
-        .addra(addra),  // write address
-        .dina(rxd),     // write data
-        .clkb(eth_rxck),
-        //.enb(1'b1),     // PortB enable
-        .addrb(addr_r),       // read address
-        .doutb(imdata)  // read data
+        .clka   (eth_rxck),
+        //.ena(1'b1),           // PortA  enable
+        .wea    (wea),          // write enable
+        .addra  (addra),        // write address
+        .dina   (rxd_i[7:0]),   // write data
+        .clkb   (eth_rxck),
+        //.enb(1'b1),           // PortB enable
+        .addrb  (addr_r),       // read address
+        .doutb  (imdata)        // read data
     );
     
     
