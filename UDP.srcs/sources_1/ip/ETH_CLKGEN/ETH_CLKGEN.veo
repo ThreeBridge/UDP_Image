@@ -55,11 +55,9 @@
 //  Output     Output      Phase    Duty Cycle   Pk-to-Pk     Phase
 //   Clock     Freq (MHz)  (degrees)    (%)     Jitter (ps)  Error (ps)
 //----------------------------------------------------------------------------
-// rxck_0deg___125.000______0.000______50.0______119.348_____96.948
-// rxck_90deg___125.000_____90.000______50.0______119.348_____96.948
-// rxck_180deg___125.000____180.000______50.0______119.348_____96.948
-// rxck_270deg___125.000____270.000______50.0______119.348_____96.948
-// rxck_n90deg___125.000____-90.000______50.0______119.348_____96.948
+// rxck_0deg___125.000______0.000______50.0______112.261_____89.430
+// rxck_90deg___125.000____165.000______50.0______112.261_____89.430
+// rxck_180deg___125.000____255.000______50.0______112.261_____89.430
 //
 //----------------------------------------------------------------------------
 // Input Clock   Freq (MHz)    Input Jitter (UI)
@@ -78,8 +76,6 @@
     .rxck_0deg(rxck_0deg),     // output rxck_0deg
     .rxck_90deg(rxck_90deg),     // output rxck_90deg
     .rxck_180deg(rxck_180deg),     // output rxck_180deg
-    .rxck_270deg(rxck_270deg),     // output rxck_270deg
-    .rxck_n90deg(rxck_n90deg),     // output rxck_n90deg
     // Status and control signals
     .resetn(resetn), // input resetn
     .locked(locked),       // output locked

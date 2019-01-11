@@ -1,10 +1,10 @@
 -- Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2018.1 (lin64) Build 2188600 Wed Apr  4 18:39:19 MDT 2018
--- Date        : Mon Dec 24 21:25:53 2018
--- Host        : Z10PE-01 running 64-bit Ubuntu 16.04.5 LTS
+-- Date        : Fri Jan 11 16:13:49 2019
+-- Host        : bluewater01.localdomain running 64-bit unknown
 -- Command     : write_vhdl -force -mode funcsim
---               /home/moikawa/proj_Mitsuhashi/UDP_20181221/UDP.srcs/sources_1/ip/ETH_CLKGEN/ETH_CLKGEN_sim_netlist.vhdl
+--               /home/tmitsuhashi/bin/vivado_h30/UDP_Image/UDP.srcs/sources_1/ip/ETH_CLKGEN/ETH_CLKGEN_sim_netlist.vhdl
 -- Design      : ETH_CLKGEN
 -- Purpose     : This VHDL netlist is a functional simulation representation of the design and should not be modified or
 --               synthesized. This netlist cannot be used for SDF annotated simulation.
@@ -19,8 +19,6 @@ entity ETH_CLKGEN_ETH_CLKGEN_clk_wiz is
     rxck_0deg : out STD_LOGIC;
     rxck_90deg : out STD_LOGIC;
     rxck_180deg : out STD_LOGIC;
-    rxck_270deg : out STD_LOGIC;
-    rxck_n90deg : out STD_LOGIC;
     resetn : in STD_LOGIC;
     locked : out STD_LOGIC;
     eth_rxck : in STD_LOGIC
@@ -36,16 +34,16 @@ architecture STRUCTURE of ETH_CLKGEN_ETH_CLKGEN_clk_wiz is
   signal reset_high : STD_LOGIC;
   signal rxck_0deg_ETH_CLKGEN : STD_LOGIC;
   signal rxck_180deg_ETH_CLKGEN : STD_LOGIC;
-  signal rxck_270deg_ETH_CLKGEN : STD_LOGIC;
   signal rxck_90deg_ETH_CLKGEN : STD_LOGIC;
-  signal rxck_n90deg_ETH_CLKGEN : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKFBOUTB_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKFBSTOPPED_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKINSTOPPED_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKOUT0B_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKOUT1B_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKOUT2B_UNCONNECTED : STD_LOGIC;
+  signal NLW_mmcm_adv_inst_CLKOUT3_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKOUT3B_UNCONNECTED : STD_LOGIC;
+  signal NLW_mmcm_adv_inst_CLKOUT4_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKOUT5_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKOUT6_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_DRDY_UNCONNECTED : STD_LOGIC;
@@ -63,8 +61,6 @@ architecture STRUCTURE of ETH_CLKGEN_ETH_CLKGEN_clk_wiz is
   attribute BOX_TYPE of clkout1_buf : label is "PRIMITIVE";
   attribute BOX_TYPE of clkout2_buf : label is "PRIMITIVE";
   attribute BOX_TYPE of clkout3_buf : label is "PRIMITIVE";
-  attribute BOX_TYPE of clkout4_buf : label is "PRIMITIVE";
-  attribute BOX_TYPE of clkout5_buf : label is "PRIMITIVE";
   attribute BOX_TYPE of mmcm_adv_inst : label is "PRIMITIVE";
 begin
 clkf_buf: unisim.vcomponents.BUFG
@@ -95,44 +91,34 @@ clkout3_buf: unisim.vcomponents.BUFG
       I => rxck_180deg_ETH_CLKGEN,
       O => rxck_180deg
     );
-clkout4_buf: unisim.vcomponents.BUFG
-     port map (
-      I => rxck_270deg_ETH_CLKGEN,
-      O => rxck_270deg
-    );
-clkout5_buf: unisim.vcomponents.BUFG
-     port map (
-      I => rxck_n90deg_ETH_CLKGEN,
-      O => rxck_n90deg
-    );
 mmcm_adv_inst: unisim.vcomponents.MMCME2_ADV
     generic map(
       BANDWIDTH => "OPTIMIZED",
-      CLKFBOUT_MULT_F => 8.000000,
+      CLKFBOUT_MULT_F => 9.000000,
       CLKFBOUT_PHASE => 0.000000,
       CLKFBOUT_USE_FINE_PS => false,
       CLKIN1_PERIOD => 8.000000,
       CLKIN2_PERIOD => 0.000000,
-      CLKOUT0_DIVIDE_F => 8.000000,
+      CLKOUT0_DIVIDE_F => 9.000000,
       CLKOUT0_DUTY_CYCLE => 0.500000,
       CLKOUT0_PHASE => 0.000000,
       CLKOUT0_USE_FINE_PS => false,
-      CLKOUT1_DIVIDE => 8,
+      CLKOUT1_DIVIDE => 9,
       CLKOUT1_DUTY_CYCLE => 0.500000,
-      CLKOUT1_PHASE => 90.000000,
+      CLKOUT1_PHASE => 165.000000,
       CLKOUT1_USE_FINE_PS => false,
-      CLKOUT2_DIVIDE => 8,
+      CLKOUT2_DIVIDE => 9,
       CLKOUT2_DUTY_CYCLE => 0.500000,
-      CLKOUT2_PHASE => 180.000000,
+      CLKOUT2_PHASE => 255.000000,
       CLKOUT2_USE_FINE_PS => false,
-      CLKOUT3_DIVIDE => 8,
+      CLKOUT3_DIVIDE => 1,
       CLKOUT3_DUTY_CYCLE => 0.500000,
-      CLKOUT3_PHASE => 270.000000,
+      CLKOUT3_PHASE => 0.000000,
       CLKOUT3_USE_FINE_PS => false,
       CLKOUT4_CASCADE => false,
-      CLKOUT4_DIVIDE => 8,
+      CLKOUT4_DIVIDE => 1,
       CLKOUT4_DUTY_CYCLE => 0.500000,
-      CLKOUT4_PHASE => -90.000000,
+      CLKOUT4_PHASE => 0.000000,
       CLKOUT4_USE_FINE_PS => false,
       CLKOUT5_DIVIDE => 1,
       CLKOUT5_DUTY_CYCLE => 0.500000,
@@ -171,9 +157,9 @@ mmcm_adv_inst: unisim.vcomponents.MMCME2_ADV
       CLKOUT1B => NLW_mmcm_adv_inst_CLKOUT1B_UNCONNECTED,
       CLKOUT2 => rxck_180deg_ETH_CLKGEN,
       CLKOUT2B => NLW_mmcm_adv_inst_CLKOUT2B_UNCONNECTED,
-      CLKOUT3 => rxck_270deg_ETH_CLKGEN,
+      CLKOUT3 => NLW_mmcm_adv_inst_CLKOUT3_UNCONNECTED,
       CLKOUT3B => NLW_mmcm_adv_inst_CLKOUT3B_UNCONNECTED,
-      CLKOUT4 => rxck_n90deg_ETH_CLKGEN,
+      CLKOUT4 => NLW_mmcm_adv_inst_CLKOUT4_UNCONNECTED,
       CLKOUT5 => NLW_mmcm_adv_inst_CLKOUT5_UNCONNECTED,
       CLKOUT6 => NLW_mmcm_adv_inst_CLKOUT6_UNCONNECTED,
       DADDR(6 downto 0) => B"0000000",
@@ -209,8 +195,6 @@ entity ETH_CLKGEN is
     rxck_0deg : out STD_LOGIC;
     rxck_90deg : out STD_LOGIC;
     rxck_180deg : out STD_LOGIC;
-    rxck_270deg : out STD_LOGIC;
-    rxck_n90deg : out STD_LOGIC;
     resetn : in STD_LOGIC;
     locked : out STD_LOGIC;
     eth_rxck : in STD_LOGIC
@@ -228,8 +212,6 @@ inst: entity work.ETH_CLKGEN_ETH_CLKGEN_clk_wiz
       resetn => resetn,
       rxck_0deg => rxck_0deg,
       rxck_180deg => rxck_180deg,
-      rxck_270deg => rxck_270deg,
-      rxck_90deg => rxck_90deg,
-      rxck_n90deg => rxck_n90deg
+      rxck_90deg => rxck_90deg
     );
 end STRUCTURE;

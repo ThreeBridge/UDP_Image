@@ -1,10 +1,10 @@
 // Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2018.1 (lin64) Build 2188600 Wed Apr  4 18:39:19 MDT 2018
-// Date        : Mon Dec 24 21:25:53 2018
-// Host        : Z10PE-01 running 64-bit Ubuntu 16.04.5 LTS
+// Date        : Fri Jan 11 16:13:49 2019
+// Host        : bluewater01.localdomain running 64-bit unknown
 // Command     : write_verilog -force -mode funcsim
-//               /home/moikawa/proj_Mitsuhashi/UDP_20181221/UDP.srcs/sources_1/ip/ETH_CLKGEN/ETH_CLKGEN_sim_netlist.v
+//               /home/tmitsuhashi/bin/vivado_h30/UDP_Image/UDP.srcs/sources_1/ip/ETH_CLKGEN/ETH_CLKGEN_sim_netlist.v
 // Design      : ETH_CLKGEN
 // Purpose     : This verilog netlist is a functional simulation representation of the design and should not be modified
 //               or synthesized. This netlist cannot be used for SDF annotated simulation.
@@ -17,16 +17,12 @@ module ETH_CLKGEN
    (rxck_0deg,
     rxck_90deg,
     rxck_180deg,
-    rxck_270deg,
-    rxck_n90deg,
     resetn,
     locked,
     eth_rxck);
   output rxck_0deg;
   output rxck_90deg;
   output rxck_180deg;
-  output rxck_270deg;
-  output rxck_n90deg;
   input resetn;
   output locked;
   input eth_rxck;
@@ -36,9 +32,7 @@ module ETH_CLKGEN
   wire resetn;
   wire rxck_0deg;
   wire rxck_180deg;
-  wire rxck_270deg;
   wire rxck_90deg;
-  wire rxck_n90deg;
 
   ETH_CLKGEN_ETH_CLKGEN_clk_wiz inst
        (.eth_rxck(eth_rxck),
@@ -46,9 +40,7 @@ module ETH_CLKGEN
         .resetn(resetn),
         .rxck_0deg(rxck_0deg),
         .rxck_180deg(rxck_180deg),
-        .rxck_270deg(rxck_270deg),
-        .rxck_90deg(rxck_90deg),
-        .rxck_n90deg(rxck_n90deg));
+        .rxck_90deg(rxck_90deg));
 endmodule
 
 (* ORIG_REF_NAME = "ETH_CLKGEN_clk_wiz" *) 
@@ -56,16 +48,12 @@ module ETH_CLKGEN_ETH_CLKGEN_clk_wiz
    (rxck_0deg,
     rxck_90deg,
     rxck_180deg,
-    rxck_270deg,
-    rxck_n90deg,
     resetn,
     locked,
     eth_rxck);
   output rxck_0deg;
   output rxck_90deg;
   output rxck_180deg;
-  output rxck_270deg;
-  output rxck_n90deg;
   input resetn;
   output locked;
   input eth_rxck;
@@ -81,19 +69,17 @@ module ETH_CLKGEN_ETH_CLKGEN_clk_wiz
   wire rxck_0deg_ETH_CLKGEN;
   wire rxck_180deg;
   wire rxck_180deg_ETH_CLKGEN;
-  wire rxck_270deg;
-  wire rxck_270deg_ETH_CLKGEN;
   wire rxck_90deg;
   wire rxck_90deg_ETH_CLKGEN;
-  wire rxck_n90deg;
-  wire rxck_n90deg_ETH_CLKGEN;
   wire NLW_mmcm_adv_inst_CLKFBOUTB_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKFBSTOPPED_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKINSTOPPED_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKOUT0B_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKOUT1B_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKOUT2B_UNCONNECTED;
+  wire NLW_mmcm_adv_inst_CLKOUT3_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKOUT3B_UNCONNECTED;
+  wire NLW_mmcm_adv_inst_CLKOUT4_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKOUT5_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKOUT6_UNCONNECTED;
   wire NLW_mmcm_adv_inst_DRDY_UNCONNECTED;
@@ -126,41 +112,33 @@ module ETH_CLKGEN_ETH_CLKGEN_clk_wiz
        (.I(rxck_180deg_ETH_CLKGEN),
         .O(rxck_180deg));
   (* BOX_TYPE = "PRIMITIVE" *) 
-  BUFG clkout4_buf
-       (.I(rxck_270deg_ETH_CLKGEN),
-        .O(rxck_270deg));
-  (* BOX_TYPE = "PRIMITIVE" *) 
-  BUFG clkout5_buf
-       (.I(rxck_n90deg_ETH_CLKGEN),
-        .O(rxck_n90deg));
-  (* BOX_TYPE = "PRIMITIVE" *) 
   MMCME2_ADV #(
     .BANDWIDTH("OPTIMIZED"),
-    .CLKFBOUT_MULT_F(8.000000),
+    .CLKFBOUT_MULT_F(9.000000),
     .CLKFBOUT_PHASE(0.000000),
     .CLKFBOUT_USE_FINE_PS("FALSE"),
     .CLKIN1_PERIOD(8.000000),
     .CLKIN2_PERIOD(0.000000),
-    .CLKOUT0_DIVIDE_F(8.000000),
+    .CLKOUT0_DIVIDE_F(9.000000),
     .CLKOUT0_DUTY_CYCLE(0.500000),
     .CLKOUT0_PHASE(0.000000),
     .CLKOUT0_USE_FINE_PS("FALSE"),
-    .CLKOUT1_DIVIDE(8),
+    .CLKOUT1_DIVIDE(9),
     .CLKOUT1_DUTY_CYCLE(0.500000),
-    .CLKOUT1_PHASE(90.000000),
+    .CLKOUT1_PHASE(165.000000),
     .CLKOUT1_USE_FINE_PS("FALSE"),
-    .CLKOUT2_DIVIDE(8),
+    .CLKOUT2_DIVIDE(9),
     .CLKOUT2_DUTY_CYCLE(0.500000),
-    .CLKOUT2_PHASE(180.000000),
+    .CLKOUT2_PHASE(255.000000),
     .CLKOUT2_USE_FINE_PS("FALSE"),
-    .CLKOUT3_DIVIDE(8),
+    .CLKOUT3_DIVIDE(1),
     .CLKOUT3_DUTY_CYCLE(0.500000),
-    .CLKOUT3_PHASE(270.000000),
+    .CLKOUT3_PHASE(0.000000),
     .CLKOUT3_USE_FINE_PS("FALSE"),
     .CLKOUT4_CASCADE("FALSE"),
-    .CLKOUT4_DIVIDE(8),
+    .CLKOUT4_DIVIDE(1),
     .CLKOUT4_DUTY_CYCLE(0.500000),
-    .CLKOUT4_PHASE(-90.000000),
+    .CLKOUT4_PHASE(0.000000),
     .CLKOUT4_USE_FINE_PS("FALSE"),
     .CLKOUT5_DIVIDE(1),
     .CLKOUT5_DUTY_CYCLE(0.500000),
@@ -198,9 +176,9 @@ module ETH_CLKGEN_ETH_CLKGEN_clk_wiz
         .CLKOUT1B(NLW_mmcm_adv_inst_CLKOUT1B_UNCONNECTED),
         .CLKOUT2(rxck_180deg_ETH_CLKGEN),
         .CLKOUT2B(NLW_mmcm_adv_inst_CLKOUT2B_UNCONNECTED),
-        .CLKOUT3(rxck_270deg_ETH_CLKGEN),
+        .CLKOUT3(NLW_mmcm_adv_inst_CLKOUT3_UNCONNECTED),
         .CLKOUT3B(NLW_mmcm_adv_inst_CLKOUT3B_UNCONNECTED),
-        .CLKOUT4(rxck_n90deg_ETH_CLKGEN),
+        .CLKOUT4(NLW_mmcm_adv_inst_CLKOUT4_UNCONNECTED),
         .CLKOUT5(NLW_mmcm_adv_inst_CLKOUT5_UNCONNECTED),
         .CLKOUT6(NLW_mmcm_adv_inst_CLKOUT6_UNCONNECTED),
         .DADDR({1'b0,1'b0,1'b0,1'b0,1'b0,1'b0,1'b0}),

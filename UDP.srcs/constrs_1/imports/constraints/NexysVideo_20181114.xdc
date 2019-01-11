@@ -20,15 +20,15 @@ set_input_jitter [get_clocks -of_objects [get_ports ETH_RXCK]] 0.080
 #set_input_delay -clock phyrx_ddr -max 1.000 [get_ports ETH_RXCTL]
 #set_input_delay -clock phyrx_ddr -clock_fall -min -1.000 [get_ports ETH_RXCTL]
 
-set_input_delay -clock PHY_RXCLK -max 0.500                         [get_ports {ETH_RXD[*]}]
-set_input_delay -clock PHY_RXCLK -max 0.500 -clock_fall -add_delay  [get_ports {ETH_RXD[*]}]
-set_input_delay -clock PHY_RXCLK -min -0.500                        [get_ports {ETH_RXD[*]}]
-set_input_delay -clock PHY_RXCLK -min -0.500 -clock_fall -add_delay [get_ports {ETH_RXD[*]}]
+set_input_delay -clock PHY_RXCLK -max 0.500 [get_ports {ETH_RXD[*]}]
+set_input_delay -clock PHY_RXCLK -clock_fall -max -add_delay 0.500 [get_ports {ETH_RXD[*]}]
+set_input_delay -clock PHY_RXCLK -min -0.500 [get_ports {ETH_RXD[*]}]
+set_input_delay -clock PHY_RXCLK -clock_fall -min -add_delay -0.500 [get_ports {ETH_RXD[*]}]
 
 set_input_delay -clock PHY_RXCLK -max 0.500 [get_ports ETH_RXCTL]
-set_input_delay -clock PHY_RXCLK -max 0.500 -clock_fall -add_delay [get_ports ETH_RXCTL]
+set_input_delay -clock PHY_RXCLK -clock_fall -max -add_delay 0.500 [get_ports ETH_RXCTL]
 set_input_delay -clock PHY_RXCLK -min -0.500 [get_ports ETH_RXCTL]
-set_input_delay -clock PHY_RXCLK -min -0.500 -clock_fall -add_delay [get_ports ETH_RXCTL]
+set_input_delay -clock PHY_RXCLK -clock_fall -min -add_delay -0.500 [get_ports ETH_RXCTL]
 
 ## false_path
 #set_false_path -setup -rise_from phyrx_ddr -fall_to PHY_RXCLK
@@ -322,47 +322,23 @@ set_property -dict {PACKAGE_PIN V14 IOSTANDARD LVCMOS25} [get_ports VADJ_EN]
 #set_false_path -from [get_cells R_Arbiter/trans_image/image_bufferB_reg*] -to [get_cells R_Arbiter/trans_image/TXBUF_reg*]
 #--> add by manual
 
-connect_debug_port u_ila_0/probe3 [get_nets [list {R_Arbiter/recv_image/addra[0]} {R_Arbiter/recv_image/addra[1]} {R_Arbiter/recv_image/addra[2]} {R_Arbiter/recv_image/addra[3]} {R_Arbiter/recv_image/addra[4]} {R_Arbiter/recv_image/addra[5]} {R_Arbiter/recv_image/addra[6]} {R_Arbiter/recv_image/addra[7]} {R_Arbiter/recv_image/addra[8]} {R_Arbiter/recv_image/addra[9]} {R_Arbiter/recv_image/addra[10]} {R_Arbiter/recv_image/addra[11]} {R_Arbiter/recv_image/addra[12]} {R_Arbiter/recv_image/addra[13]}]]
-connect_debug_port u_ila_1/probe1 [get_nets [list {R_Arbiter/trans_image/clk_cnt_reg__0[0]} {R_Arbiter/trans_image/clk_cnt_reg__0[1]} {R_Arbiter/trans_image/clk_cnt_reg__0[2]} {R_Arbiter/trans_image/clk_cnt_reg__0[3]} {R_Arbiter/trans_image/clk_cnt_reg__0[4]} {R_Arbiter/trans_image/clk_cnt_reg__0[5]}]]
-connect_debug_port u_ila_1/probe2 [get_nets [list {R_Arbiter/trans_image/clk_cnt_reg__0__0[6]} {R_Arbiter/trans_image/clk_cnt_reg__0__0[7]} {R_Arbiter/trans_image/clk_cnt_reg__0__0[8]} {R_Arbiter/trans_image/clk_cnt_reg__0__0[9]} {R_Arbiter/trans_image/clk_cnt_reg__0__0[10]}]]
-
-
-connect_debug_port u_ila_0/probe2 [get_nets [list {R_Arbiter/recv_image/addra[0]} {R_Arbiter/recv_image/addra[1]} {R_Arbiter/recv_image/addra[2]} {R_Arbiter/recv_image/addra[3]} {R_Arbiter/recv_image/addra[4]} {R_Arbiter/recv_image/addra[5]} {R_Arbiter/recv_image/addra[6]} {R_Arbiter/recv_image/addra[7]} {R_Arbiter/recv_image/addra[8]} {R_Arbiter/recv_image/addra[9]} {R_Arbiter/recv_image/addra[10]} {R_Arbiter/recv_image/addra[11]} {R_Arbiter/recv_image/addra[12]} {R_Arbiter/recv_image/addra[13]}]]
-
-
-connect_debug_port u_ila_0/probe5 [get_nets [list R_Arbiter/trans_image/tx_end]]
-
-
-
-connect_debug_port u_ila_0/probe17 [get_nets [list {R_Arbiter/UDP_st_reg_n_0_[2]}]]
-
-connect_debug_port u_ila_1/probe3 [get_nets [list R_Arbiter/trans_image/hcend_clk125]]
-connect_debug_port u_ila_1/probe36 [get_nets [list R_Arbiter/trans_image/ready_clk125]]
-connect_debug_port u_ila_1/probe37 [get_nets [list R_Arbiter/trans_image/ucend_clk125]]
 
 
 
 
 
-connect_debug_port u_ila_0/clk [get_nets [list eth_rxck_IBUF_BUFG]]
-connect_debug_port u_ila_0/probe0 [get_nets [list {R_Arbiter/ARP/st[0]} {R_Arbiter/ARP/st[1]}]]
-connect_debug_port u_ila_0/probe8 [get_nets [list {R_Arbiter/ping_st[0]} {R_Arbiter/ping_st[1]} {R_Arbiter/ping_st[2]}]]
-connect_debug_port u_ila_0/probe11 [get_nets [list {UDP_d[0]} {UDP_d[1]} {UDP_d[2]} {UDP_d[3]} {UDP_d[4]} {UDP_d[5]} {UDP_d[6]} {UDP_d[7]} {UDP_d[8]}]]
-connect_debug_port u_ila_0/probe12 [get_nets [list {arp_d[0]} {arp_d[1]} {arp_d[2]} {arp_d[3]} {arp_d[4]} {arp_d[5]} {arp_d[6]} {arp_d[7]} {arp_d[8]}]]
-connect_debug_port u_ila_0/probe14 [get_nets [list {ping_d[0]} {ping_d[1]} {ping_d[2]} {ping_d[3]} {ping_d[4]} {ping_d[5]} {ping_d[6]} {ping_d[7]} {ping_d[8]}]]
-connect_debug_port u_ila_0/probe15 [get_nets [list arp_tx]]
-connect_debug_port u_ila_0/probe16 [get_nets [list R_Arbiter/crc_ok_reg_n_0]]
-connect_debug_port u_ila_0/probe17 [get_nets [list ping_tx]]
-connect_debug_port u_ila_0/probe18 [get_nets [list UDP_tx]]
-connect_debug_port u_ila_1/probe3 [get_nets [list {T_Arbiter/st[0]} {T_Arbiter/st[1]}]]
-connect_debug_port u_ila_1/probe5 [get_nets [list arp_tx_en]]
-connect_debug_port u_ila_1/probe7 [get_nets [list ping_tx_en]]
-connect_debug_port u_ila_1/probe9 [get_nets [list UDP_tx_en]]
-connect_debug_port dbg_hub/clk [get_nets clk125]
 
-connect_debug_port u_ila_1/clk [get_nets [list clkgen/inst/clk125]]
-connect_debug_port dbg_hub/clk [get_nets clkgen_n_0]
 
+
+
+
+
+
+
+
+
+
+set_multicycle_path -setup -rise_from [get_cells R_Arbiter/ping/rx_cnt_reg*] -rise_to [get_cells R_Arbiter/ping/TXBUF_reg*] 2
 create_debug_core u_ila_0 ila
 set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
 set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
@@ -373,7 +349,7 @@ set_property C_INPUT_PIPE_STAGES 0 [get_debug_cores u_ila_0]
 set_property C_TRIGIN_EN false [get_debug_cores u_ila_0]
 set_property C_TRIGOUT_EN false [get_debug_cores u_ila_0]
 set_property port_width 1 [get_debug_ports u_ila_0/clk]
-connect_debug_port u_ila_0/clk [get_nets [list eth_clkgen/inst/rxck_90deg]]
+connect_debug_port u_ila_0/clk [get_nets [list eth_rxck]]
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe0]
 set_property port_width 4 [get_debug_ports u_ila_0/probe0]
 connect_debug_port u_ila_0/probe0 [get_nets [list {R_Arbiter/st[0]} {R_Arbiter/st[1]} {R_Arbiter/st[2]} {R_Arbiter/st[3]}]]

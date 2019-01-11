@@ -453,9 +453,11 @@ module trans_image(
     always_ff @(posedge eth_rxck)begin 
        if(st==Hc_End) begin
            if(err_cnt==2'b10) csum_extend <= csum;
+           //if(err_cnt==2'b10) csum_extend <= 16'h00_00;
        end
        else if(st==Uc_End)begin
-           if(err_cnt==2'b10) csum_extend <= csum;
+           //if(err_cnt==2'b10) csum_extend <= csum;
+           if(err_cnt==2'b10) csum_extend <= 16'h00_00;
        end
        else csum_extend <= 16'h5555;  // dummy value.
     end    
@@ -500,13 +502,7 @@ module trans_image(
         //else if(ucend_clk125)    {TXBUF[40],TXBUF[41]} <= csum_extend;
         else if(st==Hc_End)    {TXBUF[24],TXBUF[25]} <= csum_extend;
         else if(st==Uc_End)    {TXBUF[40],TXBUF[41]} <= csum_extend;
-        /*
-        else if(st==IDLE)begin
-            for(j=0;j<11'd1046;j=j+1) TXBUF[j] <= 0;
-            //Hcsum_st <= 0;
-            //j <= 0;
-        end
-        */
+        else if(st==Tx_En) TXBUF <= {TXBUF[0],TXBUF[1045:1]};
     end    
     
     /*---仮想ヘッダ準備---*/
@@ -571,7 +567,7 @@ module trans_image(
         end
         else if(st==Tx_En)begin
             tx_cnt <= tx_cnt + 1;
-            if(tx_cnt==PckSize+1) tx_end <= 1'b1; 
+            if(tx_cnt==PckSize) tx_end <= 1'b1; 
         end
         else begin
             tx_end <= 1'b0;
@@ -596,7 +592,8 @@ module trans_image(
     always_ff @(posedge eth_rxck)begin
 //        if (st==Tx_En&&tx_cnt<(PckSize-3'd4))   UDP_o <= {delay_flg,data_pipe2[data_pipe_sel2]};
 //        else if (st==Tx_En&&fcs_cnt!=3'b100)    UDP_o <= {delay_flg,data_pipe2[data_pipe_sel2]};
-        if (st==Tx_En)  UDP_o <= {delay_flg,data_pipe2[data_pipe_sel2]};
+        //if (st==Tx_En)  UDP_o <= {delay_flg,data_pipe2[data_pipe_sel2]};
+        if (st==Tx_En)  UDP_o <= {(tx_cnt<(PckSize-3'd4)),TXBUF[0]};
         else            UDP_o <= 0;
     end
 

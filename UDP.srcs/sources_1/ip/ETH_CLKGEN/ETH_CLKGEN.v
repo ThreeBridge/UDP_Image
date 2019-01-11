@@ -56,11 +56,9 @@
 //  Output     Output      Phase    Duty Cycle   Pk-to-Pk     Phase
 //   Clock     Freq (MHz)  (degrees)    (%)     Jitter (ps)  Error (ps)
 //----------------------------------------------------------------------------
-// rxck_0deg___125.000______0.000______50.0______119.348_____96.948
-// rxck_90deg___125.000_____90.000______50.0______119.348_____96.948
-// rxck_180deg___125.000____180.000______50.0______119.348_____96.948
-// rxck_270deg___125.000____270.000______50.0______119.348_____96.948
-// rxck_n90deg___125.000____-90.000______50.0______119.348_____96.948
+// rxck_0deg___125.000______0.000______50.0______112.261_____89.430
+// rxck_90deg___125.000____165.000______50.0______112.261_____89.430
+// rxck_180deg___125.000____255.000______50.0______112.261_____89.430
 //
 //----------------------------------------------------------------------------
 // Input Clock   Freq (MHz)    Input Jitter (UI)
@@ -69,7 +67,7 @@
 
 `timescale 1ps/1ps
 
-(* CORE_GENERATION_INFO = "ETH_CLKGEN,clk_wiz_v6_0_0_0,{component_name=ETH_CLKGEN,use_phase_alignment=true,use_min_o_jitter=false,use_max_i_jitter=false,use_dyn_phase_shift=false,use_inclk_switchover=false,use_dyn_reconfig=false,enable_axi=0,feedback_source=FDBK_AUTO,PRIMITIVE=MMCM,num_out_clk=5,clkin1_period=8.000,clkin2_period=10.000,use_power_down=false,use_reset=true,use_locked=true,use_inclk_stopped=false,feedback_type=SINGLE,CLOCK_MGR_TYPE=NA,manual_override=false}" *)
+(* CORE_GENERATION_INFO = "ETH_CLKGEN,clk_wiz_v6_0_0_0,{component_name=ETH_CLKGEN,use_phase_alignment=true,use_min_o_jitter=false,use_max_i_jitter=false,use_dyn_phase_shift=false,use_inclk_switchover=false,use_dyn_reconfig=false,enable_axi=0,feedback_source=FDBK_AUTO,PRIMITIVE=MMCM,num_out_clk=3,clkin1_period=8.000,clkin2_period=10.000,use_power_down=false,use_reset=true,use_locked=true,use_inclk_stopped=false,feedback_type=SINGLE,CLOCK_MGR_TYPE=NA,manual_override=false}" *)
 
 module ETH_CLKGEN 
  (
@@ -77,8 +75,6 @@ module ETH_CLKGEN
   output        rxck_0deg,
   output        rxck_90deg,
   output        rxck_180deg,
-  output        rxck_270deg,
-  output        rxck_n90deg,
   // Status and control signals
   input         resetn,
   output        locked,
@@ -92,8 +88,6 @@ module ETH_CLKGEN
   .rxck_0deg(rxck_0deg),
   .rxck_90deg(rxck_90deg),
   .rxck_180deg(rxck_180deg),
-  .rxck_270deg(rxck_270deg),
-  .rxck_n90deg(rxck_n90deg),
   // Status and control signals               
   .resetn(resetn), 
   .locked(locked),

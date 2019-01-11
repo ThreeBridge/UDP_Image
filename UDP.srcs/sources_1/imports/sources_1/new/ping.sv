@@ -101,6 +101,7 @@ module ping(
     wire icend_end = (err_cnt==3'd7);
     wire txhc_end  = (csum_cnt==8'd34);
     wire txic_end  = (csum_cnt==rx_cnt-8'd3);
+    wire pres_end  = (rx_cnt>=8'd255);
     
     always_ff @(posedge eth_rxck) begin
         if (rst_rx) st <= Idle;
@@ -124,7 +125,7 @@ module ping(
             Presv : begin
                 if(arp_st)  nx = Idle;
                 else if(ping_st) nx = Hcsum;
-                else if(rx_cnt>=8'd255) nx = Idle;
+                else if(pres_end) nx = Idle;
             end
             Hcsum : if(hcsum_end) nx = Hc_End;
             Hc_End : if(hcend_end)begin
