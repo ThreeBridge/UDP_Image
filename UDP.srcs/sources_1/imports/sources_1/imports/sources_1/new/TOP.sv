@@ -29,7 +29,7 @@ module TOP(
     output [3:0]    ETH_TXD,    //-- Ether RGMII Tx data.
     output          ETH_TXCK,
     output          ETH_TXCTL,
-    output          ETH_RST_B,  //-- Ether PHY reset(active low)
+    inout           ETH_RST_B,  //-- Ether PHY reset(active low)
     input 	        eth_int_b,
     input           eth_pme_b,
     output          eth_mdc,

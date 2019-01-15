@@ -12,14 +12,14 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="266917978fs"></ZoomEndTime>
-      <Cursor1Time time="0fs"></Cursor1Time>
+      <ZoomEndTime time="91519000001fs"></ZoomEndTime>
+      <Cursor1Time time="36422493000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="137"></NameColumnWidth>
+      <NameColumnWidth column_width="133"></NameColumnWidth>
       <ValueColumnWidth column_width="62"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="183" />
+   <WVObjectSize size="189" />
    <wave_markers>
       <marker label="" time="32952830000" />
       <marker label="" time="232605844000" />
@@ -366,6 +366,8 @@
       <obj_property name="ElementShortName">rx_cnt[7:0]</obj_property>
       <obj_property name="ObjectShortName">rx_cnt[7:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="CustomSignalColor">#F0E68C</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/ping/tx_cnt">
       <obj_property name="ElementShortName">tx_cnt[7:0]</obj_property>
@@ -801,6 +803,30 @@
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/delay_flg">
       <obj_property name="ElementShortName">delay_flg</obj_property>
       <obj_property name="ObjectShortName">delay_flg</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/TXBUF[1045]">
+      <obj_property name="ElementShortName">[1045][7:0]</obj_property>
+      <obj_property name="ObjectShortName">[1045][7:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/TXBUF[1044]">
+      <obj_property name="ElementShortName">[1044][7:0]</obj_property>
+      <obj_property name="ObjectShortName">[1044][7:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/TXBUF[1043]">
+      <obj_property name="ElementShortName">[1043][7:0]</obj_property>
+      <obj_property name="ObjectShortName">[1043][7:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/TXBUF[2]">
+      <obj_property name="ElementShortName">[2][7:0]</obj_property>
+      <obj_property name="ObjectShortName">[2][7:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/TXBUF[1]">
+      <obj_property name="ElementShortName">[1][7:0]</obj_property>
+      <obj_property name="ObjectShortName">[1][7:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/TXBUF[0]">
+      <obj_property name="ElementShortName">[0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">[0][7:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/tx_cnt">
       <obj_property name="ElementShortName">tx_cnt[10:0]</obj_property>
