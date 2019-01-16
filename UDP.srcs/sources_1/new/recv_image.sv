@@ -93,7 +93,7 @@ module recv_image(
     parameter   Recv_End    =   8'h07;
     parameter   ERROR       =   8'h08;
     
-    //parameter   eth_head    =   4'd14;
+    parameter   eth_head    =   4'd14;
     //parameter   udp         =   6'd34;
     parameter   MsgSize     =   16'd1000;
     
@@ -129,8 +129,8 @@ module recv_image(
     reg [2:0]   err_cnt;
     reg [8:0]   packet_cnt;
     
-    wire hcsum_end = (csum_cnt==8'd34);
-    wire hcend_end = (err_cnt==3'd7);    
+    wire hcsum_end = (csum_cnt==8'd22);
+    wire hcend_end = (err_cnt==3'd1);    
     wire ucsum_end = (csum_cnt==MsgSize+5'd20);
     wire ucend_end = (err_cnt==3'd7);    
 
@@ -165,7 +165,8 @@ module recv_image(
             end
             Hc_End : begin 
                 if (hcend_end)begin
-                    if (csum_ok) nx = Ucsum;
+                    //if (csum_ok) nx = Ucsum;
+                    if (csum_ok) nx = Select;
                     else nx = ERROR;
                 end
             end
@@ -299,8 +300,8 @@ module recv_image(
 
 
 //<-- moikawa add (2018.11.02)
-    //wire [10:0] rxbuf_sel = csum_cnt + eth_head;
-    wire [10:0] rxbuf_sel = csum_cnt;
+    wire [10:0] rxbuf_sel = csum_cnt + eth_head;
+    //wire [10:0] rxbuf_sel = csum_cnt;
     reg [7:0]  data_pipe [17:0]; // part of pipelined selector from TXBUF[].
     wire [4:0]  data_pipe_sel;
 
@@ -393,9 +394,10 @@ module recv_image(
     /*---チェックサム計算開始用---*/
     reg data_en_d;
     always_ff @(posedge eth_rxck)begin
-        if(st==Hcsum)       data_en <= (csum_cnt > 8'd13 && csum_cnt < 8'd34);
+        //if(st==Hcsum)       data_en <= (csum_cnt > 8'd13 && csum_cnt < 8'd34);
+        if(st==Hcsum)       data_en <= (csum_cnt < 8'd20);
         else if(st==Ucsum)  data_en <= (csum_cnt < MsgSize+5'd20);
-        else if(st==Idle)   data_en <= 0;
+        else if(st==Idle)   data_en <= `LO;
     end
     
     always_ff @(posedge eth_rxck)begin
