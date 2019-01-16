@@ -265,7 +265,7 @@ parameter  Recv_End    = 8'h03;
         .eth_rxck     (eth_rxck),
         .rst_rx       (rst_rx),
         .rxd_i        ({q_rxctl[0], q_rxd[0]}),
-        .arp_st(arp_st[2]),
+        .els_packet   (arp_st[2]||els_packet[2]),
         .ping_st      (ping_st),
         .my_MAC_i     (my_MACadd),
         .my_IP_i      (my_IPadd),

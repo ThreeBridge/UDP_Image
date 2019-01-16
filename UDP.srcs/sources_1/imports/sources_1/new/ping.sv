@@ -24,7 +24,7 @@ module ping(
     eth_rxck,
     rst_rx,
     rxd_i,
-    arp_st,
+    els_packet,
     ping_st,
     my_MAC_i,
     my_IP_i,
@@ -38,7 +38,7 @@ module ping(
     input           eth_rxck;
     input           rst_rx;
     input [8:0]     rxd_i;
-    input           arp_st;
+    input           els_packet;
     input           ping_st;
     input [47:0]    my_MAC_i;
     input [31:0]    my_IP_i;
@@ -123,7 +123,7 @@ module ping(
                 else nx = Idle;                
             end
             Presv : begin
-                if(arp_st)  nx = Idle;
+                if(els_packet)  nx = Idle;
                 else if(ping_st) nx = Hcsum;
                 else if(pres_end) nx = Idle;
             end
