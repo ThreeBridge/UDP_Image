@@ -82,7 +82,7 @@ module trans_image(
     parameter   Tx_End  =   8'h09;
     parameter   ERROR   =   8'h0A;
     
-    //parameter   eth_head =  4'd14;
+    parameter   eth_head =  4'd14;
     //parameter   udp     =   6'd34;
     parameter   FTYPE   =   16'h08_00;
     parameter   MsgSize =   16'd1000;
@@ -131,8 +131,8 @@ module trans_image(
     //reg [3:0]   ready_cnt;
     reg [9:0]   d_img_cnt [2:0];        // BlockRAMの出力が1サイクルずれるため & recv_image側でimage_cntにFFを挟むため
     
-    wire hcsum_end = (csum_cnt==8'd34);
-    wire hcend_end = (err_cnt==3'd7);    
+    wire hcsum_end = (csum_cnt==8'd0);
+    wire hcend_end = (err_cnt==3'd1);    
     wire ucsum_end = (csum_cnt==MsgSize+5'd20);
     wire ucend_end = (err_cnt==3'd7);
     
@@ -158,7 +158,7 @@ module trans_image(
                 if (hcsum_end) nx = Hc_End;
             end
             Hc_End : begin
-                if (hcend_end) nx = Ucsum;
+                if (hcend_end) nx = Tx_En;
             end
             Ucsum : begin
                 if (ucsum_end) nx = Uc_End;
@@ -227,7 +227,8 @@ module trans_image(
 //                image_cnt <= image_cnt + 14'b1;
 //        end
         //else if(st==Ucsum&&packet_cnt!=9)begin
-        else if(st==Ucsum&&packet_cnt!=packet_cnt_sel)begin     // add 2018.12.5
+        //else if(st==Ucsum&&packet_cnt!=packet_cnt_sel)begin     // add 2018.12.5
+        else if(st==Tx_En&&packet_cnt!=packet_cnt_sel)begin     // add 2019.1.17
             if(image_cnt<1000)begin
                 image_cnt <= image_cnt + 10'b1;
             end
@@ -245,23 +246,6 @@ module trans_image(
         if(st==IDLE)        addr_cnt <= 9'b0;
         else if(st==Hc_End) addr_cnt <= packet_cnt + 1;
     end
-    
-    
-//    reg [9:0] buffer_cnt;
-//    always_ff @(posedge eth_rxck)begin
-//        if(st==IDLE)begin
-//            buffer_cnt <= 10'b0;
-//        end
-//        else if(st==Ucsum)begin
-//            if(buffer_cnt<1000)begin
-//                buffer_cnt <= buffer_cnt + 10'b1;
-//            end
-//        end
-//        else if(st==READY)begin
-//            buffer_cnt <= 10'b0;
-//        end
-//    end
-    
     
     always_ff @(posedge eth_rxck)begin
         d_img_cnt <= {d_img_cnt[1:0],image_cnt};
@@ -283,7 +267,8 @@ module trans_image(
             if(d_img_cnt[2]<500)
                 image_bufferA[d_img_cnt[2]] <= imdata ^ 8'hFF;
         end
-        else if(st==Ucsum&&d_packet_cnt!=packet_cnt_sel)begin
+        //else if(st==Ucsum&&d_packet_cnt!=packet_cnt_sel)begin
+        else if(st==Tx_En&&d_packet_cnt!=packet_cnt_sel)begin   // 2019.1.17
             if(d_img_cnt[2]<500)
                 image_bufferA[d_img_cnt[2]] <= imdata ^ 8'hFF;
         end
@@ -299,7 +284,8 @@ module trans_image(
             if(d_img_cnt[2]>=500)
                 image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
         end
-        else if(st==Ucsum&&d_packet_cnt!=packet_cnt_sel)begin
+        //else if(st==Ucsum&&d_packet_cnt!=packet_cnt_sel)begin
+        else if(st==Tx_En&&d_packet_cnt!=packet_cnt_sel)begin   // 2019.1.17
             if(d_img_cnt[2]>=500)
                 image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
         end
@@ -336,6 +322,7 @@ module trans_image(
     (*dont_touch="true"*)reg [7:0]       data;
     reg            data_en;
     (*dont_touch="true"*)reg [15:0]      csum;
+    wire    [15:0]  csum_o;
     
     always_ff @(posedge eth_rxck)begin         
         if(st==IDLE)        csum_cnt <= 0;
@@ -346,8 +333,8 @@ module trans_image(
     
 //<-- moikawa add (2018.11.02)
     //TXBUF
-    //wire [10:0] txbuf_sel = csum_cnt + eth_head;
-    wire [10:0] txbuf_sel = csum_cnt;
+    wire [10:0] txbuf_sel = csum_cnt + eth_head;
+    //wire [10:0] txbuf_sel = csum_cnt;
     reg [7:0]  data_pipe [17:0]; // part of pipelined selector from TXBUF[].
     wire [4:0]  data_pipe_sel;
     //VBUF
@@ -439,9 +426,10 @@ module trans_image(
     /*---チェックサム計算開始用---*/
     reg data_en_d;
     always_ff @(posedge eth_rxck)begin
-        if(st==Hcsum)       data_en <= (csum_cnt > 8'd13 && csum_cnt < 8'd34);
+        //if(st==Hcsum)       data_en <= (csum_cnt > 8'd13 && csum_cnt < 8'd34);
+        if(st==Hcsum)       data_en <= `HI;
         else if(st==Ucsum)  data_en <= (csum_cnt < MsgSize+5'd20);
-        else if(st==IDLE)   data_en <= 0;
+        else if(st==IDLE)   data_en <= `LO;
     end    
     
     always_ff @(posedge eth_rxck)begin
@@ -452,14 +440,14 @@ module trans_image(
     reg [15:0] csum_extend;
     always_ff @(posedge eth_rxck)begin 
        if(st==Hc_End) begin
-           if(err_cnt==2'b10) csum_extend <= csum;
+           if(err_cnt==2'b01) csum_extend <= csum;
            //if(err_cnt==2'b10) csum_extend <= 16'h00_00;
        end
        else if(st==Uc_End)begin
            //if(err_cnt==2'b10) csum_extend <= csum;
-           if(err_cnt==2'b10) csum_extend <= 16'h00_00;
+           if(err_cnt==2'b01) csum_extend <= 16'h00_00;
        end
-       else csum_extend <= 16'h5555;  // dummy value.
+       else if (st==IDLE) csum_extend <= 16'h5555;  // dummy value.
     end    
    
     /*---UDPパケット準備---*/
@@ -500,7 +488,8 @@ module trans_image(
         end
         //else if(hcend_clk125)    {TXBUF[24],TXBUF[25]} <= csum_extend;
         //else if(ucend_clk125)    {TXBUF[40],TXBUF[41]} <= csum_extend;
-        else if(st==Hc_End)    {TXBUF[24],TXBUF[25]} <= csum_extend;
+        //else if(st==Hc_End)    {TXBUF[24],TXBUF[25]} <= csum_extend;
+        else if(st==Hc_End)    {TXBUF[24],TXBUF[25]} <= csum_o;
         else if(st==Uc_End)    {TXBUF[40],TXBUF[41]} <= csum_extend;
         else if(st==Tx_En) TXBUF <= {TXBUF[0],TXBUF[1045:1]};
     end    
@@ -538,6 +527,16 @@ module trans_image(
         .data_en    (data_en_d),
         .csum_o     (csum),
         .rst        (rst)
+    );
+    
+    wire [7:0]  csum_data [19:0] = TXBUF[33:14];
+    csum_fast trans_csum(
+        /*---INPUT---*/
+        .data_i     (csum_data),
+        .dataen_i   (data_en),
+        .reset_i    (rst),
+        /*---OUTPUT---*/
+        .csum_o     (csum_o)        
     );
     
     //<----------

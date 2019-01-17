@@ -129,7 +129,7 @@ module recv_image(
     reg [2:0]   err_cnt;
     reg [8:0]   packet_cnt;
     
-    wire hcsum_end = (csum_cnt==8'd22);
+    wire hcsum_end = (csum_cnt==8'd0);
     wire hcend_end = (err_cnt==3'd1);    
     wire ucsum_end = (csum_cnt==MsgSize+5'd20);
     wire ucend_end = (err_cnt==3'd7);    
@@ -395,7 +395,7 @@ module recv_image(
     reg data_en_d;
     always_ff @(posedge eth_rxck)begin
         //if(st==Hcsum)       data_en <= (csum_cnt > 8'd13 && csum_cnt < 8'd34);
-        if(st==Hcsum)       data_en <= (csum_cnt < 8'd20);
+        if(st==Hcsum)       data_en <= `HI;
         else if(st==Ucsum)  data_en <= (csum_cnt < MsgSize+5'd20);
         else if(st==Idle)   data_en <= `LO;
     end
@@ -404,10 +404,11 @@ module recv_image(
        data_en_d <= data_en; 
     end
     
+    wire [15:0] csum_o;     // add 2019.1.17
     /*---Checksum OK---*/
     always_ff @(posedge eth_rxck)begin
         if(st==Hc_End)begin
-            if(csum==16'h00_00) csum_ok <= `HI;
+            if(csum_o==16'h00_00) csum_ok <= `HI;
         end
         else if(st==Uc_End)begin
             if(csum==16'h00_00) csum_ok <= `HI;
@@ -448,12 +449,23 @@ module recv_image(
         else              recvend <= 0;
     end
     
+    /*---checksum---*/
     checksum recv_checksum(
         .clk_i(eth_rxck),
         .d(data),
         .data_en(data_en_d),
         .csum_o(csum),
         .rst(rst)
+    );
+    /*---checksum_fast---*/
+    wire [7:0]  csum_data [19:0] = RXBUF[33:14];
+    csum_fast recv_csum(
+        /*---INPUT---*/
+        .data_i     (csum_data),
+        .dataen_i   (data_en),
+        .reset_i    (rst),
+        /*---OUTPUT---*/
+        .csum_o     (csum_o)
     );
     /*
     wire [17:0] addr_r = addrb + (addr_cnt * 1000);

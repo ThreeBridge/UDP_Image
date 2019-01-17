@@ -18,11 +18,11 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
+// IPヘッダのチェックサム計算を1サイクルで行うためのモジュール
+//
 
 module csum_fast(
     /*---INPUT---*/
-    CLK_i,
     data_i,
     dataen_i,
     reset_i,
@@ -30,7 +30,6 @@ module csum_fast(
     csum_o
     );
     /*---I/O Declare---*/
-    input       CLK_i;
     input [7:0] data_i [19:0];
     input       dataen_i;
     input       reset_i;
@@ -39,10 +38,19 @@ module csum_fast(
     
     /*---wire/resister---*/
     reg [16:0] sum;
-    reg [16:0] buffer;
     
+    integer i;
     always_comb begin
         if (reset_i) sum = 17'b0;
+        else if (dataen_i) begin
+            for (i=0;i<20;i=i+2'd2) begin
+                sum = sum + {1'b0,data_i[i],data_i[i+1'b1]};
+                sum = sum[15:0] + sum[16];
+            end
+        end
+        else sum = 17'b0;
     end
+    
+    assign csum_o = (dataen_i) ? sum[15:0] ^ 16'hFF_FF : 16'h55_55;
     
 endmodule

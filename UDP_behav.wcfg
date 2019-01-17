@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="91519000001fs"></ZoomEndTime>
-      <Cursor1Time time="36422493000fs"></Cursor1Time>
+      <ZoomStartTime time="21621329819fs"></ZoomStartTime>
+      <ZoomEndTime time="22039861317fs"></ZoomEndTime>
+      <Cursor1Time time="30194666000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="133"></NameColumnWidth>
+      <NameColumnWidth column_width="125"></NameColumnWidth>
       <ValueColumnWidth column_width="62"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="189" />
+   <WVObjectSize size="194" />
    <wave_markers>
       <marker label="" time="32952830000" />
       <marker label="" time="232605844000" />
@@ -349,10 +349,6 @@
       <obj_property name="CustomSignalColor">#00FFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ping/arp_st">
-      <obj_property name="ElementShortName">arp_st</obj_property>
-      <obj_property name="ObjectShortName">arp_st</obj_property>
-   </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/ping/ping_st">
       <obj_property name="ElementShortName">ping_st</obj_property>
       <obj_property name="ObjectShortName">ping_st</obj_property>
@@ -609,6 +605,19 @@
       <obj_property name="ElementShortName">csum_ok</obj_property>
       <obj_property name="ObjectShortName">csum_ok</obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/csum_data">
+      <obj_property name="ElementShortName">csum_data[19:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">csum_data[19:0][7:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/csum_o">
+      <obj_property name="ElementShortName">csum_o[15:0]</obj_property>
+      <obj_property name="ObjectShortName">csum_o[15:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/err_cnt">
+      <obj_property name="ElementShortName">err_cnt[2:0]</obj_property>
+      <obj_property name="ObjectShortName">err_cnt[2:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recvend">
       <obj_property name="ElementShortName">recvend</obj_property>
       <obj_property name="ObjectShortName">recvend</obj_property>
@@ -794,6 +803,18 @@
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/trans_checksum/sum_17">
       <obj_property name="ElementShortName">sum_17[16:0]</obj_property>
       <obj_property name="ObjectShortName">sum_17[16:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/csum_data">
+      <obj_property name="ElementShortName">csum_data[19:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">csum_data[19:0][7:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/csum_o">
+      <obj_property name="ElementShortName">csum_o[15:0]</obj_property>
+      <obj_property name="ObjectShortName">csum_o[15:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/err_cnt">
+      <obj_property name="ElementShortName">err_cnt[3:0]</obj_property>
+      <obj_property name="ObjectShortName">err_cnt[3:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/fcs_cnt">
       <obj_property name="ElementShortName">fcs_cnt[2:0]</obj_property>
