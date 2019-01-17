@@ -51,6 +51,7 @@ module csum_fast(
     
     reg  [15:0] r_sum2;
     reg  [15:0] r_sum5;
+    reg  [15:0] csum;
     
     assign sum0 = subsum({data_i[0],data_i[1]},{data_i[2],data_i[3]});
     assign sum1 = subsum({data_i[4],data_i[5]},{data_i[6],data_i[7]});
@@ -70,7 +71,12 @@ module csum_fast(
     assign sum7 = subsum(r_sum2,r_sum5);
     assign sum8 = subsum(sum6,sum7);
     
-    assign csum_o = (dataen_i) ? sum8 ^ 16'hFF_FF : 16'h55_55;
+    always_ff @(posedge CLK_i)begin
+        if(dataen_i)    csum <= sum8 ^ 16'hFF_FF;
+        else            csum <= 16'h55_55;          // dummy
+    end
+    
+    assign csum_o = csum;
     
     function  [15:0] subsum (input [15:0] inA,input [15:0] inB);
         reg [16:0] sum;

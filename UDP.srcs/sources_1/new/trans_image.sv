@@ -131,6 +131,7 @@ module trans_image(
     //reg [3:0]   ready_cnt;
     reg [9:0]   d_img_cnt [2:0];        // BlockRAMの出力が1サイクルずれるため & recv_image側でimage_cntにFFを挟むため
     
+    wire ready_end = (err_cnt==3'd1);
     wire hcsum_end = (csum_cnt==8'd0);
     wire hcend_end = (err_cnt==3'd0);    
     wire ucsum_end = (csum_cnt==MsgSize+5'd20);
@@ -151,8 +152,8 @@ module trans_image(
                 if (d_img_cnt[2]>10'd999) nx = READY;
             end
             READY : begin
-                //if (ready_cnt==4'd8) nx = Hcsum;
-                nx = Hcsum;
+                if (ready_end) nx = Hcsum;
+                //nx = Hcsum;
             end
             Hcsum : begin
                 if (hcsum_end) nx = Hc_End;
@@ -313,8 +314,9 @@ module trans_image(
     end
     
     always_ff @(posedge eth_rxck)begin
-        if (st==Hc_End)         err_cnt <= err_cnt + 4'b1;
-        else if (st==Uc_End)    err_cnt <= err_cnt + 4'b1;
+        if (st==READY)          err_cnt <= err_cnt + 4'b1;
+        else if (st==Hc_End)         err_cnt <= err_cnt + 4'b1;
+        //else if (st==Uc_End)    err_cnt <= err_cnt + 4'b1;
         else                    err_cnt <= 0;
     end     
     
@@ -327,108 +329,109 @@ module trans_image(
     always_ff @(posedge eth_rxck)begin         
         if(st==IDLE)        csum_cnt <= 0;
         else if(st==Hcsum)  csum_cnt <= csum_cnt + 1;
-        else if(st==Ucsum)  csum_cnt <= csum_cnt + 1;
+        //else if(st==Ucsum)  csum_cnt <= csum_cnt + 1;
         else                csum_cnt <= 0; 
     end
     
 //<-- moikawa add (2018.11.02)
     //TXBUF
-    wire [10:0] txbuf_sel = csum_cnt + eth_head;
-    //wire [10:0] txbuf_sel = csum_cnt;
-    reg [7:0]  data_pipe [17:0]; // part of pipelined selector from TXBUF[].
-    wire [4:0]  data_pipe_sel;
-    //VBUF
-    wire [10:0] txbuf_sel_v = csum_cnt;
-    reg [7:0]  data_pipe_v [16:0]; // part of pipelined selector from TXBUF[].
-    wire [4:0]  data_pipe_sel_v;
-//--> moikawa add (2018.11.02)
+//    wire [10:0] txbuf_sel = csum_cnt + eth_head;
+//    //wire [10:0] txbuf_sel = csum_cnt;
+//    reg [7:0]  data_pipe [17:0]; // part of pipelined selector from TXBUF[].
+//    wire [4:0]  data_pipe_sel;
+//    //VBUF
+//    wire [10:0] txbuf_sel_v = csum_cnt;
+//    reg [7:0]  data_pipe_v [16:0]; // part of pipelined selector from TXBUF[].
+//    wire [4:0]  data_pipe_sel_v;
+////--> moikawa add (2018.11.02)
     
-    /*---チェックサム用データ---*/
-    always_ff @(posedge eth_rxck)begin    // 最初の14bitはMACヘッダ
-        //if(st==Hcsum)      data <= TXBUF[csum_cnt+eth_head];
-        if(st==Hcsum)      data <= data_pipe[ data_pipe_sel ];
-        else if(st==Ucsum) data <= data_pipe_v[ data_pipe_sel_v ];
-        else               data <= 0;
-    end
+//    /*---チェックサム用データ---*/
+//    always_ff @(posedge eth_rxck)begin    // 最初の14bitはMACヘッダ
+//        //if(st==Hcsum)      data <= TXBUF[csum_cnt+eth_head];
+//        if(st==Hcsum)      data <= data_pipe[ data_pipe_sel ];
+//        else if(st==Ucsum) data <= data_pipe_v[ data_pipe_sel_v ];
+//        else               data <= 0;
+//    end
 
-//<-- moikawa add (2018.11.02)
-    reg [10:0] txbuf_sel_d;
-    integer    k;
+////<-- moikawa add (2018.11.02)
+//    reg [10:0] txbuf_sel_d;
+//    integer    k;
 
-    always_ff @(posedge eth_rxck) begin
-        txbuf_sel_d <= txbuf_sel;
-    end
-    assign data_pipe_sel = (txbuf_sel_d[10:6] < 5'd17)? 
-                            txbuf_sel_d[10:6] : 5'd17 ;
+//    always_ff @(posedge eth_rxck) begin
+//        txbuf_sel_d <= txbuf_sel;
+//    end
+//    assign data_pipe_sel = (txbuf_sel_d[10:6] < 5'd17)? 
+//                            txbuf_sel_d[10:6] : 5'd17 ;
 
-    always_ff @(posedge eth_rxck) begin // inserted pipelined stage.
-        //for (k=0; k<64; k=k+1) begin
-        //  data_pipe[k] <= TXBUF[ (64*k) + txbuf_sel[5:0] ];
-        //end
-        data_pipe[0]  <=  TXBUF[ txbuf_sel[5:0]         ];
-        data_pipe[1]  <=  TXBUF[ txbuf_sel[5:0] + 64    ];
-        data_pipe[2]  <=  TXBUF[ txbuf_sel[5:0] + 128   ];
-        data_pipe[3]  <=  TXBUF[ txbuf_sel[5:0] + 192   ];
-        data_pipe[4]  <=  TXBUF[ txbuf_sel[5:0] + 256   ];
-        data_pipe[5]  <=  TXBUF[ txbuf_sel[5:0] + 320   ];
-        data_pipe[6]  <=  TXBUF[ txbuf_sel[5:0] + 384   ];
-        data_pipe[7]  <=  TXBUF[ txbuf_sel[5:0] + 448   ];
-        data_pipe[8]  <=  TXBUF[ txbuf_sel[5:0] + 512   ];
-        data_pipe[9]  <=  TXBUF[ txbuf_sel[5:0] + 576   ];
-        data_pipe[10] <=  TXBUF[ txbuf_sel[5:0] + 640   ];
-        data_pipe[11] <=  TXBUF[ txbuf_sel[5:0] + 704   ];
-        data_pipe[12] <=  TXBUF[ txbuf_sel[5:0] + 768   ];
-        data_pipe[13] <=  TXBUF[ txbuf_sel[5:0] + 832   ];
-        data_pipe[14] <=  TXBUF[ txbuf_sel[5:0] + 896   ];
-        data_pipe[15] <=  TXBUF[ txbuf_sel[5:0] + 960   ];
-        if (txbuf_sel[5:0] < 6'd22) begin
-	       data_pipe[16] <=  TXBUF[ txbuf_sel[5:0] + 1024  ];
-        end else begin
-	       data_pipe[16] <=  8'h00;
-        end
-        data_pipe[17] <= 8'h00;  // dummy value.
-    end
-//--> moikawa add (2018.11.02)
+//    always_ff @(posedge eth_rxck) begin // inserted pipelined stage.
+//        //for (k=0; k<64; k=k+1) begin
+//        //  data_pipe[k] <= TXBUF[ (64*k) + txbuf_sel[5:0] ];
+//        //end
+//        data_pipe[0]  <=  TXBUF[ txbuf_sel[5:0]         ];
+//        data_pipe[1]  <=  TXBUF[ txbuf_sel[5:0] + 64    ];
+//        data_pipe[2]  <=  TXBUF[ txbuf_sel[5:0] + 128   ];
+//        data_pipe[3]  <=  TXBUF[ txbuf_sel[5:0] + 192   ];
+//        data_pipe[4]  <=  TXBUF[ txbuf_sel[5:0] + 256   ];
+//        data_pipe[5]  <=  TXBUF[ txbuf_sel[5:0] + 320   ];
+//        data_pipe[6]  <=  TXBUF[ txbuf_sel[5:0] + 384   ];
+//        data_pipe[7]  <=  TXBUF[ txbuf_sel[5:0] + 448   ];
+//        data_pipe[8]  <=  TXBUF[ txbuf_sel[5:0] + 512   ];
+//        data_pipe[9]  <=  TXBUF[ txbuf_sel[5:0] + 576   ];
+//        data_pipe[10] <=  TXBUF[ txbuf_sel[5:0] + 640   ];
+//        data_pipe[11] <=  TXBUF[ txbuf_sel[5:0] + 704   ];
+//        data_pipe[12] <=  TXBUF[ txbuf_sel[5:0] + 768   ];
+//        data_pipe[13] <=  TXBUF[ txbuf_sel[5:0] + 832   ];
+//        data_pipe[14] <=  TXBUF[ txbuf_sel[5:0] + 896   ];
+//        data_pipe[15] <=  TXBUF[ txbuf_sel[5:0] + 960   ];
+//        if (txbuf_sel[5:0] < 6'd22) begin
+//	       data_pipe[16] <=  TXBUF[ txbuf_sel[5:0] + 1024  ];
+//        end else begin
+//	       data_pipe[16] <=  8'h00;
+//        end
+//        data_pipe[17] <= 8'h00;  // dummy value.
+//    end
+////--> moikawa add (2018.11.02)
 
-    /*---VBUF用data_pipe---*/
-    reg [10:0] txbuf_sel_v_d;
+//    /*---VBUF用data_pipe---*/
+//    reg [10:0] txbuf_sel_v_d;
 
-    always_ff @(posedge eth_rxck) begin
-        txbuf_sel_v_d <= txbuf_sel_v;
-    end
-    assign data_pipe_sel_v = (txbuf_sel_v_d[10:6] < 5'd17)? 
-                              txbuf_sel_v_d[10:6] : 5'd17 ;
+//    always_ff @(posedge eth_rxck) begin
+//        txbuf_sel_v_d <= txbuf_sel_v;
+//    end
+//    assign data_pipe_sel_v = (txbuf_sel_v_d[10:6] < 5'd17)? 
+//                              txbuf_sel_v_d[10:6] : 5'd17 ;
 
-    always_ff @(posedge eth_rxck) begin // inserted pipelined stage.
-        data_pipe_v[0]  <=  VBUF[ txbuf_sel_v[5:0]         ];
-        data_pipe_v[1]  <=  VBUF[ txbuf_sel_v[5:0] + 64    ];
-        data_pipe_v[2]  <=  VBUF[ txbuf_sel_v[5:0] + 128   ];
-        data_pipe_v[3]  <=  VBUF[ txbuf_sel_v[5:0] + 192   ];
-        data_pipe_v[4]  <=  VBUF[ txbuf_sel_v[5:0] + 256   ];
-        data_pipe_v[5]  <=  VBUF[ txbuf_sel_v[5:0] + 320   ];
-        data_pipe_v[6]  <=  VBUF[ txbuf_sel_v[5:0] + 384   ];
-        data_pipe_v[7]  <=  VBUF[ txbuf_sel_v[5:0] + 448   ];
-        data_pipe_v[8]  <=  VBUF[ txbuf_sel_v[5:0] + 512   ];
-        data_pipe_v[9]  <=  VBUF[ txbuf_sel_v[5:0] + 576   ];
-        data_pipe_v[10] <=  VBUF[ txbuf_sel_v[5:0] + 640   ];
-        data_pipe_v[11] <=  VBUF[ txbuf_sel_v[5:0] + 704   ];
-        data_pipe_v[12] <=  VBUF[ txbuf_sel_v[5:0] + 768   ];
-        data_pipe_v[13] <=  VBUF[ txbuf_sel_v[5:0] + 832   ];
-        data_pipe_v[14] <=  VBUF[ txbuf_sel_v[5:0] + 896   ];
-        if(txbuf_sel_v[5:0] < 6'd60)begin
-            data_pipe_v[15] <=  VBUF[ txbuf_sel_v[5:0] + 960   ];
-        end else begin
-	       data_pipe_v[15] <=  8'h00;
-        end
-        data_pipe_v[16] <= 8'h00;  // dummy value.
-    end
+//    always_ff @(posedge eth_rxck) begin // inserted pipelined stage.
+//        data_pipe_v[0]  <=  VBUF[ txbuf_sel_v[5:0]         ];
+//        data_pipe_v[1]  <=  VBUF[ txbuf_sel_v[5:0] + 64    ];
+//        data_pipe_v[2]  <=  VBUF[ txbuf_sel_v[5:0] + 128   ];
+//        data_pipe_v[3]  <=  VBUF[ txbuf_sel_v[5:0] + 192   ];
+//        data_pipe_v[4]  <=  VBUF[ txbuf_sel_v[5:0] + 256   ];
+//        data_pipe_v[5]  <=  VBUF[ txbuf_sel_v[5:0] + 320   ];
+//        data_pipe_v[6]  <=  VBUF[ txbuf_sel_v[5:0] + 384   ];
+//        data_pipe_v[7]  <=  VBUF[ txbuf_sel_v[5:0] + 448   ];
+//        data_pipe_v[8]  <=  VBUF[ txbuf_sel_v[5:0] + 512   ];
+//        data_pipe_v[9]  <=  VBUF[ txbuf_sel_v[5:0] + 576   ];
+//        data_pipe_v[10] <=  VBUF[ txbuf_sel_v[5:0] + 640   ];
+//        data_pipe_v[11] <=  VBUF[ txbuf_sel_v[5:0] + 704   ];
+//        data_pipe_v[12] <=  VBUF[ txbuf_sel_v[5:0] + 768   ];
+//        data_pipe_v[13] <=  VBUF[ txbuf_sel_v[5:0] + 832   ];
+//        data_pipe_v[14] <=  VBUF[ txbuf_sel_v[5:0] + 896   ];
+//        if(txbuf_sel_v[5:0] < 6'd60)begin
+//            data_pipe_v[15] <=  VBUF[ txbuf_sel_v[5:0] + 960   ];
+//        end else begin
+//	       data_pipe_v[15] <=  8'h00;
+//        end
+//        data_pipe_v[16] <= 8'h00;  // dummy value.
+//    end
 
     /*---チェックサム計算開始用---*/
     reg data_en_d;
     always_ff @(posedge eth_rxck)begin
         //if(st==Hcsum)       data_en <= (csum_cnt > 8'd13 && csum_cnt < 8'd34);
-        if(st==Hcsum)       data_en <= `HI;
-        else if(st==Ucsum)  data_en <= (csum_cnt < MsgSize+5'd20);
+        //if(st==Hcsum)       data_en <= `HI;
+        if(st==READY)       data_en <= `HI;
+        //else if(st==Ucsum)  data_en <= (csum_cnt < MsgSize+5'd20);
         else if(st==Tx_En)  data_en <= `LO;
         else if(st==IDLE)   data_en <= `LO;
     end    
@@ -487,40 +490,37 @@ module trans_image(
             {TXBUF[1042],TXBUF[1043],TXBUF[1044],TXBUF[1045]} <= 32'h01_02_03_04;   // dummy
             //Hcsum_st <= 1;
         end
-        //else if(hcend_clk125)    {TXBUF[24],TXBUF[25]} <= csum_extend;
-        //else if(ucend_clk125)    {TXBUF[40],TXBUF[41]} <= csum_extend;
-        //else if(st==Hc_End)    {TXBUF[24],TXBUF[25]} <= csum_extend;
         else if(st==Hc_End)    {TXBUF[24],TXBUF[25]} <= csum_o;
-        else if(st==Uc_End)    {TXBUF[40],TXBUF[41]} <= csum_extend;
+        //else if(st==Uc_End)    {TXBUF[40],TXBUF[41]} <= csum_extend;
         else if(st==Tx_En) TXBUF <= {TXBUF[0],TXBUF[1045:1]};
     end    
     
     /*---仮想ヘッダ準備---*/
-    integer v_cnt;
-    integer v_cnt_A;
-    integer v_cnt_B;
-    always_ff @(posedge eth_rxck)begin
-        if(st==Hc_End)begin
-            //{VBUF[0],VBUF[1],VBUF[2],VBUF[3]} <= `my_IP;
-            {VBUF[0],VBUF[1],VBUF[2],VBUF[3]} <= my_IPadd_i;
-            {VBUF[4],VBUF[5],VBUF[6],VBUF[7]} <= DstIP_d;
-            {VBUF[8],VBUF[9]} <= 16'h00_11;
-            {VBUF[10],VBUF[11]} <= MsgSize+4'd8;
-            {VBUF[12],VBUF[13]} <= DstPort_d;
-            {VBUF[14],VBUF[15]} <= SrcPort_d;
-            {VBUF[16],VBUF[17]} <= MsgSize+4'd8;
-            {VBUF[18],VBUF[19]} <= 16'h00_00;
-            //for(v_cnt=0;v_cnt<10'd1000;v_cnt=v_cnt+1)
-            //    VBUF[20+v_cnt]  <= image_buffer[v_cnt];
-            for(v_cnt_A=0;v_cnt_A<500;v_cnt_A=v_cnt_A+1) VBUF[20+v_cnt_A] <= image_bufferA[v_cnt_A];      // 2018.11.16
-            for(v_cnt_B=0;v_cnt_B<500;v_cnt_B=v_cnt_B+1) VBUF[20+v_cnt_B+500] <= image_bufferB[v_cnt_B];  // 2018.11.16
-        end
-        else if(st==IDLE)begin
-            for(v_cnt=0;v_cnt<10'd1020;v_cnt=v_cnt+1) VBUF[v_cnt] <= 8'b0;
-            v_cnt <= 0;
-        end
-        else v_cnt <= 0;
-    end    
+//    integer v_cnt;
+//    integer v_cnt_A;
+//    integer v_cnt_B;
+//    always_ff @(posedge eth_rxck)begin
+//        if(st==Hc_End)begin
+//            //{VBUF[0],VBUF[1],VBUF[2],VBUF[3]} <= `my_IP;
+//            {VBUF[0],VBUF[1],VBUF[2],VBUF[3]} <= my_IPadd_i;
+//            {VBUF[4],VBUF[5],VBUF[6],VBUF[7]} <= DstIP_d;
+//            {VBUF[8],VBUF[9]} <= 16'h00_11;
+//            {VBUF[10],VBUF[11]} <= MsgSize+4'd8;
+//            {VBUF[12],VBUF[13]} <= DstPort_d;
+//            {VBUF[14],VBUF[15]} <= SrcPort_d;
+//            {VBUF[16],VBUF[17]} <= MsgSize+4'd8;
+//            {VBUF[18],VBUF[19]} <= 16'h00_00;
+//            //for(v_cnt=0;v_cnt<10'd1000;v_cnt=v_cnt+1)
+//            //    VBUF[20+v_cnt]  <= image_buffer[v_cnt];
+//            for(v_cnt_A=0;v_cnt_A<500;v_cnt_A=v_cnt_A+1) VBUF[20+v_cnt_A] <= image_bufferA[v_cnt_A];      // 2018.11.16
+//            for(v_cnt_B=0;v_cnt_B<500;v_cnt_B=v_cnt_B+1) VBUF[20+v_cnt_B+500] <= image_bufferB[v_cnt_B];  // 2018.11.16
+//        end
+//        else if(st==IDLE)begin
+//            for(v_cnt=0;v_cnt<10'd1020;v_cnt=v_cnt+1) VBUF[v_cnt] <= 8'b0;
+//            v_cnt <= 0;
+//        end
+//        else v_cnt <= 0;
+//    end    
     
     checksum trans_checksum(
         .clk_i      (eth_rxck),
@@ -542,7 +542,7 @@ module trans_image(
         /*---INPUT---*/
         .CLK_i      (eth_rxck),
         .data_i     (csum_data),
-        .dataen_i   (data_en),
+        .dataen_i   (data_en_d),
         .reset_i    (rst),
         /*---OUTPUT---*/
         .csum_o     (csum_o)        

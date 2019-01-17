@@ -282,7 +282,7 @@ module recv_image(
     /*---チェックサム計算失敗用(2019.1.10 現在,この用途では用いていない)---*/
     always_ff @(posedge eth_rxck)begin
         if(st==Hc_End)          err_cnt <= err_cnt + 3'b1;
-        else if(st==Uc_End)     err_cnt <= err_cnt + 3'b1;
+        //else if(st==Uc_End)     err_cnt <= err_cnt + 3'b1;
         else                    err_cnt <= 0;
     end 
     
@@ -294,7 +294,7 @@ module recv_image(
     always_ff @(posedge eth_rxck)begin         
         if(st==Idle)       csum_cnt <= 0;
         else if(st==Hcsum) csum_cnt <= csum_cnt + 1;
-        else if(st==Ucsum) csum_cnt <= csum_cnt + 1;
+        //else if(st==Ucsum) csum_cnt <= csum_cnt + 1;
         else               csum_cnt <= 0;
     end
 
@@ -311,92 +311,92 @@ module recv_image(
 //--> moikawa add (2018.11.02)
 
     
-    always_ff @(posedge eth_rxck)begin    // 最初の14bitはMACヘッダ
-        //if(st==Hcsum)       data <= RXBUF[csum_cnt+eth_head];
-        if(st==Hcsum)       data <= data_pipe[ data_pipe_sel ];
-        //else if(st==Ucsum)  data <= VBUF[csum_cnt];
-        else if(st==Ucsum)  data <= data_pipe_v[ data_pipe_sel_v ];
-        else                data <= 0;
-    end
+//    always_ff @(posedge eth_rxck)begin    // 最初の14bitはMACヘッダ
+//        //if(st==Hcsum)       data <= RXBUF[csum_cnt+eth_head];
+//        if(st==Hcsum)       data <= data_pipe[ data_pipe_sel ];
+//        //else if(st==Ucsum)  data <= VBUF[csum_cnt];
+//        else if(st==Ucsum)  data <= data_pipe_v[ data_pipe_sel_v ];
+//        else                data <= 0;
+//    end
 
-//<-- moikawa add (2018.11.02)
-    reg [10:0] rxbuf_sel_d;
-    integer    k;
+////<-- moikawa add (2018.11.02)
+//    reg [10:0] rxbuf_sel_d;
+//    integer    k;
 
-    always_ff @(posedge eth_rxck) begin
-        rxbuf_sel_d <= rxbuf_sel;
-    end
-    assign data_pipe_sel = (rxbuf_sel_d[10:6] < 5'd17)? 
-                            rxbuf_sel_d[10:6] : 5'd17 ;
+//    always_ff @(posedge eth_rxck) begin
+//        rxbuf_sel_d <= rxbuf_sel;
+//    end
+//    assign data_pipe_sel = (rxbuf_sel_d[10:6] < 5'd17)? 
+//                            rxbuf_sel_d[10:6] : 5'd17 ;
 
-    always_ff @(posedge eth_rxck) begin // inserted pipelined stage.
-        //for (k=0; k<64; k=k+1) begin
-        //  data_pipe[k] <= TXBUF[ (64*k) + txbuf_sel[5:0] ];
-        //end
-        data_pipe[0]  <=  RXBUF[ rxbuf_sel[5:0]         ];
-        data_pipe[1]  <=  RXBUF[ rxbuf_sel[5:0] + 64    ];
-        data_pipe[2]  <=  RXBUF[ rxbuf_sel[5:0] + 128   ];
-        data_pipe[3]  <=  RXBUF[ rxbuf_sel[5:0] + 192   ];
-        data_pipe[4]  <=  RXBUF[ rxbuf_sel[5:0] + 256   ];
-        data_pipe[5]  <=  RXBUF[ rxbuf_sel[5:0] + 320   ];
-        data_pipe[6]  <=  RXBUF[ rxbuf_sel[5:0] + 384   ];
-        data_pipe[7]  <=  RXBUF[ rxbuf_sel[5:0] + 448   ];
-        data_pipe[8]  <=  RXBUF[ rxbuf_sel[5:0] + 512   ];
-        data_pipe[9]  <=  RXBUF[ rxbuf_sel[5:0] + 576   ];
-        data_pipe[10] <=  RXBUF[ rxbuf_sel[5:0] + 640   ];
-        data_pipe[11] <=  RXBUF[ rxbuf_sel[5:0] + 704   ];
-        data_pipe[12] <=  RXBUF[ rxbuf_sel[5:0] + 768   ];
-        data_pipe[13] <=  RXBUF[ rxbuf_sel[5:0] + 832   ];
-        data_pipe[14] <=  RXBUF[ rxbuf_sel[5:0] + 896   ];
-        data_pipe[15] <=  RXBUF[ rxbuf_sel[5:0] + 960   ];
-        if (rxbuf_sel[5:0] < 6'd22) begin
-	       data_pipe[16] <=  RXBUF[ rxbuf_sel[5:0] + 1024  ];
-        end else begin
-	       data_pipe[16] <=  8'h00;
-        end
-        data_pipe[17] <= 8'h00;  // dummy value.
-    end
-//--> moikawa add (2018.11.02)
+//    always_ff @(posedge eth_rxck) begin // inserted pipelined stage.
+//        //for (k=0; k<64; k=k+1) begin
+//        //  data_pipe[k] <= TXBUF[ (64*k) + txbuf_sel[5:0] ];
+//        //end
+//        data_pipe[0]  <=  RXBUF[ rxbuf_sel[5:0]         ];
+//        data_pipe[1]  <=  RXBUF[ rxbuf_sel[5:0] + 64    ];
+//        data_pipe[2]  <=  RXBUF[ rxbuf_sel[5:0] + 128   ];
+//        data_pipe[3]  <=  RXBUF[ rxbuf_sel[5:0] + 192   ];
+//        data_pipe[4]  <=  RXBUF[ rxbuf_sel[5:0] + 256   ];
+//        data_pipe[5]  <=  RXBUF[ rxbuf_sel[5:0] + 320   ];
+//        data_pipe[6]  <=  RXBUF[ rxbuf_sel[5:0] + 384   ];
+//        data_pipe[7]  <=  RXBUF[ rxbuf_sel[5:0] + 448   ];
+//        data_pipe[8]  <=  RXBUF[ rxbuf_sel[5:0] + 512   ];
+//        data_pipe[9]  <=  RXBUF[ rxbuf_sel[5:0] + 576   ];
+//        data_pipe[10] <=  RXBUF[ rxbuf_sel[5:0] + 640   ];
+//        data_pipe[11] <=  RXBUF[ rxbuf_sel[5:0] + 704   ];
+//        data_pipe[12] <=  RXBUF[ rxbuf_sel[5:0] + 768   ];
+//        data_pipe[13] <=  RXBUF[ rxbuf_sel[5:0] + 832   ];
+//        data_pipe[14] <=  RXBUF[ rxbuf_sel[5:0] + 896   ];
+//        data_pipe[15] <=  RXBUF[ rxbuf_sel[5:0] + 960   ];
+//        if (rxbuf_sel[5:0] < 6'd22) begin
+//	       data_pipe[16] <=  RXBUF[ rxbuf_sel[5:0] + 1024  ];
+//        end else begin
+//	       data_pipe[16] <=  8'h00;
+//        end
+//        data_pipe[17] <= 8'h00;  // dummy value.
+//    end
+////--> moikawa add (2018.11.02)
 
-    /*---VBUF用data_pipe---*/
-    reg [10:0] rxbuf_sel_v_d;
+//    /*---VBUF用data_pipe---*/
+//    reg [10:0] rxbuf_sel_v_d;
 
-    always_ff @(posedge eth_rxck) begin
-        rxbuf_sel_v_d <= rxbuf_sel_v;
-    end
-    assign data_pipe_sel_v = (rxbuf_sel_v_d[10:6] < 5'd17)? 
-                              rxbuf_sel_v_d[10:6] : 5'd17 ;
+//    always_ff @(posedge eth_rxck) begin
+//        rxbuf_sel_v_d <= rxbuf_sel_v;
+//    end
+//    assign data_pipe_sel_v = (rxbuf_sel_v_d[10:6] < 5'd17)? 
+//                              rxbuf_sel_v_d[10:6] : 5'd17 ;
 
-    always_ff @(posedge eth_rxck) begin // inserted pipelined stage.
-        data_pipe_v[0]  <=  VBUF[ rxbuf_sel_v[5:0]         ];
-        data_pipe_v[1]  <=  VBUF[ rxbuf_sel_v[5:0] + 64    ];
-        data_pipe_v[2]  <=  VBUF[ rxbuf_sel_v[5:0] + 128   ];
-        data_pipe_v[3]  <=  VBUF[ rxbuf_sel_v[5:0] + 192   ];
-        data_pipe_v[4]  <=  VBUF[ rxbuf_sel_v[5:0] + 256   ];
-        data_pipe_v[5]  <=  VBUF[ rxbuf_sel_v[5:0] + 320   ];
-        data_pipe_v[6]  <=  VBUF[ rxbuf_sel_v[5:0] + 384   ];
-        data_pipe_v[7]  <=  VBUF[ rxbuf_sel_v[5:0] + 448   ];
-        data_pipe_v[8]  <=  VBUF[ rxbuf_sel_v[5:0] + 512   ];
-        data_pipe_v[9]  <=  VBUF[ rxbuf_sel_v[5:0] + 576   ];
-        data_pipe_v[10] <=  VBUF[ rxbuf_sel_v[5:0] + 640   ];
-        data_pipe_v[11] <=  VBUF[ rxbuf_sel_v[5:0] + 704   ];
-        data_pipe_v[12] <=  VBUF[ rxbuf_sel_v[5:0] + 768   ];
-        data_pipe_v[13] <=  VBUF[ rxbuf_sel_v[5:0] + 832   ];
-        data_pipe_v[14] <=  VBUF[ rxbuf_sel_v[5:0] + 896   ];
-        if(rxbuf_sel_v[5:0] < 6'd60)begin
-            data_pipe_v[15] <=  VBUF[ rxbuf_sel_v[5:0] + 960   ];
-        end else begin
-	       data_pipe_v[15] <=  8'h00;
-        end
-        data_pipe_v[16] <= 8'h00;  // dummy value.
-    end
+//    always_ff @(posedge eth_rxck) begin // inserted pipelined stage.
+//        data_pipe_v[0]  <=  VBUF[ rxbuf_sel_v[5:0]         ];
+//        data_pipe_v[1]  <=  VBUF[ rxbuf_sel_v[5:0] + 64    ];
+//        data_pipe_v[2]  <=  VBUF[ rxbuf_sel_v[5:0] + 128   ];
+//        data_pipe_v[3]  <=  VBUF[ rxbuf_sel_v[5:0] + 192   ];
+//        data_pipe_v[4]  <=  VBUF[ rxbuf_sel_v[5:0] + 256   ];
+//        data_pipe_v[5]  <=  VBUF[ rxbuf_sel_v[5:0] + 320   ];
+//        data_pipe_v[6]  <=  VBUF[ rxbuf_sel_v[5:0] + 384   ];
+//        data_pipe_v[7]  <=  VBUF[ rxbuf_sel_v[5:0] + 448   ];
+//        data_pipe_v[8]  <=  VBUF[ rxbuf_sel_v[5:0] + 512   ];
+//        data_pipe_v[9]  <=  VBUF[ rxbuf_sel_v[5:0] + 576   ];
+//        data_pipe_v[10] <=  VBUF[ rxbuf_sel_v[5:0] + 640   ];
+//        data_pipe_v[11] <=  VBUF[ rxbuf_sel_v[5:0] + 704   ];
+//        data_pipe_v[12] <=  VBUF[ rxbuf_sel_v[5:0] + 768   ];
+//        data_pipe_v[13] <=  VBUF[ rxbuf_sel_v[5:0] + 832   ];
+//        data_pipe_v[14] <=  VBUF[ rxbuf_sel_v[5:0] + 896   ];
+//        if(rxbuf_sel_v[5:0] < 6'd60)begin
+//            data_pipe_v[15] <=  VBUF[ rxbuf_sel_v[5:0] + 960   ];
+//        end else begin
+//	       data_pipe_v[15] <=  8'h00;
+//        end
+//        data_pipe_v[16] <= 8'h00;  // dummy value.
+//    end
     
     /*---チェックサム計算開始用---*/
     reg data_en_d;
     always_ff @(posedge eth_rxck)begin
         //if(st==Hcsum)       data_en <= (csum_cnt > 8'd13 && csum_cnt < 8'd34);
-        if(st==Hcsum)       data_en <= `HI;
-        else if(st==Ucsum)  data_en <= (csum_cnt < MsgSize+5'd20);
+        if(UDP_st)       data_en <= `HI;
+        //else if(st==Ucsum)  data_en <= (csum_cnt < MsgSize+5'd20);
         else if(st==Idle)   data_en <= `LO;
     end
     
@@ -410,33 +410,33 @@ module recv_image(
         if(st==Hc_End)begin
             if(csum_o==16'h00_00) csum_ok <= `HI;
         end
-        else if(st==Uc_End)begin
-            if(csum==16'h00_00) csum_ok <= `HI;
-        end
+//        else if(st==Uc_End)begin
+//            if(csum==16'h00_00) csum_ok <= `HI;
+//        end
         else                    csum_ok <= `LO;
     end
     
     /*---仮想ヘッダ準備---*/
-    integer v_cnt;
-    always_ff @(posedge eth_rxck)begin
-        if(st==Hc_End)begin
-            {VBUF[0],VBUF[1],VBUF[2],VBUF[3]} <= {RXBUF[26],RXBUF[27],RXBUF[28],RXBUF[29]};
-            //{VBUF[4],VBUF[5],VBUF[6],VBUF[7]} <= `my_IP;
-            {VBUF[4],VBUF[5],VBUF[6],VBUF[7]} <= {RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]};        // add 2018.12.5
-            {VBUF[8],VBUF[9]} <= 16'h00_11;
-            {VBUF[10],VBUF[11]} <= MsgSize+4'd8;
-            {VBUF[12],VBUF[13]} <= {RXBUF[34],RXBUF[35]};
-            {VBUF[14],VBUF[15]} <= {RXBUF[36],RXBUF[37]};
-            {VBUF[16],VBUF[17]} <= MsgSize+4'd8;
-            {VBUF[18],VBUF[19]} <= {RXBUF[40],RXBUF[41]};
-            for(v_cnt=0;v_cnt<10'd1000;v_cnt=v_cnt+1)
-                VBUF[20+v_cnt]  <= RXBUF[42+v_cnt];
-        end
-        else if(st==Idle)begin
-            for(v_cnt=0;v_cnt<10'd1020;v_cnt=v_cnt+1) VBUF[v_cnt] <= 8'b0;
-            v_cnt <= 0;
-        end
-    end
+//    integer v_cnt;
+//    always_ff @(posedge eth_rxck)begin
+//        if(st==Hc_End)begin
+//            {VBUF[0],VBUF[1],VBUF[2],VBUF[3]} <= {RXBUF[26],RXBUF[27],RXBUF[28],RXBUF[29]};
+//            //{VBUF[4],VBUF[5],VBUF[6],VBUF[7]} <= `my_IP;
+//            {VBUF[4],VBUF[5],VBUF[6],VBUF[7]} <= {RXBUF[30],RXBUF[31],RXBUF[32],RXBUF[33]};        // add 2018.12.5
+//            {VBUF[8],VBUF[9]} <= 16'h00_11;
+//            {VBUF[10],VBUF[11]} <= MsgSize+4'd8;
+//            {VBUF[12],VBUF[13]} <= {RXBUF[34],RXBUF[35]};
+//            {VBUF[14],VBUF[15]} <= {RXBUF[36],RXBUF[37]};
+//            {VBUF[16],VBUF[17]} <= MsgSize+4'd8;
+//            {VBUF[18],VBUF[19]} <= {RXBUF[40],RXBUF[41]};
+//            for(v_cnt=0;v_cnt<10'd1000;v_cnt=v_cnt+1)
+//                VBUF[20+v_cnt]  <= RXBUF[42+v_cnt];
+//        end
+//        else if(st==Idle)begin
+//            for(v_cnt=0;v_cnt<10'd1020;v_cnt=v_cnt+1) VBUF[v_cnt] <= 8'b0;
+//            v_cnt <= 0;
+//        end
+//    end
     
     /*---終了---*/
     always_ff @(posedge eth_rxck)begin
