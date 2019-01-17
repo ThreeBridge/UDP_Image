@@ -326,6 +326,11 @@ set_property -dict {PACKAGE_PIN V14 IOSTANDARD LVCMOS25} [get_ports VADJ_EN]
 set_false_path -from [get_cells R_Arbiter/ping/rx_cnt_reg*] -to [get_cells R_Arbiter/ping/TXBUF_reg*]
 
 
+
+#set_multicycle_path -setup -rise_from [get_cells R_Arbiter/trans_image/st_reg*] -rise_to [get_cells R_Arbiter/trans_image/TXBUF_reg*] 2
+#set_multicycle_path -hold -rise_from [get_cells R_Arbiter/trans_image/st_reg*] -rise_to [get_cells R_Arbiter/trans_image/TXBUF_reg*] 1
+#set_multicycle_path -setup -rise_from [get_cells R_Arbiter/recv_image/RXBUF_reg*] -rise_to [get_cells R_Arbiter/recv_image/csum_ok_reg*] 2
+#set_multicycle_path -hold -rise_from [get_cells R_Arbiter/recv_image/RXBUF_reg*] -rise_to [get_cells R_Arbiter/recv_image/csum_ok_reg*] 1
 create_debug_core u_ila_0 ila
 set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
 set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
@@ -336,7 +341,7 @@ set_property C_INPUT_PIPE_STAGES 0 [get_debug_cores u_ila_0]
 set_property C_TRIGIN_EN false [get_debug_cores u_ila_0]
 set_property C_TRIGOUT_EN false [get_debug_cores u_ila_0]
 set_property port_width 1 [get_debug_ports u_ila_0/clk]
-connect_debug_port u_ila_0/clk [get_nets [list eth_clkgen/inst/rxck_90deg]]
+connect_debug_port u_ila_0/clk [get_nets [list eth_rxck]]
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe0]
 set_property port_width 8 [get_debug_ports u_ila_0/probe0]
 connect_debug_port u_ila_0/probe0 [get_nets [list {R_Arbiter/trans_image/st[0]} {R_Arbiter/trans_image/st[1]} {R_Arbiter/trans_image/st[2]} {R_Arbiter/trans_image/st[3]} {R_Arbiter/trans_image/st[4]} {R_Arbiter/trans_image/st[5]} {R_Arbiter/trans_image/st[6]} {R_Arbiter/trans_image/st[7]}]]

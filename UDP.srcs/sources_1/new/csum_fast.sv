@@ -23,6 +23,7 @@
 
 module csum_fast(
     /*---INPUT---*/
+    CLK_i,
     data_i,
     dataen_i,
     reset_i,
@@ -30,6 +31,7 @@ module csum_fast(
     csum_o
     );
     /*---I/O Declare---*/
+    input       CLK_i;
     input [7:0] data_i [19:0];
     input       dataen_i;
     input       reset_i;
@@ -37,20 +39,45 @@ module csum_fast(
     output [15:0] csum_o;
     
     /*---wire/resister---*/
-    reg [16:0] sum;
+    wire [15:0] sum0;
+    wire [15:0] sum1;
+    wire [15:0] sum2;
+    wire [15:0] sum3;
+    wire [15:0] sum4;
+    wire [15:0] sum5;
+    wire [15:0] sum6;
+    wire [15:0] sum7;
+    wire [15:0] sum8;
     
-    integer i;
-    always_comb begin
-        if (reset_i) sum = 17'b0;
-        else if (dataen_i) begin
-            for (i=0;i<20;i=i+2'd2) begin
-                sum = sum + {1'b0,data_i[i],data_i[i+1'b1]};
-                sum = sum[15:0] + sum[16];
-            end
-        end
-        else sum = 17'b0;
+    reg  [15:0] r_sum2;
+    reg  [15:0] r_sum5;
+    
+    assign sum0 = subsum({data_i[0],data_i[1]},{data_i[2],data_i[3]});
+    assign sum1 = subsum({data_i[4],data_i[5]},{data_i[6],data_i[7]});
+    assign sum2 = subsum(sum0,sum1);
+    always_ff @(posedge CLK_i)begin
+        r_sum2 <= sum2;
     end
     
-    assign csum_o = (dataen_i) ? sum[15:0] ^ 16'hFF_FF : 16'h55_55;
+    assign sum3 = subsum({data_i[8],data_i[9]},{data_i[10],data_i[11]});
+    assign sum4 = subsum({data_i[12],data_i[13]},{data_i[14],data_i[15]});
+    assign sum5 = subsum(sum3,sum4);
+    always_ff @(posedge CLK_i)begin
+        r_sum5 <= sum5;
+    end    
+    
+    assign sum6 = subsum({data_i[16],data_i[17]},{data_i[18],data_i[19]});
+    assign sum7 = subsum(r_sum2,r_sum5);
+    assign sum8 = subsum(sum6,sum7);
+    
+    assign csum_o = (dataen_i) ? sum8 ^ 16'hFF_FF : 16'h55_55;
+    
+    function  [15:0] subsum (input [15:0] inA,input [15:0] inB);
+        reg [16:0] sum;
+        begin
+            sum = inA + inB;
+            subsum = sum[15:0] + sum[16];
+        end
+    endfunction
     
 endmodule

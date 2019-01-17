@@ -11,12 +11,12 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="21621329819fs"></ZoomStartTime>
-      <ZoomEndTime time="22039861317fs"></ZoomEndTime>
-      <Cursor1Time time="30194666000fs"></Cursor1Time>
+      <ZoomStartTime time="29560520072fs"></ZoomStartTime>
+      <ZoomEndTime time="30593776695fs"></ZoomEndTime>
+      <Cursor1Time time="30170666000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="125"></NameColumnWidth>
+      <NameColumnWidth column_width="121"></NameColumnWidth>
       <ValueColumnWidth column_width="62"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="194" />
@@ -606,8 +606,9 @@
       <obj_property name="ObjectShortName">csum_ok</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/csum_data">
-      <obj_property name="ElementShortName">csum_data[19:0][7:0]</obj_property>
-      <obj_property name="ObjectShortName">csum_data[19:0][7:0]</obj_property>
+      <obj_property name="ElementShortName">csum_data[7:0][19:0]</obj_property>
+      <obj_property name="ObjectShortName">csum_data[7:0][19:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/csum_o">
       <obj_property name="ElementShortName">csum_o[15:0]</obj_property>
@@ -805,8 +806,8 @@
       <obj_property name="ObjectShortName">sum_17[16:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/csum_data">
-      <obj_property name="ElementShortName">csum_data[19:0][7:0]</obj_property>
-      <obj_property name="ObjectShortName">csum_data[19:0][7:0]</obj_property>
+      <obj_property name="ElementShortName">csum_data[7:0][19:0]</obj_property>
+      <obj_property name="ObjectShortName">csum_data[7:0][19:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/csum_o">
       <obj_property name="ElementShortName">csum_o[15:0]</obj_property>

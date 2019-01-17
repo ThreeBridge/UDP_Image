@@ -132,7 +132,7 @@ module trans_image(
     reg [9:0]   d_img_cnt [2:0];        // BlockRAMの出力が1サイクルずれるため & recv_image側でimage_cntにFFを挟むため
     
     wire hcsum_end = (csum_cnt==8'd0);
-    wire hcend_end = (err_cnt==3'd1);    
+    wire hcend_end = (err_cnt==3'd0);    
     wire ucsum_end = (csum_cnt==MsgSize+5'd20);
     wire ucend_end = (err_cnt==3'd7);
     
@@ -429,6 +429,7 @@ module trans_image(
         //if(st==Hcsum)       data_en <= (csum_cnt > 8'd13 && csum_cnt < 8'd34);
         if(st==Hcsum)       data_en <= `HI;
         else if(st==Ucsum)  data_en <= (csum_cnt < MsgSize+5'd20);
+        else if(st==Tx_En)  data_en <= `LO;
         else if(st==IDLE)   data_en <= `LO;
     end    
     
@@ -529,9 +530,17 @@ module trans_image(
         .rst        (rst)
     );
     
-    wire [7:0]  csum_data [19:0] = TXBUF[33:14];
+    wire [7:0] csum_data [19:0];
+    genvar g;
+    generate
+        for (g=0; g < 20; g=g+1)
+        begin
+            assign csum_data[g] = TXBUF[g+14];
+        end
+    endgenerate    
     csum_fast trans_csum(
         /*---INPUT---*/
+        .CLK_i      (eth_rxck),
         .data_i     (csum_data),
         .dataen_i   (data_en),
         .reset_i    (rst),

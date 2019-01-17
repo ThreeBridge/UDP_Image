@@ -458,9 +458,18 @@ module recv_image(
         .rst(rst)
     );
     /*---checksum_fast---*/
-    wire [7:0]  csum_data [19:0] = RXBUF[33:14];
+    wire [7:0] csum_data [19:0];
+    genvar g;
+    generate
+        for (g=0; g < 20; g=g+1)
+        begin
+            assign csum_data[g] = RXBUF[g+14];
+        end
+    endgenerate
+    
     csum_fast recv_csum(
         /*---INPUT---*/
+        .CLK_i      (eth_rxck),
         .data_i     (csum_data),
         .dataen_i   (data_en),
         .reset_i    (rst),
