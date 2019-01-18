@@ -48,6 +48,7 @@ parameter Tx_End    =  4'h4;   // 送信終了
     reg [3:0] nx;
     reg [2:0] fcs_cnt;
     reg [3:0] pre_cnt;
+    reg [3:0] end_cnt;
     wire      pre_end = (pre_cnt==4'd8);
     wire      tx_end = (st==Tx_Data && fcs_cnt==3'd4);
     
@@ -68,7 +69,7 @@ parameter Tx_End    =  4'h4;   // 送信終了
             Stby : if(q_dout[11] && valid) nx = Tx_Pre; 
             Tx_Pre : if(pre_cnt==4'd8) nx = Tx_Data;
             Tx_Data : if(tx_end) nx = Tx_End;
-            Tx_End :  nx = Idle;
+            Tx_End :  if(end_cnt==4'd13) nx = Idle;
         endcase
     end
  
@@ -193,7 +194,8 @@ parameter Tx_End    =  4'h4;   // 送信終了
                 if(pre_end) rd_req<=1;
             end
             Tx_Data: begin
-                if (empty) rd_req <= `LO;  //-- means last byte in stream.
+                //if (empty) rd_req <= `LO;  //-- means last byte in stream.
+                if (empty || last_byte) rd_req <= `LO;  //-- means last byte in stream.
             end
             default: rd_req <= `LO;
         endcase
@@ -281,10 +283,12 @@ parameter Tx_End    =  4'h4;   // 送信終了
 //        else CRC32 <= 0;
 //    end
     
+    
     always_ff @(posedge eth_rxck)begin
         if(st==Tx_End)begin
-            LED <= LED + 1'd1;
+            end_cnt <= end_cnt + 4'd1;
         end
+        else end_cnt <= 0;
     end
     
 endmodule

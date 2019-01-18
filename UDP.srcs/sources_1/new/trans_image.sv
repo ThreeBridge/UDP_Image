@@ -124,15 +124,15 @@ module trans_image(
     reg [7:0]   nx;
     (*dont_touch="true"*)reg [10:0]  csum_cnt;
     (*dont_touch="true"*)reg         csum_ok;
-    reg [3:0]   err_cnt;
+    reg [4:0]   err_cnt;
     (*dont_touch="true"*)reg         tx_end;
     reg [8:0]   packet_cnt;
     //reg         Hcsum_st;
     //reg [3:0]   ready_cnt;
     reg [9:0]   d_img_cnt [2:0];        // BlockRAMの出力が1サイクルずれるため & recv_image側でimage_cntにFFを挟むため
     
-    wire ready_end = (err_cnt==3'd1);
-    wire hcsum_end = (csum_cnt==8'd0);
+    wire ready_end = (err_cnt==5'd30);
+    wire hcsum_end = (csum_cnt==8'd2);
     wire hcend_end = (err_cnt==3'd0);    
     wire ucsum_end = (csum_cnt==MsgSize+5'd20);
     wire ucend_end = (err_cnt==3'd7);
@@ -314,10 +314,10 @@ module trans_image(
     end
     
     always_ff @(posedge eth_rxck)begin
-        if (st==READY)          err_cnt <= err_cnt + 4'b1;
-        else if (st==Hc_End)         err_cnt <= err_cnt + 4'b1;
+        if (st==READY)          err_cnt <= err_cnt + 6'b1;
+        else if (st==Hc_End)         err_cnt <= err_cnt + 6'b1;
         //else if (st==Uc_End)    err_cnt <= err_cnt + 4'b1;
-        else                    err_cnt <= 0;
+        else                    err_cnt <= 6'b0;
     end     
     
     /*---チェックサム用データ---*/
@@ -429,8 +429,8 @@ module trans_image(
     reg data_en_d;
     always_ff @(posedge eth_rxck)begin
         //if(st==Hcsum)       data_en <= (csum_cnt > 8'd13 && csum_cnt < 8'd34);
-        //if(st==Hcsum)       data_en <= `HI;
-        if(st==READY)       data_en <= `HI;
+        if(st==Hcsum)       data_en <= `HI;
+        //if(st==READY)       data_en <= `HI;
         //else if(st==Ucsum)  data_en <= (csum_cnt < MsgSize+5'd20);
         else if(st==Tx_En)  data_en <= `LO;
         else if(st==IDLE)   data_en <= `LO;

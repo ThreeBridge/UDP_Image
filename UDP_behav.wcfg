@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="29560520072fs"></ZoomStartTime>
-      <ZoomEndTime time="30593776695fs"></ZoomEndTime>
-      <Cursor1Time time="30170666000fs"></Cursor1Time>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="4872170000001fs"></ZoomEndTime>
+      <Cursor1Time time="3343578766000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="121"></NameColumnWidth>
+      <NameColumnWidth column_width="117"></NameColumnWidth>
       <ValueColumnWidth column_width="62"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="194" />
+   <WVObjectSize size="199" />
    <wave_markers>
       <marker label="" time="32952830000" />
       <marker label="" time="232605844000" />
@@ -212,6 +212,30 @@
    <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/q_dout">
       <obj_property name="ElementShortName">q_dout[11:0]</obj_property>
       <obj_property name="ObjectShortName">q_dout[11:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/last_byte">
+      <obj_property name="ElementShortName">last_byte</obj_property>
+      <obj_property name="ObjectShortName">last_byte</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/overflow">
+      <obj_property name="ElementShortName">overflow</obj_property>
+      <obj_property name="ObjectShortName">overflow</obj_property>
+      <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/underflow">
+      <obj_property name="ElementShortName">underflow</obj_property>
+      <obj_property name="ObjectShortName">underflow</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/wr_data_count">
+      <obj_property name="ElementShortName">wr_data_count[10:0]</obj_property>
+      <obj_property name="ObjectShortName">wr_data_count[10:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/T_Arbiter/rd_data_count">
+      <obj_property name="ElementShortName">rd_data_count[10:0]</obj_property>
+      <obj_property name="ObjectShortName">rd_data_count[10:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/T_Arbiter/rd_en">
       <obj_property name="ElementShortName">rd_en</obj_property>
@@ -606,9 +630,8 @@
       <obj_property name="ObjectShortName">csum_ok</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/csum_data">
-      <obj_property name="ElementShortName">csum_data[7:0][19:0]</obj_property>
-      <obj_property name="ObjectShortName">csum_data[7:0][19:0]</obj_property>
-      <obj_property name="isExpanded"></obj_property>
+      <obj_property name="ElementShortName">csum_data[19:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">csum_data[19:0][7:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/csum_o">
       <obj_property name="ElementShortName">csum_o[15:0]</obj_property>
@@ -806,16 +829,16 @@
       <obj_property name="ObjectShortName">sum_17[16:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/csum_data">
-      <obj_property name="ElementShortName">csum_data[7:0][19:0]</obj_property>
-      <obj_property name="ObjectShortName">csum_data[7:0][19:0]</obj_property>
+      <obj_property name="ElementShortName">csum_data[19:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">csum_data[19:0][7:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/csum_o">
       <obj_property name="ElementShortName">csum_o[15:0]</obj_property>
       <obj_property name="ObjectShortName">csum_o[15:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/err_cnt">
-      <obj_property name="ElementShortName">err_cnt[3:0]</obj_property>
-      <obj_property name="ObjectShortName">err_cnt[3:0]</obj_property>
+      <obj_property name="ElementShortName">err_cnt[4:0]</obj_property>
+      <obj_property name="ObjectShortName">err_cnt[4:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/fcs_cnt">
       <obj_property name="ElementShortName">fcs_cnt[2:0]</obj_property>
