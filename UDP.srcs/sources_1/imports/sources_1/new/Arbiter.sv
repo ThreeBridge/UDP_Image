@@ -50,10 +50,10 @@ parameter  Recv_End    = 8'h03;
     reg [3:0] nx;
     
     //<-- test by oikawa
-    reg [3:0] rxend_cnt;
+    reg [2:0] rxend_cnt;
     always_ff @(posedge eth_rxck)begin
-       if (st==Idle) rxend_cnt <= 4'h0;
-       else if (st==Recv_End) rxend_cnt <= rxend_cnt + 5'h1;
+       if (st==Idle) rxend_cnt <= 3'b0;
+       else if (st==Recv_End) rxend_cnt <= rxend_cnt + 3'd1;
     end
     //--> test by oikawa
     
@@ -68,7 +68,7 @@ parameter  Recv_End    = 8'h03;
             Idle:       if (gmii_rxctl)  nx = SFD_Wait;
             SFD_Wait:   if (pre)         nx = Recv_Data;
             Recv_Data:  if (!gmii_rxctl) nx = Recv_End;
-            Recv_End:   if (rxend_cnt==4'hF)  nx = Idle;
+            Recv_End:   if (rxend_cnt==3'd4)  nx = Idle;
             default:begin end
         endcase
     end

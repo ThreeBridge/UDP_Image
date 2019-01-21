@@ -71,13 +71,13 @@ module ARP(
        else if(st==Tx_Ready)    rdy_cyc <= rdy_cyc + 4'd1;
        else if(st==Tx_End)      rdy_cyc <= 4'd0;
     end
-    assign s_rdy_done = (rdy_cyc==4'd12);
+    assign s_rdy_done = (rdy_cyc==4'd2);
  
     always @(posedge eth_rxck) begin
        if(st==Idle)       end_cyc <= 4'd0;
        else if(st==Tx_End) end_cyc <= end_cyc + 4'd1;
     end
-    assign s_end_done = (end_cyc==4'd12);    
+    assign s_end_done = (end_cyc==4'd4);    
     
     
     /* パケット準備 */
