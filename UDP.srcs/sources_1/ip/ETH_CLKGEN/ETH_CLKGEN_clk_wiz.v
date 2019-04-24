@@ -56,9 +56,10 @@
 //  Output     Output      Phase    Duty Cycle   Pk-to-Pk     Phase
 //   Clock     Freq (MHz)  (degrees)    (%)     Jitter (ps)  Error (ps)
 //----------------------------------------------------------------------------
-// rxck_0deg___125.000______0.000______50.0______112.261_____89.430
-// rxck_90deg___125.000____165.000______50.0______112.261_____89.430
-// rxck_180deg___125.000____255.000______50.0______112.261_____89.430
+// rxck_0deg___125.000______0.000______50.0______119.348_____96.948
+// rxck_90deg___125.000____163.125______50.0______119.348_____96.948
+// rxck_180deg___125.000____253.125______50.0______119.348_____96.948
+// __clk200___200.000______0.000______50.0______109.241_____96.948
 //
 //----------------------------------------------------------------------------
 // Input Clock   Freq (MHz)    Input Jitter (UI)
@@ -74,6 +75,7 @@ module ETH_CLKGEN_clk_wiz
   output        rxck_0deg,
   output        rxck_90deg,
   output        rxck_180deg,
+  output        clk200,
   // Status and control signals
   input         resetn,
   output        locked,
@@ -100,7 +102,7 @@ wire clk_in2_ETH_CLKGEN;
   wire        rxck_0deg_ETH_CLKGEN;
   wire        rxck_90deg_ETH_CLKGEN;
   wire        rxck_180deg_ETH_CLKGEN;
-  wire        rxck_270deg_ETH_CLKGEN;
+  wire        clk200_ETH_CLKGEN;
   wire        rxck_n90deg_ETH_CLKGEN;
   wire        clk_out6_ETH_CLKGEN;
   wire        clk_out7_ETH_CLKGEN;
@@ -115,7 +117,6 @@ wire clk_in2_ETH_CLKGEN;
     wire clkout0b_unused;
    wire clkout1b_unused;
    wire clkout2b_unused;
-   wire clkout3_unused;
    wire clkout3b_unused;
    wire clkout4_unused;
   wire        clkout5_unused;
@@ -130,21 +131,25 @@ wire clk_in2_ETH_CLKGEN;
     .COMPENSATION         ("ZHOLD"),
     .STARTUP_WAIT         ("FALSE"),
     .DIVCLK_DIVIDE        (1),
-    .CLKFBOUT_MULT_F      (9.000),
+    .CLKFBOUT_MULT_F      (8.000),
     .CLKFBOUT_PHASE       (0.000),
     .CLKFBOUT_USE_FINE_PS ("FALSE"),
-    .CLKOUT0_DIVIDE_F     (9.000),
+    .CLKOUT0_DIVIDE_F     (8.000),
     .CLKOUT0_PHASE        (0.000),
     .CLKOUT0_DUTY_CYCLE   (0.500),
     .CLKOUT0_USE_FINE_PS  ("FALSE"),
-    .CLKOUT1_DIVIDE       (9),
-    .CLKOUT1_PHASE        (165.000),
+    .CLKOUT1_DIVIDE       (8),
+    .CLKOUT1_PHASE        (163.125),
     .CLKOUT1_DUTY_CYCLE   (0.500),
     .CLKOUT1_USE_FINE_PS  ("FALSE"),
-    .CLKOUT2_DIVIDE       (9),
-    .CLKOUT2_PHASE        (255.000),
+    .CLKOUT2_DIVIDE       (8),
+    .CLKOUT2_PHASE        (253.125),
     .CLKOUT2_DUTY_CYCLE   (0.500),
     .CLKOUT2_USE_FINE_PS  ("FALSE"),
+    .CLKOUT3_DIVIDE       (5),
+    .CLKOUT3_PHASE        (0.000),
+    .CLKOUT3_DUTY_CYCLE   (0.500),
+    .CLKOUT3_USE_FINE_PS  ("FALSE"),
     .CLKIN1_PERIOD        (8.000))
   mmcm_adv_inst
     // Output clocks
@@ -157,7 +162,7 @@ wire clk_in2_ETH_CLKGEN;
     .CLKOUT1B            (clkout1b_unused),
     .CLKOUT2             (rxck_180deg_ETH_CLKGEN),
     .CLKOUT2B            (clkout2b_unused),
-    .CLKOUT3             (clkout3_unused),
+    .CLKOUT3             (clk200_ETH_CLKGEN),
     .CLKOUT3B            (clkout3b_unused),
     .CLKOUT4             (clkout4_unused),
     .CLKOUT5             (clkout5_unused),
@@ -216,6 +221,10 @@ wire clk_in2_ETH_CLKGEN;
   BUFG clkout3_buf
    (.O   (rxck_180deg),
     .I   (rxck_180deg_ETH_CLKGEN));
+
+  BUFG clkout4_buf
+   (.O   (clk200),
+    .I   (clk200_ETH_CLKGEN));
 
 
 

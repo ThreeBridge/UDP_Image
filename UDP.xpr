@@ -32,20 +32,20 @@
     <Option Name="DSAVendor" Val="xilinx"/>
     <Option Name="DSABoardId" Val="nexys_video"/>
     <Option Name="DSANumComputeUnits" Val="60"/>
-    <Option Name="WTXSimLaunchSim" Val="627"/>
+    <Option Name="WTXSimLaunchSim" Val="629"/>
     <Option Name="WTModelSimLaunchSim" Val="0"/>
     <Option Name="WTQuestaLaunchSim" Val="0"/>
     <Option Name="WTIesLaunchSim" Val="0"/>
     <Option Name="WTVcsLaunchSim" Val="0"/>
     <Option Name="WTRivieraLaunchSim" Val="0"/>
     <Option Name="WTActivehdlLaunchSim" Val="0"/>
-    <Option Name="WTXSimExportSim" Val="17"/>
-    <Option Name="WTModelSimExportSim" Val="17"/>
-    <Option Name="WTQuestaExportSim" Val="17"/>
-    <Option Name="WTIesExportSim" Val="17"/>
-    <Option Name="WTVcsExportSim" Val="17"/>
-    <Option Name="WTRivieraExportSim" Val="17"/>
-    <Option Name="WTActivehdlExportSim" Val="17"/>
+    <Option Name="WTXSimExportSim" Val="21"/>
+    <Option Name="WTModelSimExportSim" Val="21"/>
+    <Option Name="WTQuestaExportSim" Val="21"/>
+    <Option Name="WTIesExportSim" Val="21"/>
+    <Option Name="WTVcsExportSim" Val="21"/>
+    <Option Name="WTRivieraExportSim" Val="21"/>
+    <Option Name="WTActivehdlExportSim" Val="21"/>
     <Option Name="GenerateIPUpgradeLog" Val="TRUE"/>
     <Option Name="XSimRadix" Val="hex"/>
     <Option Name="XSimTimeUnit" Val="ns"/>
@@ -245,6 +245,28 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
+      <File Path="$PSRCDIR/sources_1/ip/mig_7series_0/mig_a.prj">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="ScopedToCell" Val="mig_7series_0"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/new/axi_write.sv">
+        <FileInfo>
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/new/axi_read.sv">
+        <FileInfo>
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
       <Config>
         <Option Name="DesignMode" Val="RTL"/>
         <Option Name="TopModule" Val="TOP"/>
@@ -275,6 +297,13 @@
         </FileInfo>
       </File>
       <File Path="$PSRCDIR/constrs_1/new/clock_rxd.xdc">
+        <FileInfo>
+          <Attr Name="UserDisabled" Val="1"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../../vivado_h31/Nexys-Video-HDMI/src/constraints/NexysVideo_Master.xdc">
         <FileInfo>
           <Attr Name="UserDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -357,6 +386,46 @@
         <Option Name="UseBlackboxStub" Val="1"/>
       </Config>
     </FileSet>
+    <FileSet Name="mig_7series_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/mig_7series_0">
+      <File Path="$PSRCDIR/sources_1/ip/mig_7series_0/mig_7series_0.xci">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <Config>
+        <Option Name="TopModule" Val="mig_7series_0"/>
+        <Option Name="UseBlackboxStub" Val="1"/>
+      </Config>
+    </FileSet>
+    <FileSet Name="axi_interconnect_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/axi_interconnect_0">
+      <File Path="$PSRCDIR/sources_1/ip/axi_interconnect_0/axi_interconnect_0.xci">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <Config>
+        <Option Name="TopModule" Val="axi_interconnect_0"/>
+        <Option Name="UseBlackboxStub" Val="1"/>
+      </Config>
+    </FileSet>
+    <FileSet Name="image_8to32" Type="BlockSrcs" RelSrcDir="$PSRCDIR/image_8to32">
+      <File Path="$PSRCDIR/sources_1/ip/image_8to32/image_8to32.xci">
+        <FileInfo>
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <Config>
+        <Option Name="TopModule" Val="image_8to32"/>
+        <Option Name="UseBlackboxStub" Val="1"/>
+      </Config>
+    </FileSet>
   </FileSets>
   <Simulators>
     <Simulator Name="XSim">
@@ -424,6 +493,37 @@
     <Run Id="ETH_CLKGEN_synth_1" Type="Ft3:Synth" SrcSet="ETH_CLKGEN" Part="xc7a200tsbg484-1" ConstrsSet="ETH_CLKGEN" Description="Vivado Synthesis Defaults" WriteIncrSynthDcp="false" Dir="$PRUNDIR/ETH_CLKGEN_synth_1" IncludeInArchive="true">
       <Strategy Version="1" Minor="2">
         <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2018"/>
+        <Step Id="synth_design"/>
+      </Strategy>
+      <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>
+      <ReportStrategy Name="Vivado Synthesis Default Reports" Flow="Vivado Synthesis 2018"/>
+      <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
+    </Run>
+    <Run Id="mig_7series_0_synth_1" Type="Ft3:Synth" SrcSet="mig_7series_0" Part="xc7a200tsbg484-1" ConstrsSet="mig_7series_0" Description="Vivado Synthesis Defaults" WriteIncrSynthDcp="false" Dir="$PRUNDIR/mig_7series_0_synth_1" IncludeInArchive="true">
+      <Strategy Version="1" Minor="2">
+        <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2018"/>
+        <Step Id="synth_design"/>
+      </Strategy>
+      <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>
+      <ReportStrategy Name="Vivado Synthesis Default Reports" Flow="Vivado Synthesis 2018"/>
+      <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
+    </Run>
+    <Run Id="axi_interconnect_0_synth_1" Type="Ft3:Synth" SrcSet="axi_interconnect_0" Part="xc7a200tsbg484-1" ConstrsSet="axi_interconnect_0" Description="Vivado Synthesis Defaults" WriteIncrSynthDcp="false" Dir="$PRUNDIR/axi_interconnect_0_synth_1" IncludeInArchive="true">
+      <Strategy Version="1" Minor="2">
+        <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2018">
+          <Desc>Vivado Synthesis Defaults</Desc>
+        </StratHandle>
+        <Step Id="synth_design"/>
+      </Strategy>
+      <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>
+      <ReportStrategy Name="Vivado Synthesis Default Reports" Flow="Vivado Synthesis 2018"/>
+      <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
+    </Run>
+    <Run Id="image_8to32_synth_1" Type="Ft3:Synth" SrcSet="image_8to32" Part="xc7a200tsbg484-1" ConstrsSet="image_8to32" Description="Vivado Synthesis Defaults" WriteIncrSynthDcp="false" Dir="$PRUNDIR/image_8to32_synth_1" IncludeInArchive="true">
+      <Strategy Version="1" Minor="2">
+        <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2018">
+          <Desc>Vivado Synthesis Defaults</Desc>
+        </StratHandle>
         <Step Id="synth_design"/>
       </Strategy>
       <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>
@@ -500,6 +600,58 @@
     <Run Id="ETH_CLKGEN_impl_1" Type="Ft2:EntireDesign" Part="xc7a200tsbg484-1" ConstrsSet="ETH_CLKGEN" Description="Default settings for Implementation." WriteIncrSynthDcp="false" SynthRun="ETH_CLKGEN_synth_1" IncludeInArchive="false">
       <Strategy Version="1" Minor="2">
         <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2018"/>
+        <Step Id="init_design"/>
+        <Step Id="opt_design"/>
+        <Step Id="power_opt_design"/>
+        <Step Id="place_design"/>
+        <Step Id="post_place_power_opt_design"/>
+        <Step Id="phys_opt_design"/>
+        <Step Id="route_design"/>
+        <Step Id="post_route_phys_opt_design"/>
+        <Step Id="write_bitstream"/>
+      </Strategy>
+      <ReportStrategy Name="Vivado Implementation Default Reports" Flow="Vivado Implementation 2018"/>
+      <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
+    </Run>
+    <Run Id="mig_7series_0_impl_1" Type="Ft2:EntireDesign" Part="xc7a200tsbg484-1" ConstrsSet="mig_7series_0" Description="Default settings for Implementation." WriteIncrSynthDcp="false" SynthRun="mig_7series_0_synth_1" IncludeInArchive="false">
+      <Strategy Version="1" Minor="2">
+        <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2018"/>
+        <Step Id="init_design"/>
+        <Step Id="opt_design"/>
+        <Step Id="power_opt_design"/>
+        <Step Id="place_design"/>
+        <Step Id="post_place_power_opt_design"/>
+        <Step Id="phys_opt_design"/>
+        <Step Id="route_design"/>
+        <Step Id="post_route_phys_opt_design"/>
+        <Step Id="write_bitstream"/>
+      </Strategy>
+      <ReportStrategy Name="Vivado Implementation Default Reports" Flow="Vivado Implementation 2018"/>
+      <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
+    </Run>
+    <Run Id="axi_interconnect_0_impl_1" Type="Ft2:EntireDesign" Part="xc7a200tsbg484-1" ConstrsSet="axi_interconnect_0" Description="Default settings for Implementation." WriteIncrSynthDcp="false" SynthRun="axi_interconnect_0_synth_1" IncludeInArchive="false">
+      <Strategy Version="1" Minor="2">
+        <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2018">
+          <Desc>Default settings for Implementation.</Desc>
+        </StratHandle>
+        <Step Id="init_design"/>
+        <Step Id="opt_design"/>
+        <Step Id="power_opt_design"/>
+        <Step Id="place_design"/>
+        <Step Id="post_place_power_opt_design"/>
+        <Step Id="phys_opt_design"/>
+        <Step Id="route_design"/>
+        <Step Id="post_route_phys_opt_design"/>
+        <Step Id="write_bitstream"/>
+      </Strategy>
+      <ReportStrategy Name="Vivado Implementation Default Reports" Flow="Vivado Implementation 2018"/>
+      <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
+    </Run>
+    <Run Id="image_8to32_impl_1" Type="Ft2:EntireDesign" Part="xc7a200tsbg484-1" ConstrsSet="image_8to32" Description="Default settings for Implementation." WriteIncrSynthDcp="false" SynthRun="image_8to32_synth_1" IncludeInArchive="false">
+      <Strategy Version="1" Minor="2">
+        <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2018">
+          <Desc>Default settings for Implementation.</Desc>
+        </StratHandle>
         <Step Id="init_design"/>
         <Step Id="opt_design"/>
         <Step Id="power_opt_design"/>

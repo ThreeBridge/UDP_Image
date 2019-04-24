@@ -1,7 +1,7 @@
 -- Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2018.1 (lin64) Build 2188600 Wed Apr  4 18:39:19 MDT 2018
--- Date        : Fri Jan 11 16:13:49 2019
+-- Date        : Wed Apr 24 16:31:54 2019
 -- Host        : bluewater01.localdomain running 64-bit unknown
 -- Command     : write_vhdl -force -mode funcsim
 --               /home/tmitsuhashi/bin/vivado_h30/UDP_Image/UDP.srcs/sources_1/ip/ETH_CLKGEN/ETH_CLKGEN_sim_netlist.vhdl
@@ -19,6 +19,7 @@ entity ETH_CLKGEN_ETH_CLKGEN_clk_wiz is
     rxck_0deg : out STD_LOGIC;
     rxck_90deg : out STD_LOGIC;
     rxck_180deg : out STD_LOGIC;
+    clk200 : out STD_LOGIC;
     resetn : in STD_LOGIC;
     locked : out STD_LOGIC;
     eth_rxck : in STD_LOGIC
@@ -28,6 +29,7 @@ entity ETH_CLKGEN_ETH_CLKGEN_clk_wiz is
 end ETH_CLKGEN_ETH_CLKGEN_clk_wiz;
 
 architecture STRUCTURE of ETH_CLKGEN_ETH_CLKGEN_clk_wiz is
+  signal clk200_ETH_CLKGEN : STD_LOGIC;
   signal clkfbout_ETH_CLKGEN : STD_LOGIC;
   signal clkfbout_buf_ETH_CLKGEN : STD_LOGIC;
   signal eth_rxck_ETH_CLKGEN : STD_LOGIC;
@@ -41,7 +43,6 @@ architecture STRUCTURE of ETH_CLKGEN_ETH_CLKGEN_clk_wiz is
   signal NLW_mmcm_adv_inst_CLKOUT0B_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKOUT1B_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKOUT2B_UNCONNECTED : STD_LOGIC;
-  signal NLW_mmcm_adv_inst_CLKOUT3_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKOUT3B_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKOUT4_UNCONNECTED : STD_LOGIC;
   signal NLW_mmcm_adv_inst_CLKOUT5_UNCONNECTED : STD_LOGIC;
@@ -61,6 +62,7 @@ architecture STRUCTURE of ETH_CLKGEN_ETH_CLKGEN_clk_wiz is
   attribute BOX_TYPE of clkout1_buf : label is "PRIMITIVE";
   attribute BOX_TYPE of clkout2_buf : label is "PRIMITIVE";
   attribute BOX_TYPE of clkout3_buf : label is "PRIMITIVE";
+  attribute BOX_TYPE of clkout4_buf : label is "PRIMITIVE";
   attribute BOX_TYPE of mmcm_adv_inst : label is "PRIMITIVE";
 begin
 clkf_buf: unisim.vcomponents.BUFG
@@ -91,27 +93,32 @@ clkout3_buf: unisim.vcomponents.BUFG
       I => rxck_180deg_ETH_CLKGEN,
       O => rxck_180deg
     );
+clkout4_buf: unisim.vcomponents.BUFG
+     port map (
+      I => clk200_ETH_CLKGEN,
+      O => clk200
+    );
 mmcm_adv_inst: unisim.vcomponents.MMCME2_ADV
     generic map(
       BANDWIDTH => "OPTIMIZED",
-      CLKFBOUT_MULT_F => 9.000000,
+      CLKFBOUT_MULT_F => 8.000000,
       CLKFBOUT_PHASE => 0.000000,
       CLKFBOUT_USE_FINE_PS => false,
       CLKIN1_PERIOD => 8.000000,
       CLKIN2_PERIOD => 0.000000,
-      CLKOUT0_DIVIDE_F => 9.000000,
+      CLKOUT0_DIVIDE_F => 8.000000,
       CLKOUT0_DUTY_CYCLE => 0.500000,
       CLKOUT0_PHASE => 0.000000,
       CLKOUT0_USE_FINE_PS => false,
-      CLKOUT1_DIVIDE => 9,
+      CLKOUT1_DIVIDE => 8,
       CLKOUT1_DUTY_CYCLE => 0.500000,
-      CLKOUT1_PHASE => 165.000000,
+      CLKOUT1_PHASE => 163.125000,
       CLKOUT1_USE_FINE_PS => false,
-      CLKOUT2_DIVIDE => 9,
+      CLKOUT2_DIVIDE => 8,
       CLKOUT2_DUTY_CYCLE => 0.500000,
-      CLKOUT2_PHASE => 255.000000,
+      CLKOUT2_PHASE => 253.125000,
       CLKOUT2_USE_FINE_PS => false,
-      CLKOUT3_DIVIDE => 1,
+      CLKOUT3_DIVIDE => 5,
       CLKOUT3_DUTY_CYCLE => 0.500000,
       CLKOUT3_PHASE => 0.000000,
       CLKOUT3_USE_FINE_PS => false,
@@ -157,7 +164,7 @@ mmcm_adv_inst: unisim.vcomponents.MMCME2_ADV
       CLKOUT1B => NLW_mmcm_adv_inst_CLKOUT1B_UNCONNECTED,
       CLKOUT2 => rxck_180deg_ETH_CLKGEN,
       CLKOUT2B => NLW_mmcm_adv_inst_CLKOUT2B_UNCONNECTED,
-      CLKOUT3 => NLW_mmcm_adv_inst_CLKOUT3_UNCONNECTED,
+      CLKOUT3 => clk200_ETH_CLKGEN,
       CLKOUT3B => NLW_mmcm_adv_inst_CLKOUT3B_UNCONNECTED,
       CLKOUT4 => NLW_mmcm_adv_inst_CLKOUT4_UNCONNECTED,
       CLKOUT5 => NLW_mmcm_adv_inst_CLKOUT5_UNCONNECTED,
@@ -195,6 +202,7 @@ entity ETH_CLKGEN is
     rxck_0deg : out STD_LOGIC;
     rxck_90deg : out STD_LOGIC;
     rxck_180deg : out STD_LOGIC;
+    clk200 : out STD_LOGIC;
     resetn : in STD_LOGIC;
     locked : out STD_LOGIC;
     eth_rxck : in STD_LOGIC
@@ -207,6 +215,7 @@ architecture STRUCTURE of ETH_CLKGEN is
 begin
 inst: entity work.ETH_CLKGEN_ETH_CLKGEN_clk_wiz
      port map (
+      clk200 => clk200,
       eth_rxck => eth_rxck,
       locked => locked,
       resetn => resetn,

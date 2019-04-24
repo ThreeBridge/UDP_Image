@@ -239,6 +239,18 @@ module recv_image(
         end
     end
     
+    /*---パケット判別---*/
+    reg [7:0] q_rxd [23:0];
+    always_ff @(posedge eth_rxck)begin
+        q_rxd <= {q_rxd[22:0],rxd_i[7:0]};
+    end
+    
+    reg udp_flg;
+    always_ff @(posedge eth_rxck)begin
+        if(rx_cnt==11'd22)
+            udp_flg <= (q_rxd[0]==8'h11) ? `HI : `LO ;
+    end
+    
     
     /*---RAM用データ---*/
     reg wea;

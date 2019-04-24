@@ -802,7 +802,7 @@ module tb_rarp(
         recvByte(8'hF0);
         // UDP_Checksum
         recvByte(8'h60);
-        recvByte(8'h70);         
+        recvByte(8'h70); 
         /*--UDP Data--*/      
         repeat(100) recvByte(8'h00);    // 100
         repeat(100) recvByte(8'hFF);    // 200
