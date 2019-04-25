@@ -19,7 +19,28 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 `include "user_defines.sv"
-
+    /*---STRUCT---*/
+    typedef struct packed{
+        logic           id;
+        logic [28:0]    addr;
+        logic [7:0]     len;
+        logic [2:0]     size;
+        logic [1:0]     burst;
+        logic           lock;
+        logic [3:0]     cache;
+        logic [2:0]     prot;
+        logic [3:0]     qos;
+        logic           valid;    
+    }AXI_AW;
+    
+    typedef struct packed{
+        logic [31:0]    data;
+        logic [3:0]     strb;
+        logic           last;
+        logic           valid;  
+    }AXI_W;
+    
+    
 module Arbiter(
     input [7:0]           gmii_rxd,
     input                 eth_rxck,
@@ -30,13 +51,18 @@ module Arbiter(
     
     input                 rst_btn,
     input [7:0]           SW,
+    input                 axi_awready,
+    input                 axi_wready,
     
     output [8:0]          rarp_o,
     output [8:0]          ping_o,
-    output [8:0]          UDP_o
+    output [8:0]          UDP_o,
     //output reg [7:0]      LED
+    output AXI_AW         axi_aw,
+    output AXI_W          axi_w
     );
-    
+
+
 parameter  Idle        = 8'h00;
 parameter  SFD_Wait    = 8'h01;
 parameter  Recv_Data   = 8'h02;
@@ -313,6 +339,8 @@ parameter  Recv_End    = 8'h03;
         .rst_btn    (rst_btn),
         .trans_err  (trans_err),
         .SW         (SW),        // add 2018.12.5
+        .axi_awready(axi_awready),
+        .axi_wready (axi_wready),
         /*---Output---*/
         .imdata     (imdata),
         .recvend    (recvend),
@@ -320,7 +348,9 @@ parameter  Recv_End    = 8'h03;
         .DstMAC_o   (DstMAC_UDP),
         .DstIP_o    (DstIP_UDP),
         .SrcPort_o  (SrcPort),
-        .DstPort_o  (DstPort)
+        .DstPort_o  (DstPort),
+        .axi_aw     (axi_aw),
+        .axi_w      (axi_w)
     );
     
     trans_image trans_image(

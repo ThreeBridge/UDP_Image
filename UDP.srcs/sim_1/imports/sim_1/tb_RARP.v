@@ -33,6 +33,23 @@ module tb_rarp(
      reg tx_flg;
      reg BTN;
      reg [7:0] SW;
+     
+     // Input
+     wire          dq;
+     wire [1:0]    dqs_n;
+     wire [1:0]    dqs;
+     // Outputs
+     wire [14:0]   a;
+     wire [2:0]    ba;
+     wire          ras_n;
+     wire          cas_n;
+     wire          we_n;
+     wire          rst_n;
+     wire          ck;
+     wire          ck_n;
+     wire          cke;
+     wire [1:0]    dm;
+     wire          odt;
 
    TOP top_i(
         .ETH_RXCTL(P_RXDV),
@@ -45,7 +62,42 @@ module tb_rarp(
         .CPU_RSTN(CPU_RSTN),
         .reset_i(reset),
         .BTN_C(BTN),
-        .SW(SW)
+        .SW(SW),
+        // Inouts
+        .ddr3_dq        (dq),
+        .ddr3_dqs_n     (dqs_n),
+        .ddr3_dqs_p     (dqs),
+        // Outputs
+        .ddr3_addr      (a),
+        .ddr3_ba        (ba),
+        .ddr3_ras_n     (ras_n),
+        .ddr3_cas_n     (cas_n),
+        .ddr3_we_n      (we_n),
+        .ddr3_reset_n   (rst_n),
+        .ddr3_ck_p      (ck),
+        .ddr3_ck_n      (ck_n),
+        .ddr3_cke       (cke),
+        .ddr3_dm        (dm),
+        .ddr3_odt       (odt)
+    );
+    
+    ddr3_den4096Mb ddr3_den4096Mb (
+        .rst_n(rst_n),
+        .ck(ck), 
+        .ck_n(ck_n),
+        .cke(cke), 
+        .cs_n(1'b0),       // コントロールしない
+        .ras_n(ras_n), 
+        .cas_n(cas_n), 
+        .we_n(we_n), 
+        .dm_tdqs(dm), 
+        .ba(ba), 
+        .addr(a), 
+        .dq(dq), 
+        .dqs(dqs),
+        .dqs_n(dqs_n),
+        .tdqs_n(),     // 未使用
+        .odt(odt)
     );
     
    /*---R_Arbiter---*/
@@ -106,12 +158,24 @@ module tb_rarp(
    parameter   Select_t =   8'h08;
    parameter   Tx_End_t =   8'h09;
    
+   /*---axi_write---*/
+   parameter   AWCH    =   4'h1;
+   parameter   AW_OK   =   4'h2;
+   
+   parameter   STBY    =   4'h3;
+   parameter   WCH     =   4'h4;
+   parameter   WEND    =   4'h5;
+   
+   
+   
    reg [79:0] str_st_rx;
    reg [79:0] str_st_tx;
    reg [79:0] str_st_arp;
    reg [79:0] str_st_ping;
    reg [79:0] str_st_udp_image;
    reg [79:0] str_st_trans_image;
+   reg [79:0] str_st_axi_aw;
+   reg [79:0] str_st_axi_w;
    always_comb begin
       case (top_i.R_Arbiter.st)
          Idle: str_st_rx = "idle";   
@@ -220,8 +284,23 @@ module tb_rarp(
             Tx_End_t : str_st_trans_image = "tx_end";
         endcase
     end
-
-
+    
+    always_comb begin
+        case (top_i.R_Arbiter.recv_image.axi_write.st_aw)
+            IDLE : str_st_axi_aw = "idle";
+            AWCH : str_st_axi_aw = "awch";
+            AW_OK : str_st_axi_aw = "aw_ok";
+        endcase
+    end
+    
+    always_comb begin
+        case (top_i.R_Arbiter.recv_image.axi_write.st_w)
+            IDLE : str_st_axi_w = "idle";
+            STBY : str_st_axi_w = "stby";
+            WCH : str_st_axi_w = "wch";
+            WEND : str_st_axi_w = "wend";
+        endcase    
+    end
 
       
    initial begin
@@ -254,6 +333,7 @@ module tb_rarp(
       #100;
       rstCPU();
       #4000;
+      #120000;  // wait ddr3 calib
       
       /*---Select MAC/IP address---*/
       SW = 8'd1;

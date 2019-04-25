@@ -66,6 +66,30 @@ module TOP(
     output [1:0]    ddr3_dm,
     output          ddr3_odt    
     );
+ 
+    /*---STRUCT---*/
+    typedef struct packed{
+        logic           id;
+        logic [28:0]    addr;
+        logic [7:0]     len;
+        logic [2:0]     size;
+        logic [1:0]     burst;
+        logic           lock;
+        logic [3:0]     cache;
+        logic [2:0]     prot;
+        logic [3:0]     qos;
+        logic           valid;    
+    }AXI_AW;
+    
+    typedef struct packed{
+        logic [31:0]    data;
+        logic [3:0]     strb;
+        logic           last;
+        logic           valid;  
+    }AXI_W; 
+    
+    AXI_AW          axi_aw;
+    AXI_W           axi_w;
     
     wire [7:0]       gmii_txd;
     wire             gmii_txctl;
@@ -134,6 +158,8 @@ module TOP(
     //wire arp_tx;
     //wire ping_tx;
     wire UDP_btn_tx;        // ボタン入力によるUDP送信
+    wire axi_awready;
+    wire axi_wready;
     //wire UDP_tx;            // UDPの送受信
     wire [8:0] rarp_o;   
     wire [8:0] ping_o;  
@@ -149,11 +175,15 @@ module TOP(
         .rst125       (rst125),
         .clk125       (clk125),
         .rst_btn      (rst_btn),
-        .SW(SW),
+        .SW           (SW),
+        .axi_awready  (axi_awready),
+        .axi_wready   (axi_wready),
         /*---OUTPUT---*/
         .rarp_o       (rarp_o),
         .ping_o       (ping_o),
-        .UDP_o        (UDP_o)
+        .UDP_o        (UDP_o),
+        .axi_aw       (axi_aw),
+        .axi_w        (axi_w)
     );
 
     wire [7:0] tx_led;
@@ -181,7 +211,7 @@ module TOP(
     logic           ui_clk;
     logic           ui_clk_sync_rst;
     logic           mmcm_locked;
-    logic           aresetn;
+    logic           aresetn = ~rst_rx;
     logic           app_sr_req=1'b0;
     logic           app_ref_req=1'b0;
     logic           app_zq_req=1'b0;
@@ -242,6 +272,10 @@ module TOP(
     `endif
     
     logic sys_rst;
+    
+    always_ff @(posedge SYSCLK)begin
+        
+    end
     
     mig_7series_0 mig_7series_0(
         // Inouts
@@ -332,26 +366,26 @@ module TOP(
     );
     
     axi_interconnect_0 axi_interconnect_0(
-        .INTERCONNECT_ACLK      (),
-        .INTERCONNECT_ARESETN   (),
+        .INTERCONNECT_ACLK      (eth_rxck),
+        .INTERCONNECT_ARESETN   (rst_rx),
         .S00_AXI_ARESET_OUT_N   (),
         .S00_AXI_ACLK           (eth_rxck),
-        .S00_AXI_AWID           (),
-        .S00_AXI_AWADDR         (),
-        .S00_AXI_AWLEN          (),
-        .S00_AXI_AWSIZE         (),
-        .S00_AXI_AWBURST        (),
-        .S00_AXI_AWLOCK         (),
-        .S00_AXI_AWCACHE        (),
-        .S00_AXI_AWPROT         (),
-        .S00_AXI_AWQOS          (),
-        .S00_AXI_AWVALID        (),
-        .S00_AXI_AWREADY        (),
-        .S00_AXI_WDATA          (),
-        .S00_AXI_WSTRB          (),
-        .S00_AXI_WLAST          (),
-        .S00_AXI_WVALID         (),
-        .S00_AXI_WREADY         (),
+        .S00_AXI_AWID           (axi_aw.id),
+        .S00_AXI_AWADDR         (axi_aw.addr),
+        .S00_AXI_AWLEN          (axi_aw.len),
+        .S00_AXI_AWSIZE         (axi_aw.size),
+        .S00_AXI_AWBURST        (axi_aw.burst),
+        .S00_AXI_AWLOCK         (axi_aw.lock),
+        .S00_AXI_AWCACHE        (axi_aw.cache),
+        .S00_AXI_AWPROT         (axi_aw.prot),
+        .S00_AXI_AWQOS          (axi_aw.qos),
+        .S00_AXI_AWVALID        (axi_aw.valid),
+        .S00_AXI_AWREADY        (axi_awready),
+        .S00_AXI_WDATA          (axi_w.data),
+        .S00_AXI_WSTRB          (axi_w.strb),
+        .S00_AXI_WLAST          (axi_w.last),
+        .S00_AXI_WVALID         (axi_w.valid),
+        .S00_AXI_WREADY         (axi_wready),
         .S00_AXI_BID            (),
         .S00_AXI_BRESP          (),
         .S00_AXI_BVALID         (),

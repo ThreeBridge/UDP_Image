@@ -31,10 +31,11 @@ module axi_write(
     UDP_st,
     
     axi_awready,
-    
+    axi_wready,
     
     /*---OUTPUT---*/
-    axi_aw
+    axi_aw,
+    axi_w
     
     );
     /*---STRUCT---*/
@@ -68,11 +69,15 @@ module axi_write(
     input       UDP_st;
     
     input       axi_awready;
+    input       axi_wready;
     
     output      axi_aw;
+    output      axi_w;
     
     /*---signal---*/
     reg         w_ch_st;    // Write Transaction start
+    reg [7:0]   write_cnt;
+    reg         fifo_sel=0;
     
     AXI_AW      axi_aw;
     AXI_W       axi_w;
@@ -85,6 +90,7 @@ module axi_write(
     
     parameter   STBY    =   4'h3;
     parameter   WCH     =   4'h4;
+    parameter   WEND    =   4'h5;
     
     /*---ステートマシン(AW_CH)---*/
     reg [3:0] st_aw;
@@ -127,6 +133,12 @@ module axi_write(
             end
             STBY : begin
                 if (UDP_st) nx_w = WCH;
+            end
+            WCH : begin
+                if (write_cnt==8'd250) nx_w = WEND;
+            end
+            WEND : begin
+                nx_w = IDLE;
             end
             default : begin
             end
@@ -199,21 +211,59 @@ module axi_write(
     end
     
     reg rd_en0;
+    reg rd_en1;
     always_ff @(posedge clk_i)begin
         if(st_w==WCH)begin
-            rd_en0 <= `HI;
+            if(!fifo_sel)   rd_en0 <= `HI;
+            else            rd_en1 <= `HI;
+        end
+        else if(st_w==WEND)begin
+             rd_en0 <= 1'b0;
+             rd_en1 <= 1'b0;       
+        end
+        else if(st_w==IDLE)begin
+            rd_en0 <= 1'b0;
+            rd_en1 <= 1'b0;
         end
     end
     
     logic [31:0] d_out0;
+    logic [31:0] d_out1;
     
     always_ff @(posedge clk_i)begin
         if(st_w==WCH)begin
-            axi_w.data  <= d_out0;
+            axi_w.data  <= (!fifo_sel) ? d_out0 : d_out1;
             axi_w.strb  <= 4'hF;
-            axi_w.last  <= `LO;
             axi_w.valid <= `HI;
         end
+        else if(st_w==IDLE)begin
+            axi_w.data  <= 32'b0;
+            axi_w.strb  <= 4'h0;
+            axi_w.valid <= `LO;            
+        end
+    end
+
+    always_ff @(posedge clk_i)begin
+        if(st_w==WCH)begin
+            write_cnt <= write_cnt + 8'b1;
+        end
+        else if(st_w==IDLE)begin
+            write_cnt <= 8'b0;
+        end
+    end
+    
+    always_ff @(posedge clk_i)begin
+        if(st_w==WCH)begin
+            if(write_cnt==8'd250)   axi_w.last <= `HI;
+            else                    axi_w.last <= `LO;
+        end
+        else if(st_w==IDLE)begin
+            axi_w.last <= `LO;
+        end
+    end
+    
+    always_ff @(posedge clk_i)begin
+        if(st_w==WEND) fifo_sel <= fifo_sel + 1'b1;
     end
     
     image_8to32 image_8to32_0(
@@ -235,8 +285,8 @@ module axi_write(
         .srst       (rst),
         .din        (data1),
         .wr_en      (wr_en1),
-        .rd_en      (),
-        .dout       (),
+        .rd_en      (rd_en1),
+        .dout       (d_out1),
         .full       (),
         .overflow   (),
         .empty      (),

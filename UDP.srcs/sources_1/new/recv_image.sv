@@ -45,15 +45,39 @@ module recv_image(
     rst_btn,            // 任意のタイミングでのリセット
     trans_err,          // 送信エラー
     SW,
+    axi_awready,
+    axi_wready,
     /*---Output---*/
     imdata,
     recvend,
     DstMAC_o,
     DstIP_o,
     SrcPort_o,
-    DstPort_o
+    DstPort_o,
+    axi_aw,
+    axi_w
     );
+    /*---STRUCT---*/
+    typedef struct packed{
+        logic           id;
+        logic [28:0]    addr;
+        logic [7:0]     len;
+        logic [2:0]     size;
+        logic [1:0]     burst;
+        logic           lock;
+        logic [3:0]     cache;
+        logic [2:0]     prot;
+        logic [3:0]     qos;
+        logic           valid;    
+    }AXI_AW;
     
+    typedef struct packed{
+        logic [31:0]    data;
+        logic [3:0]     strb;
+        logic           last;
+        logic           valid;  
+    }AXI_W;
+        
     /*---I/O Declare---*/
     input           eth_rxck;
     //input           clk125;
@@ -72,6 +96,8 @@ module recv_image(
     input           rst_btn;
     input           trans_err;
     input [7:0]     SW;
+    input           axi_awready;
+    input           axi_wready;
         
     (*dont_touch="true"*)output reg [7:0]  imdata;
     output reg        recvend;
@@ -79,6 +105,9 @@ module recv_image(
     output reg [31:0] DstIP_o;
     output reg [15:0] SrcPort_o;
     output reg [15:0] DstPort_o;
+    
+    output AXI_AW   axi_aw;
+    output AXI_W    axi_w;
     //output reg [7:0]  image_buffer [9999:0];
     
     /*---parameter---*/
@@ -247,7 +276,7 @@ module recv_image(
     
     reg udp_flg;
     always_ff @(posedge eth_rxck)begin
-        if(rx_cnt==11'd22)
+        if(rx_cnt==11'd24)
             udp_flg <= (q_rxd[0]==8'h11) ? `HI : `LO ;
     end
     
@@ -507,6 +536,22 @@ module recv_image(
         //.enb(1'b1),           // PortB enable
         .addrb  (addr_r),       // read address
         .doutb  (imdata)        // read data
+    );
+    
+    axi_write axi_write(
+        /*---INPUT---*/
+        .clk_i      (eth_rxck),
+        .rst        (rst_rx),
+        .wea        (wea),
+        .data_i     (rxd_i[7:0]),
+        .udp_flg    (udp_flg),
+        .packet_cnt (packet_cnt),
+        .UDP_st     (UDP_st),
+        .axi_awready(axi_awready),
+        .axi_wready (axi_wready),
+        /*---OUTPUT---*/
+        .axi_aw     (axi_aw),
+        .axi_w      (axi_w)
     );
     
     
