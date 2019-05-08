@@ -151,6 +151,17 @@ module TOP(
          .clk      ( eth_rxck )
     );
     
+    //**------------------------------------------------------------
+    //** Reset generator.
+    //**    
+    logic sys_rst;
+    RSTGEN rstgen100 (
+         .reset_o  ( sys_rst ),
+         .reset_i  ( 1'b0   ),
+         .locked_i ( eth_clkgen_locked ),
+         .clk      ( SYSCLK )
+    );
+    
     wire rst_btn = BTN_C;
     //wire arp_tx_en;
     //wire ping_tx_en;
@@ -270,12 +281,7 @@ module TOP(
         logic [7:0] calib_tap_val;
         logic       calib_tap_load_done;
     `endif
-    
-    logic sys_rst;
-    
-    always_ff @(posedge SYSCLK)begin
-        
-    end
+
     
     mig_7series_0 mig_7series_0(
         // Inouts
