@@ -35,7 +35,7 @@ module tb_rarp(
      reg [7:0] SW;
      
      // Input
-     wire          dq;
+     wire [15:0]   dq;
      wire [1:0]    dqs_n;
      wire [1:0]    dqs;
      // Outputs
@@ -50,6 +50,7 @@ module tb_rarp(
      wire          cke;
      wire [1:0]    dm;
      wire          odt;
+     wire [1:0]    tdqs_n;
 
    TOP top_i(
         .ETH_RXCTL(P_RXDV),
@@ -96,7 +97,7 @@ module tb_rarp(
         .dq(dq), 
         .dqs(dqs),
         .dqs_n(dqs_n),
-        .tdqs_n(),     // 未使用
+        .tdqs_n(tdqs_n),     // 未使用
         .odt(odt)
     );
     

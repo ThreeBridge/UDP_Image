@@ -101,11 +101,12 @@ module TOP(
     wire eth_rxck_90;
     wire eth_clkgen_locked;
     wire rst_rx;
+    wire clk200;
     ETH_CLKGEN eth_clkgen (
           .eth_rxck     (ETH_RXCK),
           .rxck_90deg   (eth_rxck),
           .rxck_180deg  (eth_rxck_90),
-          .clk200       (),
+          .clk200       (clk200),
           .locked       (eth_clkgen_locked),
           .resetn       (CPU_RSTN)
     );
@@ -153,13 +154,12 @@ module TOP(
     
     //**------------------------------------------------------------
     //** Reset generator.
-    //**    
-    logic sys_rst;
-    RSTGEN rstgen100 (
-         .reset_o  ( sys_rst ),
-         .reset_i  ( 1'b0   ),
-         .locked_i ( eth_clkgen_locked ),
-         .clk      ( SYSCLK )
+    //**
+    logic aresetn;
+    RSTGEN2 rstgen100 (
+         .reset_o  ( aresetn ),
+         .locked_i ( mmcm_locked ),
+         .clk      ( ui_clk )
     );
     
     wire rst_btn = BTN_C;
@@ -219,10 +219,9 @@ module TOP(
     
     logic           clk_ref_i;
     
-    logic           ui_clk;
+    //logic           ui_clk;
     logic           ui_clk_sync_rst;
-    logic           mmcm_locked;
-    logic           aresetn = ~rst_rx;
+    //logic           mmcm_locked;
     logic           app_sr_req=1'b0;
     logic           app_ref_req=1'b0;
     logic           app_zq_req=1'b0;
@@ -281,7 +280,8 @@ module TOP(
         logic [7:0] calib_tap_val;
         logic       calib_tap_load_done;
     `endif
-
+    
+    //logic sys_rst;
     
     mig_7series_0 mig_7series_0(
         // Inouts
@@ -304,7 +304,7 @@ module TOP(
         // Single-ended system clock
         .sys_clk_i      (SYSCLK),
         // Single-ended iodelayctrl clk (reference clock)
-        .clk_ref_i      (clk_ref_i),
+        .clk_ref_i      (clk200),
         // user interface signals
         .ui_clk         (ui_clk),       //(-->master_clk)
         .ui_clk_sync_rst(ui_clk_sync_rst),
@@ -368,7 +368,7 @@ module TOP(
           .calib_tap_load_done(calib_tap_load_done),
         `endif
         
-        .sys_rst        (sys_rst)
+        .sys_rst        (!CPU_RSTN)   //-- Active high!
     );
     
     axi_interconnect_0 axi_interconnect_0(
@@ -395,24 +395,24 @@ module TOP(
         .S00_AXI_BID            (),
         .S00_AXI_BRESP          (),
         .S00_AXI_BVALID         (),
-        .S00_AXI_BREADY         (),
-        .S00_AXI_ARID           (),
-        .S00_AXI_ARADDR         (),
-        .S00_AXI_ARLEN          (),
-        .S00_AXI_ARSIZE         (),
-        .S00_AXI_ARBURST        (),
-        .S00_AXI_ARLOCK         (),
-        .S00_AXI_ARCACHE        (),
-        .S00_AXI_ARPROT         (),
-        .S00_AXI_ARQOS          (),
-        .S00_AXI_ARVALID        (),
+        .S00_AXI_BREADY         (1'b0),
+        .S00_AXI_ARID           (1'b0),
+        .S00_AXI_ARADDR         (29'b0),
+        .S00_AXI_ARLEN          (8'b0),
+        .S00_AXI_ARSIZE         (3'b0),
+        .S00_AXI_ARBURST        (2'b0),
+        .S00_AXI_ARLOCK         (2'b0),
+        .S00_AXI_ARCACHE        (4'b0),
+        .S00_AXI_ARPROT         (3'b0),
+        .S00_AXI_ARQOS          (4'b0),
+        .S00_AXI_ARVALID        (1'b0),
         .S00_AXI_ARREADY        (),
         .S00_AXI_RID            (),
         .S00_AXI_RDATA          (),
         .S00_AXI_RRESP          (),
         .S00_AXI_RLAST          (),
         .S00_AXI_RVALID         (),
-        .S00_AXI_RREADY         (),
+        .S00_AXI_RREADY         (1'b0),
         .M00_AXI_ARESET_OUT_N   (),
         .M00_AXI_ACLK           (ui_clk),
         .M00_AXI_AWID           (s_axi_awid),
@@ -435,23 +435,23 @@ module TOP(
         .M00_AXI_BRESP          (s_axi_bresp),
         .M00_AXI_BVALID         (s_axi_bvalid),
         .M00_AXI_BREADY         (s_axi_bready),
-        .M00_AXI_ARID           (),
-        .M00_AXI_ARADDR         (),
-        .M00_AXI_ARLEN          (),
-        .M00_AXI_ARSIZE         (),
-        .M00_AXI_ARBURST        (),
-        .M00_AXI_ARLOCK         (),
-        .M00_AXI_ARCACHE        (),
-        .M00_AXI_ARPROT         (),
-        .M00_AXI_ARQOS          (),
-        .M00_AXI_ARVALID        (),
-        .M00_AXI_ARREADY        (),
-        .M00_AXI_RID            (),
-        .M00_AXI_RDATA          (),
-        .M00_AXI_RRESP          (),
-        .M00_AXI_RLAST          (),
-        .M00_AXI_RVALID         (),
-        .M00_AXI_RREADY         ()
+        .M00_AXI_ARID           (s_axi_arid),
+        .M00_AXI_ARADDR         (s_axi_araddr),
+        .M00_AXI_ARLEN          (s_axi_arlen),
+        .M00_AXI_ARSIZE         (s_axi_arsize),
+        .M00_AXI_ARBURST        (s_axi_arburst),
+        .M00_AXI_ARLOCK         (s_axi_arlock),
+        .M00_AXI_ARCACHE        (s_axi_arcache),
+        .M00_AXI_ARPROT         (s_axi_arprot),
+        .M00_AXI_ARQOS          (s_axi_arqos),
+        .M00_AXI_ARVALID        (s_axi_arvalid),
+        .M00_AXI_ARREADY        (s_axi_arready),
+        .M00_AXI_RID            (s_axi_rid),
+        .M00_AXI_RDATA          (s_axi_rdata),
+        .M00_AXI_RRESP          (s_axi_rresp),
+        .M00_AXI_RLAST          (s_axi_rlast),
+        .M00_AXI_RVALID         (s_axi_rvalid),
+        .M00_AXI_RREADY         (s_axi_rready)
     );
     
     

@@ -182,7 +182,7 @@ module axi_write(
             axi_aw.lock     <= 2'b0;
             axi_aw.cache    <= 4'b0;
             axi_aw.prot     <= 3'b0;
-            axi_aw.qos      <= 4'b0;        
+            axi_aw.qos      <= 4'b0;
         end
     end
     
