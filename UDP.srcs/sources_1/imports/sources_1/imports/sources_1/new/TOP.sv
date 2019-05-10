@@ -156,6 +156,8 @@ module TOP(
     //** Reset generator.
     //**
     logic aresetn;
+    logic mmcm_locked;
+    logic ui_clk;
     RSTGEN2 rstgen100 (
          .reset_o  ( aresetn ),
          .locked_i ( mmcm_locked ),
@@ -373,7 +375,7 @@ module TOP(
     
     axi_interconnect_0 axi_interconnect_0(
         .INTERCONNECT_ACLK      (eth_rxck),
-        .INTERCONNECT_ARESETN   (rst_rx),
+        .INTERCONNECT_ARESETN   (!rst_rx),
         .S00_AXI_ARESET_OUT_N   (),
         .S00_AXI_ACLK           (eth_rxck),
         .S00_AXI_AWID           (axi_aw.id),

@@ -201,12 +201,25 @@ module axi_write(
         end
     end
     
+    /*---wea制御信号---*/
+    reg wea_en;
+    always_ff @(posedge clk_i)begin
+        if(udp_flg) wea_en <= `HI;
+        else if(UDP_st) wea_en <= `LO; 
+    end
+    
     always_comb begin
-        if(packet_cnt[0]==1'b0)begin
-            wr_en0 = wea;
+        if(wea_en)begin
+            if(packet_cnt[0]==1'b0)begin
+                wr_en0 = wea;
+            end
+            else begin
+                wr_en1 = wea;
+            end
         end
         else begin
-            wr_en1 = wea;
+            wr_en0 = `LO;
+            wr_en1 = `LO;
         end
     end
     

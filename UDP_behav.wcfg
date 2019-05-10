@@ -12,13 +12,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="23900486906fs"></ZoomStartTime>
-      <ZoomEndTime time="163911919031fs"></ZoomEndTime>
-      <Cursor1Time time="107320000000fs"></Cursor1Time>
+      <ZoomStartTime time="141963669980fs"></ZoomStartTime>
+      <ZoomEndTime time="142115339472fs"></ZoomEndTime>
+      <Cursor1Time time="142106625000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="168"></NameColumnWidth>
-      <ValueColumnWidth column_width="140"></ValueColumnWidth>
+      <ValueColumnWidth column_width="136"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="307" />
    <wave_markers>
@@ -779,6 +779,8 @@
       <obj_property name="ElementShortName">str_st_axi_aw[79:0]</obj_property>
       <obj_property name="ObjectShortName">str_st_axi_aw[79:0]</obj_property>
       <obj_property name="Radix">ASCIIRADIX</obj_property>
+      <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/data_i">
       <obj_property name="ElementShortName">data_i[7:0]</obj_property>
@@ -817,6 +819,8 @@
       <obj_property name="ElementShortName">str_st_axi_w[79:0]</obj_property>
       <obj_property name="ObjectShortName">str_st_axi_w[79:0]</obj_property>
       <obj_property name="Radix">ASCIIRADIX</obj_property>
+      <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_w">
       <obj_property name="ElementShortName">axi_w</obj_property>

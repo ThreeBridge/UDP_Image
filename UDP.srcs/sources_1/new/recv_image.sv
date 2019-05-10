@@ -278,6 +278,8 @@ module recv_image(
     always_ff @(posedge eth_rxck)begin
         if(rx_cnt==11'd24)
             udp_flg <= (q_rxd[0]==8'h11) ? `HI : `LO ;
+        else
+            udp_flg <= `LO;
     end
     
     
