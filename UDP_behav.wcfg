@@ -12,15 +12,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="141963669980fs"></ZoomStartTime>
-      <ZoomEndTime time="142115339472fs"></ZoomEndTime>
-      <Cursor1Time time="142106625000fs"></Cursor1Time>
+      <ZoomStartTime time="150915032440fs"></ZoomStartTime>
+      <ZoomEndTime time="151029532441fs"></ZoomEndTime>
+      <Cursor1Time time="150370625000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="168"></NameColumnWidth>
-      <ValueColumnWidth column_width="136"></ValueColumnWidth>
+      <ValueColumnWidth column_width="132"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="307" />
+   <WVObjectSize size="308" />
    <wave_markers>
       <marker label="" time="32952830000" />
       <marker label="" time="232605844000" />
@@ -825,6 +825,7 @@
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_w">
       <obj_property name="ElementShortName">axi_w</obj_property>
       <obj_property name="ObjectShortName">axi_w</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_wready">
       <obj_property name="ElementShortName">axi_wready</obj_property>
@@ -833,6 +834,10 @@
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/rd_en0">
       <obj_property name="ElementShortName">rd_en0</obj_property>
       <obj_property name="ObjectShortName">rd_en0</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/image_8to32_0/valid">
+      <obj_property name="ElementShortName">valid</obj_property>
+      <obj_property name="ObjectShortName">valid</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/d_out0">
       <obj_property name="ElementShortName">d_out0[31:0]</obj_property>
@@ -849,6 +854,7 @@
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/write_cnt">
       <obj_property name="ElementShortName">write_cnt[7:0]</obj_property>
       <obj_property name="ObjectShortName">write_cnt[7:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/fifo_sel">
       <obj_property name="ElementShortName">fifo_sel</obj_property>

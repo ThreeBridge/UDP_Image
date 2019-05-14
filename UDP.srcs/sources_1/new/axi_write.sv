@@ -225,18 +225,24 @@ module axi_write(
     
     reg rd_en0;
     reg rd_en1;
-    always_ff @(posedge clk_i)begin
+    always_comb begin
         if(st_w==WCH)begin
-            if(!fifo_sel)   rd_en0 <= `HI;
-            else            rd_en1 <= `HI;
+            if(axi_wready)begin
+                if(!fifo_sel)   rd_en0 <= `HI;
+                else            rd_en1 <= `HI;
+            end
+            else begin
+                rd_en0 = `LO;
+                rd_en1 = `LO;
+            end
         end
         else if(st_w==WEND)begin
-             rd_en0 <= 1'b0;
-             rd_en1 <= 1'b0;       
+             rd_en0 <= `LO;
+             rd_en1 <= `LO;       
         end
         else if(st_w==IDLE)begin
-            rd_en0 <= 1'b0;
-            rd_en1 <= 1'b0;
+            rd_en0 <= `LO;
+            rd_en1 <= `LO;
         end
     end
     
@@ -245,20 +251,28 @@ module axi_write(
     
     always_ff @(posedge clk_i)begin
         if(st_w==WCH)begin
-            axi_w.data  <= (!fifo_sel) ? d_out0 : d_out1;
             axi_w.strb  <= 4'hF;
             axi_w.valid <= `HI;
         end
         else if(st_w==IDLE)begin
-            axi_w.data  <= 32'b0;
             axi_w.strb  <= 4'h0;
             axi_w.valid <= `LO;            
         end
     end
+    
+    always_comb begin
+        if(st_w==WCH)begin
+            axi_w.data  <= (!fifo_sel) ? d_out0 : d_out1;
+        end
+        else if(st_w==IDLE)begin
+            axi_w.data  <= 32'b0;
+        end
+    end
+    
 
     always_ff @(posedge clk_i)begin
         if(st_w==WCH)begin
-            write_cnt <= write_cnt + 8'b1;
+            if(axi_wready) write_cnt <= write_cnt + 8'b1;
         end
         else if(st_w==IDLE)begin
             write_cnt <= 8'b0;
