@@ -32,10 +32,13 @@ module axi_write(
     
     axi_awready,
     axi_wready,
+    axi_bresp,
+    axi_bvalid,
     
     /*---OUTPUT---*/
     axi_aw,
-    axi_w
+    axi_w,
+    axi_bready
     
     );
     /*---STRUCT---*/
@@ -70,9 +73,12 @@ module axi_write(
     
     input       axi_awready;
     input       axi_wready;
+    input       axi_bresp;
+    input       axi_bvalid;
     
     output      axi_aw;
     output      axi_w;
+    output reg axi_bready;
     
     /*---signal---*/
     reg         w_ch_st;    // Write Transaction start
@@ -251,8 +257,14 @@ module axi_write(
     
     always_ff @(posedge clk_i)begin
         if(st_w==WCH)begin
-            axi_w.strb  <= 4'hF;
-            axi_w.valid <= `HI;
+            if(write_cnt==8'd250&&axi_wready)begin
+                axi_w.strb  <= 4'h0;
+                axi_w.valid <= `LO;              
+            end
+            else begin
+                axi_w.strb  <= 4'hF;
+                axi_w.valid <= `HI;
+            end
         end
         else if(st_w==IDLE)begin
             axi_w.strb  <= 4'h0;
@@ -279,10 +291,13 @@ module axi_write(
         end
     end
     
-    always_ff @(posedge clk_i)begin
+    always_comb begin
         if(st_w==WCH)begin
             if(write_cnt==8'd250)   axi_w.last <= `HI;
             else                    axi_w.last <= `LO;
+        end
+        else if(st_w==WEND)begin
+            axi_w.last <= `LO;
         end
         else if(st_w==IDLE)begin
             axi_w.last <= `LO;
@@ -291,6 +306,11 @@ module axi_write(
     
     always_ff @(posedge clk_i)begin
         if(st_w==WEND) fifo_sel <= fifo_sel + 1'b1;
+    end
+    
+    always_ff @(posedge clk_i)begin
+        if(axi_bresp==2'b0&&axi_bvalid==1'b1)   axi_bready <= `LO;
+        else                                    axi_bready <= `HI;
     end
     
     image_8to32 image_8to32_0(

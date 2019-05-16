@@ -53,13 +53,16 @@ module Arbiter(
     input [7:0]           SW,
     input                 axi_awready,
     input                 axi_wready,
+    input                 axi_bresp,
+    input                 axi_bvalid,
     
     output [8:0]          rarp_o,
     output [8:0]          ping_o,
     output [8:0]          UDP_o,
     //output reg [7:0]      LED
     output AXI_AW         axi_aw,
-    output AXI_W          axi_w
+    output AXI_W          axi_w,
+    output                axi_bready
     );
 
 
@@ -341,6 +344,8 @@ parameter  Recv_End    = 8'h03;
         .SW         (SW),        // add 2018.12.5
         .axi_awready(axi_awready),
         .axi_wready (axi_wready),
+        .axi_bresp  (axi_bresp),
+        .axi_bvalid (axi_bvalid),
         /*---Output---*/
         .imdata     (imdata),
         .recvend    (recvend),
@@ -350,7 +355,8 @@ parameter  Recv_End    = 8'h03;
         .SrcPort_o  (SrcPort),
         .DstPort_o  (DstPort),
         .axi_aw     (axi_aw),
-        .axi_w      (axi_w)
+        .axi_w      (axi_w),
+        .axi_bready (axi_bready)
     );
     
     trans_image trans_image(

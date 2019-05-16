@@ -47,6 +47,8 @@ module recv_image(
     SW,
     axi_awready,
     axi_wready,
+    axi_bresp,
+    axi_bvalid,
     /*---Output---*/
     imdata,
     recvend,
@@ -55,7 +57,8 @@ module recv_image(
     SrcPort_o,
     DstPort_o,
     axi_aw,
-    axi_w
+    axi_w,
+    axi_bready
     );
     /*---STRUCT---*/
     typedef struct packed{
@@ -98,6 +101,8 @@ module recv_image(
     input [7:0]     SW;
     input           axi_awready;
     input           axi_wready;
+    input           axi_bresp;
+    input           axi_bvalid;
         
     (*dont_touch="true"*)output reg [7:0]  imdata;
     output reg        recvend;
@@ -108,6 +113,7 @@ module recv_image(
     
     output AXI_AW   axi_aw;
     output AXI_W    axi_w;
+    output          axi_bready;
     //output reg [7:0]  image_buffer [9999:0];
     
     /*---parameter---*/
@@ -551,9 +557,12 @@ module recv_image(
         .UDP_st     (UDP_st),
         .axi_awready(axi_awready),
         .axi_wready (axi_wready),
+        .axi_bresp  (axi_bresp),
+        .axi_bvalid (axi_bvalid),
         /*---OUTPUT---*/
         .axi_aw     (axi_aw),
-        .axi_w      (axi_w)
+        .axi_w      (axi_w),
+        .axi_bready (axi_bready)
     );
     
     

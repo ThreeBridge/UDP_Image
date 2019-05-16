@@ -86,10 +86,33 @@ module TOP(
         logic [3:0]     strb;
         logic           last;
         logic           valid;  
-    }AXI_W; 
+    }AXI_W;
+
+    typedef struct packed{
+        logic           id;
+        logic [28:0]    addr;
+        logic [7:0]     len;
+        logic [2:0]     size;
+        logic [1:0]     burst;
+        logic           lock;
+        logic [3:0]     cache;
+        logic [2:0]     prot;
+        logic [3:0]     qos;
+        logic           valid;    
+    }AXI_AR;
+    
+    typedef struct packed{
+        logic [31:0]    data;
+        logic [3:0]     strb;
+        logic           last;
+        logic           valid;  
+    }AXI_R;
+    
     
     AXI_AW          axi_aw;
     AXI_W           axi_w;
+    AXI_AR          axi_ar;
+    AXI_R           axi_r;
     
     wire [7:0]       gmii_txd;
     wire             gmii_txctl;
@@ -173,6 +196,10 @@ module TOP(
     wire UDP_btn_tx;        // ボタン入力によるUDP送信
     wire axi_awready;
     wire axi_wready;
+    wire axi_bresp;
+    wire axi_bvalid;
+    wire axi_bready;
+    wire axi_arready;
     //wire UDP_tx;            // UDPの送受信
     wire [8:0] rarp_o;   
     wire [8:0] ping_o;  
@@ -191,12 +218,16 @@ module TOP(
         .SW           (SW),
         .axi_awready  (axi_awready),
         .axi_wready   (axi_wready),
+        .axi_bresp    (axi_bresp),
+        .axi_bvalid   (axi_bvalid),
+        .axi_arready  (axi_arready),
         /*---OUTPUT---*/
         .rarp_o       (rarp_o),
         .ping_o       (ping_o),
         .UDP_o        (UDP_o),
         .axi_aw       (axi_aw),
-        .axi_w        (axi_w)
+        .axi_w        (axi_w),
+        .axi_bready   (axi_bready)
     );
 
     wire [7:0] tx_led;
@@ -395,9 +426,9 @@ module TOP(
         .S00_AXI_WVALID         (axi_w.valid),
         .S00_AXI_WREADY         (axi_wready),
         .S00_AXI_BID            (),
-        .S00_AXI_BRESP          (),
-        .S00_AXI_BVALID         (),
-        .S00_AXI_BREADY         (1'b0),
+        .S00_AXI_BRESP          (axi_bresp),
+        .S00_AXI_BVALID         (axi_bvalid),
+        .S00_AXI_BREADY         (axi_bready),
         .S00_AXI_ARID           (1'b0),
         .S00_AXI_ARADDR         (29'b0),
         .S00_AXI_ARLEN          (8'b0),
@@ -408,7 +439,7 @@ module TOP(
         .S00_AXI_ARPROT         (3'b0),
         .S00_AXI_ARQOS          (4'b0),
         .S00_AXI_ARVALID        (1'b0),
-        .S00_AXI_ARREADY        (),
+        .S00_AXI_ARREADY        (axi_arready),
         .S00_AXI_RID            (),
         .S00_AXI_RDATA          (),
         .S00_AXI_RRESP          (),
