@@ -105,7 +105,8 @@ module TOP(
         logic [31:0]    data;
         logic [3:0]     strb;
         logic           last;
-        logic           valid;  
+        logic           valid;
+        logic [1:0]     resp;
     }AXI_R;
     
     
@@ -200,6 +201,7 @@ module TOP(
     wire axi_bvalid;
     wire axi_bready;
     wire axi_arready;
+    wire axi_rready;
     //wire UDP_tx;            // UDPの送受信
     wire [8:0] rarp_o;   
     wire [8:0] ping_o;  
@@ -221,13 +223,16 @@ module TOP(
         .axi_bresp    (axi_bresp),
         .axi_bvalid   (axi_bvalid),
         .axi_arready  (axi_arready),
+        .axi_r        (axi_r),
         /*---OUTPUT---*/
         .rarp_o       (rarp_o),
         .ping_o       (ping_o),
         .UDP_o        (UDP_o),
         .axi_aw       (axi_aw),
         .axi_w        (axi_w),
-        .axi_bready   (axi_bready)
+        .axi_bready   (axi_bready),
+        .axi_ar       (axi_ar),
+        .axi_rready   (axi_rready)
     );
 
     wire [7:0] tx_led;
@@ -429,23 +434,23 @@ module TOP(
         .S00_AXI_BRESP          (axi_bresp),
         .S00_AXI_BVALID         (axi_bvalid),
         .S00_AXI_BREADY         (axi_bready),
-        .S00_AXI_ARID           (1'b0),
-        .S00_AXI_ARADDR         (29'b0),
-        .S00_AXI_ARLEN          (8'b0),
-        .S00_AXI_ARSIZE         (3'b0),
-        .S00_AXI_ARBURST        (2'b0),
-        .S00_AXI_ARLOCK         (2'b0),
-        .S00_AXI_ARCACHE        (4'b0),
-        .S00_AXI_ARPROT         (3'b0),
-        .S00_AXI_ARQOS          (4'b0),
-        .S00_AXI_ARVALID        (1'b0),
+        .S00_AXI_ARID           (axi_ar.id),
+        .S00_AXI_ARADDR         (axi_ar.addr),
+        .S00_AXI_ARLEN          (axi_ar.len),
+        .S00_AXI_ARSIZE         (axi_ar.size),
+        .S00_AXI_ARBURST        (axi_ar.burst),
+        .S00_AXI_ARLOCK         (axi_ar.lock),
+        .S00_AXI_ARCACHE        (axi_ar.cache),
+        .S00_AXI_ARPROT         (axi_ar.prot),
+        .S00_AXI_ARQOS          (axi_ar.qos),
+        .S00_AXI_ARVALID        (axi_ar.valid),
         .S00_AXI_ARREADY        (axi_arready),
         .S00_AXI_RID            (),
-        .S00_AXI_RDATA          (),
-        .S00_AXI_RRESP          (),
-        .S00_AXI_RLAST          (),
-        .S00_AXI_RVALID         (),
-        .S00_AXI_RREADY         (1'b0),
+        .S00_AXI_RDATA          (axi_r.data),
+        .S00_AXI_RRESP          (axi_r.resp),
+        .S00_AXI_RLAST          (axi_r.last),
+        .S00_AXI_RVALID         (axi_r.valid),
+        .S00_AXI_RREADY         (axi_rready),
         .M00_AXI_ARESET_OUT_N   (),
         .M00_AXI_ACLK           (ui_clk),
         .M00_AXI_AWID           (s_axi_awid),

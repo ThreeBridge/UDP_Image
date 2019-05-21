@@ -40,6 +40,26 @@
         logic           valid;  
     }AXI_W;
     
+    typedef struct packed{
+        logic           id;
+        logic [28:0]    addr;
+        logic [7:0]     len;
+        logic [2:0]     size;
+        logic [1:0]     burst;
+        logic           lock;
+        logic [3:0]     cache;
+        logic [2:0]     prot;
+        logic [3:0]     qos;
+        logic           valid;    
+    }AXI_AR;
+    
+    typedef struct packed{
+        logic [31:0]    data;
+        logic [3:0]     strb;
+        logic           last;
+        logic           valid;
+        logic [1:0]     resp;
+    }AXI_R;        
     
 module Arbiter(
     input [7:0]           gmii_rxd,
@@ -55,6 +75,8 @@ module Arbiter(
     input                 axi_wready,
     input                 axi_bresp,
     input                 axi_bvalid,
+    input                 axi_arready,
+    input AXI_R           axi_r,
     
     output [8:0]          rarp_o,
     output [8:0]          ping_o,
@@ -62,7 +84,9 @@ module Arbiter(
     //output reg [7:0]      LED
     output AXI_AW         axi_aw,
     output AXI_W          axi_w,
-    output                axi_bready
+    output                axi_bready,
+    output AXI_AR         axi_ar,
+    output                axi_rready
     );
 
 
@@ -356,7 +380,8 @@ parameter  Recv_End    = 8'h03;
         .DstPort_o  (DstPort),
         .axi_aw     (axi_aw),
         .axi_w      (axi_w),
-        .axi_bready (axi_bready)
+        .axi_bready (axi_bready),
+        .write_end  ()
     );
     
     trans_image trans_image(
@@ -374,11 +399,15 @@ parameter  Recv_End    = 8'h03;
         .SrcPort_i      (SrcPort),
         .DstPort_i      (DstPort),
         .SW             (SW),        // add 2018.12.5
+        .axi_arready    (axi_arready),
+        .axi_r          (axi_r),
         /*---Output---*/
         .image_cnt      (addr),
         .addr_cnt       (addr_cnt),
         .UDP_o          (UDP_o),
-        .trans_err      (trans_err)
+        .trans_err      (trans_err),
+        .axi_ar         (axi_ar),
+        .axi_rready     (axi_rready)
     );
 
 //    Image_UDP Image_UDP(
