@@ -24,6 +24,7 @@ module axi_read(
     /*---INPUT---*/
     clk_i,
     rst,
+    rd_en,
     sel,
     axi_arready,
     axi_r,
@@ -50,12 +51,14 @@ module axi_read(
         logic [31:0]    data;
         logic [3:0]     strb;
         logic           last;
-        logic           valid;  
+        logic           valid;
+        logic [1:0]     resp;
     }AXI_R;    
     
     /*---I/O Declare---*/
     input       clk_i;
     input       rst;
+    input       rd_en;
     input [8:0] sel;
     input       axi_arready;
     input       axi_r;
@@ -91,7 +94,7 @@ module axi_read(
         nx_ar = st_ar;
         case (st_ar)
             IDLE : begin
-                if (1) nx_ar = ARCH;
+                if (rd_en) nx_ar = ARCH;
             end
             ARCH : begin
                 if (axi_arready) nx_ar = AR_OK;
@@ -108,8 +111,8 @@ module axi_read(
     reg [3:0] st_r;
     reg [3:0] nx_r;
     always_ff @(posedge clk_i)begin
-        if(rst) st_ar <= IDLE;
-        else    st_ar <= nx_ar;        
+        if(rst) st_r <= IDLE;
+        else    st_r <= nx_ar;        
     end
     
     always_comb begin
@@ -145,16 +148,16 @@ module axi_read(
             axi_ar.valid    <=  1'b0;
         end
         else if(st_ar==IDLE)begin
-            axi_aw.id       <= 1'b0;
-            axi_aw.valid    <= `LO;
-            axi_aw.addr     <= 29'b0;
-            axi_aw.len      <= 8'h0;
-            axi_aw.size     <= 3'b0;
-            axi_aw.burst    <= 2'b0;
-            axi_aw.lock     <= 2'b0;
-            axi_aw.cache    <= 4'b0;
-            axi_aw.prot     <= 3'b0;
-            axi_aw.qos      <= 4'b0;        
+            axi_ar.id       <= 1'b0;
+            axi_ar.valid    <= `LO;
+            axi_ar.addr     <= 29'b0;
+            axi_ar.len      <= 8'h0;
+            axi_ar.size     <= 3'b0;
+            axi_ar.burst    <= 2'b0;
+            axi_ar.lock     <= 2'b0;
+            axi_ar.cache    <= 4'b0;
+            axi_ar.prot     <= 3'b0;
+            axi_ar.qos      <= 4'b0;        
         end
     end
     

@@ -58,7 +58,8 @@ module recv_image(
     DstPort_o,
     axi_aw,
     axi_w,
-    axi_bready
+    axi_bready,
+    write_end
     );
     /*---STRUCT---*/
     typedef struct packed{
@@ -114,6 +115,7 @@ module recv_image(
     output AXI_AW   axi_aw;
     output AXI_W    axi_w;
     output          axi_bready;
+    output          write_end;
     //output reg [7:0]  image_buffer [9999:0];
     
     /*---parameter---*/
@@ -562,7 +564,8 @@ module recv_image(
         /*---OUTPUT---*/
         .axi_aw     (axi_aw),
         .axi_w      (axi_w),
-        .axi_bready (axi_bready)
+        .axi_bready (axi_bready),
+        .write_end  (write_end)
     );
     
     

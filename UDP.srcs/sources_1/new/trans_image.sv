@@ -41,12 +41,38 @@ module trans_image(
     SrcPort_i,
     DstPort_i,
     SW,
+    axi_arready,
+    axi_r,
     /*---Output---*/
     image_cnt,
     addr_cnt,
     UDP_o,
-    trans_err       // 送信エラー
+    trans_err,       // 送信エラー
+    axi_ar,
+    axi_rready
     );
+    
+    /*---STRUCT---*/
+    typedef struct packed{
+        logic           id;
+        logic [28:0]    addr;
+        logic [7:0]     len;
+        logic [2:0]     size;
+        logic [1:0]     burst;
+        logic           lock;
+        logic [3:0]     cache;
+        logic [2:0]     prot;
+        logic [3:0]     qos;
+        logic           valid;    
+    }AXI_AR;
+    
+    typedef struct packed{
+        logic [31:0]    data;
+        logic [3:0]     strb;
+        logic           last;
+        logic           valid;
+        logic [1:0]     resp;
+    }AXI_R;    
     
     /*---I/O Declare---*/
     input       eth_rxck;
@@ -64,10 +90,17 @@ module trans_image(
     input [15:0] DstPort_i;
     input [7:0]  SW;
     
+    input        axi_arready;
+    input AXI_R  axi_r;
+    
     output reg [9:0]   image_cnt;
     output reg [8:0]   addr_cnt;
     (*dont_touch="true"*)output reg [8:0]    UDP_o;
     output reg         trans_err;
+    
+    output AXI_AR       axi_ar;
+    output              axi_rready;
+    
     
     /*---parameter---*/
     parameter   IDLE    =   8'h00;
@@ -149,7 +182,8 @@ module trans_image(
                 if (recvend) nx = Presv;
             end
             Presv : begin
-                if (d_img_cnt[2]>10'd999) nx = READY;
+                //if (d_img_cnt[2]>10'd999) nx = READY;
+                if (axi_r.last&&axi_r.valid) nx = READY;
             end
             READY : begin
                 if (ready_end) nx = Hcsum;
@@ -217,6 +251,40 @@ module trans_image(
 //        end
 //    end
     
+    /*--DRAM2BUF--*/
+    reg [7:0] image_buf [999:0];
+    wire [7:0] r_data0 = axi_r.data[7:0];
+    wire [7:0] r_data1 = axi_r.data[15:8];
+    wire [7:0] r_data2 = axi_r.data[23:16];
+    wire [7:0] r_data3 = axi_r.data[31:24];
+    always_ff @(posedge eth_rxck)begin
+        if(st==Presv)begin
+            if(axi_r.valid)begin
+                image_buf <= {r_data3,r_data2,r_data1,r_data0,image_buf[999:4]};
+            end
+        end
+        else if(st==Tx_En&&packet_cnt!=packet_cnt_sel)begin
+            if(axi_r.valid)begin
+                image_buf <= {r_data3,r_data2,r_data1,r_data0,image_buf[999:4]};
+            end            
+        end
+    end
+    
+    /*--Read Start--*/
+    reg [1:0] d_rd_en;
+    wire read_en = (d_rd_en==2'b01);    // 1度だけHIGH
+    always_ff @(posedge eth_rxck)begin
+        if(st==Presv)begin
+            d_rd_en <= {d_rd_en[0],`HI};
+        end
+        else if(st==READY)begin
+            d_rd_en <= 2'b0;
+        end
+        else if(st==Tx_En)begin
+            d_rd_en <= {d_rd_en[0],`HI};
+        end
+    end
+    
     always_ff @(posedge eth_rxck)begin              // recv_imageにあるBRAMの出力用アドレス
         if(st==Presv)begin
             if(image_cnt<1000)begin
@@ -243,7 +311,7 @@ module trans_image(
     end
     
     
-    always_ff @(posedge eth_rxck)begin              // BRAMのアドレスを表現するためのもの
+    always_ff @(posedge eth_rxck)begin              // BRAM(DRAM)のアドレスを表現するためのもの
         if(st==IDLE)        addr_cnt <= 9'b0;
         else if(st==Hc_End) addr_cnt <= packet_cnt + 1;
     end
@@ -485,15 +553,16 @@ module trans_image(
             {TXBUF[40],TXBUF[41]} <= 16'h00_00;             // UDP Checksum (仮想ヘッダ+UDP)
             /*-UDPデータ(可変長(受信データ長による))____1000バイトに固定____-*/
             //for(j=0;j<1000;j=j+1) TXBUF[6'd42+j] <= image_buffer[j];
-            for(tx_A=0;tx_A<500;tx_A=tx_A+1) TXBUF[6'd42+tx_A] <= image_bufferA[tx_A];      // 2018.11.16
-            for(tx_B=0;tx_B<500;tx_B=tx_B+1) TXBUF[6'd42+tx_B+500] <= image_bufferB[tx_B];  // 2018.11.16
+            //for(tx_A=0;tx_A<500;tx_A=tx_A+1) TXBUF[6'd42+tx_A] <= image_bufferA[tx_A];      // 2018.11.16
+            //for(tx_B=0;tx_B<500;tx_B=tx_B+1) TXBUF[6'd42+tx_B+500] <= image_bufferB[tx_B];  // 2018.11.16
+            TXBUF[1041:42] <= image_buf[999:0];
             {TXBUF[1042],TXBUF[1043],TXBUF[1044],TXBUF[1045]} <= 32'h01_02_03_04;   // dummy
             //Hcsum_st <= 1;
         end
         else if(st==Hc_End)    {TXBUF[24],TXBUF[25]} <= csum_o;
         //else if(st==Uc_End)    {TXBUF[40],TXBUF[41]} <= csum_extend;
         else if(st==Tx_En) TXBUF <= {TXBUF[0],TXBUF[1045:1]};
-    end    
+    end
     
     /*---仮想ヘッダ準備---*/
 //    integer v_cnt;
@@ -662,5 +731,18 @@ module trans_image(
         if(st==ERROR)   trans_err <= 1'b1;
         else            trans_err <= 1'b0;
     end
+    
+    axi_read axi_read(
+        /*---INPUT---*/
+        .clk_i          (eth_rxck),
+        .rst            (rst_rx),
+        .rd_en          (read_en),
+        .sel            (addr_cnt),
+        .axi_arready    (axi_arready),
+        .axi_r          (axi_r),
+        /*---OUTPUT---*/
+        .axi_ar         (axi_ar),
+        .axi_rready     (axi_rready)    
+    );
     
 endmodule
