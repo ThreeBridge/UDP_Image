@@ -112,7 +112,7 @@ module axi_read(
     reg [3:0] nx_r;
     always_ff @(posedge clk_i)begin
         if(rst) st_r <= IDLE;
-        else    st_r <= nx_ar;        
+        else    st_r <= nx_r;        
     end
     
     always_comb begin
@@ -127,6 +127,9 @@ module axi_read(
             READ : begin
                 if (axi_r.last) nx_r = REND;
             end
+            REND : begin
+                nx_r = IDLE;
+            end
         endcase
     end
     
@@ -135,7 +138,7 @@ module axi_read(
         if(st_ar==ARCH)begin
             axi_ar.id       <=  1'b0;
             axi_ar.valid    <=  `HI;
-            axi_ar.addr     <=  29'b0 + (8'd250*sel);
+            axi_ar.addr     <=  29'b0 + (10'd1000*sel);
             axi_ar.len      <=  8'hF9;
             axi_ar.size     <=  3'b010;
             axi_ar.burst    <=  2'b01;
@@ -167,9 +170,8 @@ module axi_read(
     end
     
     /*---R_CH---*/
-    always_ff @(posedge clk_i)begin
+    always_comb begin
         if(axi_r.valid)     axi_rready <= `HI;
-        else if(axi_r.last) axi_rready <= `LO;
         else                axi_rready <= `LO;
     end
     

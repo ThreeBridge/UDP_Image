@@ -167,7 +167,7 @@ module axi_write(
         if (st_aw==AWCH)begin
             axi_aw.id       <= 1'b0;
             axi_aw.valid    <= `HI;
-            axi_aw.addr     <= 29'b0+(8'd250*packet_cnt);
+            axi_aw.addr     <= 29'b0+(10'd1000*packet_cnt);
             axi_aw.len      <= 8'hF9;
             axi_aw.size     <= 3'b010;
             axi_aw.burst    <= 2'b01;

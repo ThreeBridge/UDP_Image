@@ -253,10 +253,10 @@ module trans_image(
     
     /*--DRAM2BUF--*/
     reg [7:0] image_buf [999:0];
-    wire [7:0] r_data0 = axi_r.data[7:0];
-    wire [7:0] r_data1 = axi_r.data[15:8];
-    wire [7:0] r_data2 = axi_r.data[23:16];
-    wire [7:0] r_data3 = axi_r.data[31:24];
+    wire [7:0] r_data0 = axi_r.data[31:24] ^ 8'hFF;
+    wire [7:0] r_data1 = axi_r.data[23:16] ^ 8'hFF;
+    wire [7:0] r_data2 = axi_r.data[15:9] ^ 8'hFF;
+    wire [7:0] r_data3 = axi_r.data[7:0] ^ 8'hFF;
     always_ff @(posedge eth_rxck)begin
         if(st==Presv)begin
             if(axi_r.valid)begin
@@ -280,11 +280,15 @@ module trans_image(
         else if(st==READY)begin
             d_rd_en <= 2'b0;
         end
-        else if(st==Tx_En)begin
+        else if(st==Tx_En&&packet_cnt!=packet_cnt_sel)begin
             d_rd_en <= {d_rd_en[0],`HI};
+        end
+        else if(st==IDLE)begin
+            d_rd_en <= 2'b0;
         end
     end
     
+    /*--BRAM--*/
     always_ff @(posedge eth_rxck)begin              // recv_imageにあるBRAMの出力用アドレス
         if(st==Presv)begin
             if(image_cnt<1000)begin

@@ -167,7 +167,12 @@ module tb_rarp(
    parameter   WCH     =   4'h4;
    parameter   WEND    =   4'h5;
    
+   /*---axi_read---*/
+   parameter   ARCH    =   4'h1;
+   parameter   AR_OK   =   4'h2;
    
+   parameter   READ    =   4'h4;
+   parameter   REND    =   4'h5;   
    
    reg [79:0] str_st_rx;
    reg [79:0] str_st_tx;
@@ -177,6 +182,8 @@ module tb_rarp(
    reg [79:0] str_st_trans_image;
    reg [79:0] str_st_axi_aw;
    reg [79:0] str_st_axi_w;
+   reg [79:0] str_st_axi_ar;
+   reg [79:0] str_st_axi_r;   
    always_comb begin
       case (top_i.R_Arbiter.st)
          Idle: str_st_rx = "idle";   
@@ -302,6 +309,23 @@ module tb_rarp(
             WEND : str_st_axi_w = "wend";
         endcase    
     end
+    
+    always_comb begin
+        case (top_i.R_Arbiter.trans_image.axi_read.st_ar)
+            IDLE : str_st_axi_ar = "idle";
+            ARCH : str_st_axi_ar = "arch";
+            AR_OK : str_st_axi_ar = "ar_ok";
+        endcase
+    end
+    
+    always_comb begin
+        case (top_i.R_Arbiter.trans_image.axi_read.st_r)
+            IDLE : str_st_axi_r = "idle";
+            STBY : str_st_axi_r = "stby";
+            READ : str_st_axi_r = "read";
+            REND : str_st_axi_r = "rend";
+        endcase    
+    end    
 
       
    initial begin
@@ -884,8 +908,9 @@ module tb_rarp(
         // UDP_Checksum
         recvByte(8'h60);
         recvByte(8'h70); 
-        /*--UDP Data--*/      
-        repeat(100) recvByte(8'h00);    // 100
+        /*--UDP Data--*/
+        recvByte(8'hAA);                // dummy 1byte
+        repeat(99)  recvByte(8'h00);    // 100
         repeat(100) recvByte(8'hFF);    // 200
         repeat(100) recvByte(8'h00);    // 300
         repeat(100) recvByte(8'hFF);    // 400
@@ -897,10 +922,10 @@ module tb_rarp(
         repeat(100) recvByte(8'hFF);    // 1000
         
         // CRC
-        recvByte(8'hE6);
-        recvByte(8'h4C);
-        recvByte(8'hCD);
-        recvByte(8'h8B);
+        recvByte(8'hD9);
+        recvByte(8'h56);
+        recvByte(8'h23);
+        recvByte(8'hAB);
         recv_end();
         
         //P_RXCLK = 0;
