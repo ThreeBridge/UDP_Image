@@ -673,6 +673,14 @@ module tb_rarp(
 //         P_RXDV = 0;
          
          /*---UDP_image---*/
+         SW[7:4] = 4'h2;
+         #2500;
+         UDP_image(0);
+         #192;
+         UDP_image(1);
+         #10000;
+         
+         #100000;
          SW[7:4] = 4'hA;
          #2500;
          UDP10000();
@@ -847,7 +855,7 @@ module tb_rarp(
          CPU_RSTN = 1;
       end
    endtask
-   task UDP_image();
+   task UDP_image(input [1:0] n);
         begin
          // プリアンブル
         repeat(7) recvByte(8'h55);
@@ -909,7 +917,12 @@ module tb_rarp(
         recvByte(8'h60);
         recvByte(8'h70); 
         /*--UDP Data--*/
-        recvByte(8'hAA);                // dummy 1byte
+        if(n==0)begin
+            recvByte(8'hAA);                // dummy 1byte
+        end
+        else if(n==1)begin
+            recvByte(8'hBB);                // dummy 1byte
+        end
         repeat(99)  recvByte(8'h00);    // 100
         repeat(100) recvByte(8'hFF);    // 200
         repeat(100) recvByte(8'h00);    // 300
@@ -922,10 +935,18 @@ module tb_rarp(
         repeat(100) recvByte(8'hFF);    // 1000
         
         // CRC
-        recvByte(8'hD9);
-        recvByte(8'h56);
-        recvByte(8'h23);
-        recvByte(8'hAB);
+        if(n==0)begin
+            recvByte(8'hD9);
+            recvByte(8'h56);
+            recvByte(8'h23);
+            recvByte(8'hAB);
+        end
+        else if(n==1)begin
+            recvByte(8'h00);
+            recvByte(8'h83);
+            recvByte(8'hD5);
+            recvByte(8'h43);
+        end
         recv_end();
         
         //P_RXCLK = 0;
@@ -937,34 +958,34 @@ module tb_rarp(
    task UDP10000();
        begin
        /*--1パケット目--*/
-       UDP_image();
+       UDP_image(0);
        /*--2パケット目--*/
        #10000;
-       UDP_image();
+       UDP_image(0);
        /*--3パケット目--*/
        #10000;
-       UDP_image();
+       UDP_image(0);
        /*--4パケット目--*/
        #10000;
-       UDP_image();
+       UDP_image(0);
        /*--5パケット目--*/
        #10000;
-       UDP_image();
+       UDP_image(0);
        /*--6パケット目--*/
        #10000;
-       UDP_image();
+       UDP_image(0);
        /*--7パケット目--*/
        #10000;
-       UDP_image();
+       UDP_image(0);
        /*--8パケット目--*/
        #10000;
-       UDP_image();  
+       UDP_image(0);  
        /*--9パケット目--*/
        #10000;
-       UDP_image();
+       UDP_image(0);
        /*--10パケット目--*/
        #10000;
-       UDP_image();
+       UDP_image(0);
        end
    endtask
    
@@ -975,7 +996,7 @@ module tb_rarp(
    
    task TX_UDP();
        #10000;
-       UDP_image();
+       UDP_image(0);
    endtask
    
    task UDP_160();

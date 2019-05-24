@@ -255,7 +255,7 @@ module trans_image(
     reg [7:0] image_buf [999:0];
     wire [7:0] r_data0 = axi_r.data[31:24] ^ 8'hFF;
     wire [7:0] r_data1 = axi_r.data[23:16] ^ 8'hFF;
-    wire [7:0] r_data2 = axi_r.data[15:9] ^ 8'hFF;
+    wire [7:0] r_data2 = axi_r.data[15:8] ^ 8'hFF;
     wire [7:0] r_data3 = axi_r.data[7:0] ^ 8'hFF;
     always_ff @(posedge eth_rxck)begin
         if(st==Presv)begin

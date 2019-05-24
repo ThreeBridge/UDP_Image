@@ -82,7 +82,7 @@ module axi_write(
     output reg write_end;
     
     /*---signal---*/
-    reg         w_ch_st;    // Write Transaction start
+    reg [2:0]   w_ch_st;    // Write Transaction start
     reg [7:0]   write_cnt;
     reg         fifo_sel=0;
     
@@ -114,7 +114,7 @@ module axi_write(
                 if (udp_flg) nx_aw = AWCH;
             end
             AWCH : begin
-                if (axi_awready) nx_aw = AW_OK;
+                if (axi_awready&&axi_aw.valid) nx_aw = AW_OK;
             end
             AW_OK :begin
                 nx_aw = IDLE;
@@ -136,7 +136,7 @@ module axi_write(
         nx_w = st_w;
         case (st_w)
             IDLE : begin
-                if (w_ch_st) nx_w = STBY;
+                if (w_ch_st!=3'b0) nx_w = STBY;
             end
             STBY : begin
                 if (UDP_st) nx_w = WCH;
@@ -154,14 +154,16 @@ module axi_write(
     
     
     always_ff @(posedge clk_i)begin
-        if(st_aw==AW_OK)begin
-            w_ch_st <= `HI;
+        if(rst)begin
+            w_ch_st <= 3'b0;
         end
-        else begin
-            w_ch_st <= `LO;
+        else if(st_aw==AW_OK)begin
+            w_ch_st <= w_ch_st + 3'b1;
+        end
+        else if(st_w==WEND)begin
+            w_ch_st <= w_ch_st - 3'b1;
         end
     end
-    
     
     always_ff @(posedge clk_i)begin
         if (st_aw==AWCH)begin
@@ -176,12 +178,8 @@ module axi_write(
             axi_aw.prot     <= 3'b0;
             axi_aw.qos      <= 4'b0;
         end
-        else if (st_aw==AW_OK)begin
-            axi_aw.valid    <= 1'b0;
-        end
         else if (st_aw==IDLE)begin
             axi_aw.id       <= 1'b0;
-            axi_aw.valid    <= `LO;
             axi_aw.addr     <= 29'b0;
             axi_aw.len      <= 8'h0;
             axi_aw.size     <= 3'b0;
@@ -190,6 +188,24 @@ module axi_write(
             axi_aw.cache    <= 4'b0;
             axi_aw.prot     <= 3'b0;
             axi_aw.qos      <= 4'b0;
+        end
+    end
+    
+    /*--valid--*/
+    always_ff @(posedge clk_i)begin
+        if(st_aw==AWCH)begin
+            if(axi_awready&&axi_aw.valid)begin
+                axi_aw.valid <= `LO;
+            end
+            else begin
+                axi_aw.valid <= `HI;
+            end
+        end
+        else if (st_aw==AW_OK)begin
+            axi_aw.valid    <= `LO;
+        end
+        else if (st_aw==IDLE)begin
+            axi_aw.valid    <= `LO;
         end
     end
     
@@ -306,7 +322,8 @@ module axi_write(
     end
     
     always_ff @(posedge clk_i)begin
-        if(st_w==WEND) fifo_sel <= fifo_sel + 1'b1;
+        if(rst)             fifo_sel <= 1'b0;
+        else if(st_w==WEND) fifo_sel <= fifo_sel + 1'b1;
     end
     
     always_ff @(posedge clk_i)begin
