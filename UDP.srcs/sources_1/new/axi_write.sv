@@ -24,11 +24,13 @@ module axi_write(
     /*---INPUT---*/
     clk_i,
     rst,
+    rst_btn,
     wea,
     data_i,
     udp_flg,
     packet_cnt,
     UDP_st,
+    els_packet,
     
     axi_awready,
     axi_wready,
@@ -65,11 +67,13 @@ module axi_write(
     /*---I/O Declare---*/
     input       clk_i;
     input       rst;
+    input       rst_btn;
     input       wea;
     input [7:0] data_i;
     input       udp_flg;
     input [8:0] packet_cnt;
     input       UDP_st;
+    input       els_packet;
     
     input       axi_awready;
     input       axi_wready;
@@ -86,8 +90,8 @@ module axi_write(
     reg [7:0]   write_cnt;
     reg         fifo_sel=0;
     
-    AXI_AW      axi_aw;
-    AXI_W       axi_w;
+    (*dont_touch="true"*)AXI_AW      axi_aw;
+    (*dont_touch="true"*)AXI_W       axi_w;
     
     
     /*---parameter---*/
@@ -115,6 +119,7 @@ module axi_write(
             end
             AWCH : begin
                 if (axi_awready&&axi_aw.valid) nx_aw = AW_OK;
+                else if(rst_btn)               nx_aw = IDLE;
             end
             AW_OK :begin
                 nx_aw = IDLE;
@@ -140,6 +145,7 @@ module axi_write(
             end
             STBY : begin
                 if (UDP_st) nx_w = WCH;
+                else if(els_packet) nx_w = IDLE;
             end
             WCH : begin
                 if (write_cnt==8'd250) nx_w = WEND;
@@ -157,6 +163,9 @@ module axi_write(
         if(rst)begin
             w_ch_st <= 3'b0;
         end
+        else if(st_aw==AW_OK&&st_w==WEND)begin
+            w_ch_st <= w_ch_st;
+        end
         else if(st_aw==AW_OK)begin
             w_ch_st <= w_ch_st + 3'b1;
         end
@@ -168,7 +177,6 @@ module axi_write(
     always_ff @(posedge clk_i)begin
         if (st_aw==AWCH)begin
             axi_aw.id       <= 1'b0;
-            axi_aw.valid    <= `HI;
             axi_aw.addr     <= 29'b0+(10'd1000*packet_cnt);
             axi_aw.len      <= 8'hF9;
             axi_aw.size     <= 3'b010;
@@ -291,10 +299,10 @@ module axi_write(
     
     always_comb begin
         if(st_w==WCH)begin
-            axi_w.data  <= (!fifo_sel) ? d_out0 : d_out1;
+            axi_w.data  = (!fifo_sel) ? d_out0 : d_out1;
         end
         else if(st_w==IDLE)begin
-            axi_w.data  <= 32'b0;
+            axi_w.data  = 32'b0;
         end
     end
     
@@ -310,19 +318,20 @@ module axi_write(
     
     always_comb begin
         if(st_w==WCH)begin
-            if(write_cnt==8'd250)   axi_w.last <= `HI;
-            else                    axi_w.last <= `LO;
+            if(write_cnt==8'd250)   axi_w.last = `HI;
+            else                    axi_w.last = `LO;
         end
         else if(st_w==WEND)begin
-            axi_w.last <= `LO;
+            axi_w.last = `LO;
         end
         else if(st_w==IDLE)begin
-            axi_w.last <= `LO;
+            axi_w.last = `LO;
         end
     end
     
     always_ff @(posedge clk_i)begin
         if(rst)             fifo_sel <= 1'b0;
+        else if(rst_btn)    fifo_sel <= 1'b0;
         else if(st_w==WEND) fifo_sel <= fifo_sel + 1'b1;
     end
     

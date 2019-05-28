@@ -247,8 +247,8 @@ module TOP(
         .rst       (rst_rx),
         /*---OUTPUT---*/
         .txd_o        (gmii_txd),
-        .gmii_txctl_o (gmii_txctl),
-        .LED          (tx_led)
+        .gmii_txctl_o (gmii_txctl)
+        //.LED          (tx_led)
     );
 
 
@@ -529,8 +529,9 @@ module TOP(
     assign ETH_RST_B = 1'bz;
     assign eth_mdio  = 1'bz;
     assign eth_mdc   = 1'b1;
-
-    assign LED[3:0] = tx_led[3:0];
+    
+    assign LED[0] = init_calib_complete;
+    //assign LED[3:0] = tx_led[3:0];
     assign LED[8] = sys_clkgen_locked;
     assign LED[7] = eth_clkgen_locked;
 

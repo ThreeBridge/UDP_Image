@@ -283,9 +283,11 @@ module recv_image(
     end
     
     reg udp_flg;
+    wire [47:0] my_MACadd = `my_MAC | {44'b0, SW[3:0]};
+    wire [47:0] MACAdd = {q_rxd[23],q_rxd[22],q_rxd[21],q_rxd[20],q_rxd[19],q_rxd[18]}; 
     always_ff @(posedge eth_rxck)begin
         if(rx_cnt==11'd24)
-            udp_flg <= (q_rxd[0]==8'h11) ? `HI : `LO ;
+            udp_flg <= (q_rxd[0]==8'h11&&MACAdd==my_MACadd) ? `HI : `LO ;
         else
             udp_flg <= `LO;
     end
@@ -552,11 +554,13 @@ module recv_image(
         /*---INPUT---*/
         .clk_i      (eth_rxck),
         .rst        (rst_rx),
+        .rst_btn    (rst_btn),
         .wea        (wea),
         .data_i     (rxd_i[7:0]),
         .udp_flg    (udp_flg),
         .packet_cnt (packet_cnt),
         .UDP_st     (UDP_st),
+        .els_packet (els_packet),
         .axi_awready(axi_awready),
         .axi_wready (axi_wready),
         .axi_bresp  (axi_bresp),

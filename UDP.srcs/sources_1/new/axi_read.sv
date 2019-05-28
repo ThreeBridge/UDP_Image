@@ -97,7 +97,7 @@ module axi_read(
                 if (rd_en) nx_ar = ARCH;
             end
             ARCH : begin
-                if (axi_arready) nx_ar = AR_OK;
+                if (axi_arready&&axi_ar.valid) nx_ar = AR_OK;
             end
             AR_OK :begin
                 nx_ar = IDLE;
@@ -137,7 +137,6 @@ module axi_read(
     always_ff @(posedge clk_i)begin
         if(st_ar==ARCH)begin
             axi_ar.id       <=  1'b0;
-            axi_ar.valid    <=  `HI;
             axi_ar.addr     <=  29'b0 + (10'd1000*sel);
             axi_ar.len      <=  8'hF9;
             axi_ar.size     <=  3'b010;
@@ -147,12 +146,8 @@ module axi_read(
             axi_ar.prot     <=  3'b0;
             axi_ar.qos      <=  4'b0;
         end
-        else if(st_ar==AR_OK)begin
-            axi_ar.valid    <=  1'b0;
-        end
         else if(st_ar==IDLE)begin
             axi_ar.id       <= 1'b0;
-            axi_ar.valid    <= `LO;
             axi_ar.addr     <= 29'b0;
             axi_ar.len      <= 8'h0;
             axi_ar.size     <= 3'b0;
@@ -163,6 +158,25 @@ module axi_read(
             axi_ar.qos      <= 4'b0;        
         end
     end
+    
+    /*--valid--*/
+    always_ff @(posedge clk_i)begin
+        if(st_ar==ARCH)begin
+            if(axi_arready&&axi_ar.valid)begin
+                axi_ar.valid <= `LO;
+            end
+            else begin
+                axi_ar.valid <= `HI;
+            end
+        end
+        else if (st_ar==AR_OK)begin
+            axi_ar.valid    <= `LO;
+        end
+        else if (st_ar==IDLE)begin
+            axi_ar.valid    <= `LO;
+        end
+    end    
+
     
     always_ff @(posedge clk_i)begin
         if(st_ar==AR_OK)    r_ch_st <= `HI;

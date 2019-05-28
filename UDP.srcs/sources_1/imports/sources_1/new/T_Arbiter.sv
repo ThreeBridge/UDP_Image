@@ -31,9 +31,9 @@ module T_Arbiter(
     input rst,
 
     output reg [7:0] txd_o,
-    output reg gmii_txctl_o,
+    output reg gmii_txctl_o
 
-    output reg [7:0] LED
+    //output reg [7:0] LED
     );
     
 parameter Idle      =  4'h0;   // 待機状態
