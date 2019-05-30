@@ -148,7 +148,7 @@ module axi_write(
                 else if(els_packet) nx_w = IDLE;
             end
             WCH : begin
-                if (write_cnt==8'd250) nx_w = WEND;
+                if (write_cnt==8'd250&&axi_wready) nx_w = WEND;
             end
             WEND : begin
                 nx_w = IDLE;
@@ -304,6 +304,8 @@ module axi_write(
         else if(st_w==IDLE)begin
             axi_w.data  = 32'b0;
         end
+        // test
+        else axi_w.data = 32'b0;
     end
     
 
@@ -327,6 +329,7 @@ module axi_write(
         else if(st_w==IDLE)begin
             axi_w.last = `LO;
         end
+        else axi_w.last = `LO;
     end
     
     always_ff @(posedge clk_i)begin

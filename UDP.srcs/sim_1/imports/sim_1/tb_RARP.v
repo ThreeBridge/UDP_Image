@@ -673,11 +673,27 @@ module tb_rarp(
 //         P_RXDV = 0;
          
          /*---UDP_image---*/
-         SW[7:4] = 4'h2;
+         SW[7:4] = 4'hA;
          #2500;
          UDP_image(0);
-         #192;
+         #96;
          UDP_image(1);
+         #96;
+         UDP_image(0);
+         #96;
+         UDP_image(1);
+         #96;
+         UDP_image(0);
+         #96;
+         UDP_image(1);
+         #96;
+         UDP_image(0);
+         #96;
+         UDP_image(1);
+         #96;
+         UDP_image(0);
+         #96;
+         UDP_image(1);                
          #10000;
          
          #100000;
