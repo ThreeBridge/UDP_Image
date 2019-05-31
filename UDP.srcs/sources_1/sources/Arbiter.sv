@@ -337,9 +337,9 @@ parameter  Recv_End    = 8'h03;
     );
     */
     
-    wire [7:0] imdata;
-    wire [9:0] addr;
-    wire [8:0] addr_cnt;
+    //wire [7:0] imdata;
+    //wire [9:0] addr;
+    //wire [8:0] addr_cnt;
     wire    recvend;
     wire    trans_err;
     //wire [7:0] image_buffer [9999:0];
@@ -361,8 +361,8 @@ parameter  Recv_End    = 8'h03;
         .ping_st    (ping_st),
         .UDP_st     (UDP_st[2]),
         .els_packet (els_packet[0]),
-        .addrb      (addr),
-        .addr_cnt   (addr_cnt),
+        //.addrb      (addr),
+        //.addr_cnt   (addr_cnt),
         .rst_btn    (rst_btn),
         .trans_err  (trans_err),
         .SW         (SW),        // add 2018.12.5
@@ -371,7 +371,7 @@ parameter  Recv_End    = 8'h03;
         .axi_bresp  (axi_bresp),
         .axi_bvalid (axi_bvalid),
         /*---Output---*/
-        .imdata     (imdata),
+        //.imdata     (imdata),
         .recvend    (recvend),
         //.image_buffer(image_buffer),
         .DstMAC_o   (DstMAC_UDP),
@@ -380,8 +380,8 @@ parameter  Recv_End    = 8'h03;
         .DstPort_o  (DstPort),
         .axi_aw     (axi_aw),
         .axi_w      (axi_w),
-        .axi_bready (axi_bready),
-        .write_end  ()
+        .axi_bready (axi_bready)
+        //.write_end  ()
     );
     
     trans_image trans_image(
@@ -389,7 +389,7 @@ parameter  Recv_End    = 8'h03;
         .eth_rxck       (eth_rxck),
         .rst_rx         (rst_rx),
         .rst_btn        (rst_btn),
-        .imdata         (imdata),
+        //.imdata         (imdata),
         .recvend        (recvend),
         //.image_buffer(image_buffer),
         .my_MACadd_i    (my_MACadd),
@@ -402,8 +402,8 @@ parameter  Recv_End    = 8'h03;
         .axi_arready    (axi_arready),
         .axi_r          (axi_r),
         /*---Output---*/
-        .image_cnt      (addr),
-        .addr_cnt       (addr_cnt),
+        //.image_cnt      (addr),
+        //.addr_cnt       (addr_cnt),
         .UDP_o          (UDP_o),
         .trans_err      (trans_err),
         .axi_ar         (axi_ar),

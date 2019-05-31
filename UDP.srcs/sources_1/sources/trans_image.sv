@@ -31,7 +31,7 @@ module trans_image(
     clk125,
     rst_rx,
     rst_btn,
-    imdata,
+    //imdata,
     recvend,
     //image_buffer,
     my_MACadd_i,
@@ -44,8 +44,8 @@ module trans_image(
     axi_arready,
     axi_r,
     /*---Output---*/
-    image_cnt,
-    addr_cnt,
+    //image_cnt,
+    //addr_cnt,
     UDP_o,
     trans_err,       // 送信エラー
     axi_ar,
@@ -79,7 +79,7 @@ module trans_image(
     input       clk125;
     input       rst_rx;
     input       rst_btn;
-    input [7:0] imdata;
+    //input [7:0] imdata;
     input       recvend;
     //input [7:0] image_buffer [9999:0];
     input [47:0] my_MACadd_i;     //<--- add 2018.12.5
@@ -93,8 +93,8 @@ module trans_image(
     input        axi_arready;
     input AXI_R  axi_r;
     
-    output reg [9:0]   image_cnt;
-    output reg [8:0]   addr_cnt;
+    //output reg [9:0]   image_cnt;
+    //output reg [8:0]   addr_cnt;
     (*dont_touch="true"*)output reg [8:0]    UDP_o;
     output reg         trans_err;
     
@@ -162,7 +162,7 @@ module trans_image(
     reg [8:0]   packet_cnt;
     //reg         Hcsum_st;
     //reg [3:0]   ready_cnt;
-    reg [9:0]   d_img_cnt [2:0];        // BlockRAMの出力が1サイクルずれるため & recv_image側でimage_cntにFFを挟むため
+    //reg [9:0]   d_img_cnt [2:0];        // BlockRAMの出力が1サイクルずれるため & recv_image側でimage_cntにFFを挟むため
     
     wire ready_end = (err_cnt==5'd30);
     wire hcsum_end = (csum_cnt==8'd2);
@@ -289,40 +289,40 @@ module trans_image(
     end
     
     /*--BRAM--*/
-    always_ff @(posedge eth_rxck)begin              // recv_imageにあるBRAMの出力用アドレス
-        if(st==Presv)begin
-            if(image_cnt<1000)begin
-                image_cnt <= image_cnt + 10'b1;
-            end
-        end
-//        else if(st==Ucsum&&packet_cnt!=9)begin        10,000回カウントは冗長
-//            if(image_cnt<((packet_cnt+2)*1000))
-//                image_cnt <= image_cnt + 14'b1;
+//    always_ff @(posedge eth_rxck)begin              // recv_imageにあるBRAMの出力用アドレス
+//        if(st==Presv)begin
+//            if(image_cnt<1000)begin
+//                image_cnt <= image_cnt + 10'b1;
+//            end
 //        end
-        //else if(st==Ucsum&&packet_cnt!=9)begin
-        //else if(st==Ucsum&&packet_cnt!=packet_cnt_sel)begin     // add 2018.12.5
-        else if(st==Tx_En&&packet_cnt!=packet_cnt_sel)begin     // add 2019.1.17
-            if(image_cnt<1000)begin
-                image_cnt <= image_cnt + 10'b1;
-            end
-        end
-        else if(st==READY)begin
-            image_cnt <= 10'b0;
-        end
-        else if(st==IDLE)begin
-            image_cnt <= 10'b0;
-        end
-    end
+////        else if(st==Ucsum&&packet_cnt!=9)begin        10,000回カウントは冗長
+////            if(image_cnt<((packet_cnt+2)*1000))
+////                image_cnt <= image_cnt + 14'b1;
+////        end
+//        //else if(st==Ucsum&&packet_cnt!=9)begin
+//        //else if(st==Ucsum&&packet_cnt!=packet_cnt_sel)begin     // add 2018.12.5
+//        else if(st==Tx_En&&packet_cnt!=packet_cnt_sel)begin     // add 2019.1.17
+//            if(image_cnt<1000)begin
+//                image_cnt <= image_cnt + 10'b1;
+//            end
+//        end
+//        else if(st==READY)begin
+//            image_cnt <= 10'b0;
+//        end
+//        else if(st==IDLE)begin
+//            image_cnt <= 10'b0;
+//        end
+//    end
     
-    
+    reg [8:0] addr_cnt;
     always_ff @(posedge eth_rxck)begin              // BRAM(DRAM)のアドレスを表現するためのもの
         if(st==IDLE)        addr_cnt <= 9'b0;
         else if(st==Hc_End) addr_cnt <= packet_cnt + 1;
     end
     
-    always_ff @(posedge eth_rxck)begin
-        d_img_cnt <= {d_img_cnt[1:0],image_cnt};
-    end
+//    always_ff @(posedge eth_rxck)begin
+//        d_img_cnt <= {d_img_cnt[1:0],image_cnt};
+//    end
     
     //<-- add 2018.12.12
     reg [8:0] d_packet_cnt;
@@ -331,43 +331,43 @@ module trans_image(
     end
     //-->
     
+  
+//    integer bufferA;
+//    integer bufferB;
+//    //<-- add 2018.12.12
+//    always_ff @(posedge eth_rxck)begin
+//        if(st==Presv)begin
+//            if(d_img_cnt[2]<500)
+//                image_bufferA[d_img_cnt[2]] <= imdata ^ 8'hFF;
+//        end
+//        //else if(st==Ucsum&&d_packet_cnt!=packet_cnt_sel)begin
+//        else if(st==Tx_En&&d_packet_cnt!=packet_cnt_sel)begin   // 2019.1.17
+//            if(d_img_cnt[2]<500)
+//                image_bufferA[d_img_cnt[2]] <= imdata ^ 8'hFF;
+//        end
+//        else if(st==IDLE)begin
+//            for(bufferA=0;bufferA<500;bufferA=bufferA+1)begin
+//                image_bufferA[bufferA] <= 8'h55;
+//            end
+//        end
+//    end
     
-    integer bufferA;
-    integer bufferB;
-    //<-- add 2018.12.12
-    always_ff @(posedge eth_rxck)begin
-        if(st==Presv)begin
-            if(d_img_cnt[2]<500)
-                image_bufferA[d_img_cnt[2]] <= imdata ^ 8'hFF;
-        end
-        //else if(st==Ucsum&&d_packet_cnt!=packet_cnt_sel)begin
-        else if(st==Tx_En&&d_packet_cnt!=packet_cnt_sel)begin   // 2019.1.17
-            if(d_img_cnt[2]<500)
-                image_bufferA[d_img_cnt[2]] <= imdata ^ 8'hFF;
-        end
-        else if(st==IDLE)begin
-            for(bufferA=0;bufferA<500;bufferA=bufferA+1)begin
-                image_bufferA[bufferA] <= 8'h55;
-            end
-        end
-    end
-    
-    always_ff @(posedge eth_rxck)begin
-        if(st==Presv)begin
-            if(d_img_cnt[2]>=500)
-                image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
-        end
-        //else if(st==Ucsum&&d_packet_cnt!=packet_cnt_sel)begin
-        else if(st==Tx_En&&d_packet_cnt!=packet_cnt_sel)begin   // 2019.1.17
-            if(d_img_cnt[2]>=500)
-                image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
-        end
-        else if(st==IDLE)begin
-            for(bufferB=0;bufferB<500;bufferB=bufferB+1)begin
-                image_bufferB[bufferB] <= 8'h55;    // dummy
-            end
-        end
-    end
+//    always_ff @(posedge eth_rxck)begin
+//        if(st==Presv)begin
+//            if(d_img_cnt[2]>=500)
+//                image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
+//        end
+//        //else if(st==Ucsum&&d_packet_cnt!=packet_cnt_sel)begin
+//        else if(st==Tx_En&&d_packet_cnt!=packet_cnt_sel)begin   // 2019.1.17
+//            if(d_img_cnt[2]>=500)
+//                image_bufferB[d_img_cnt[2]-500] <= imdata ^ 8'hFF;
+//        end
+//        else if(st==IDLE)begin
+//            for(bufferB=0;bufferB<500;bufferB=bufferB+1)begin
+//                image_bufferB[bufferB] <= 8'h55;    // dummy
+//            end
+//        end
+//    end
     //-->
     
     

@@ -77,7 +77,7 @@ module ping(
     reg [15:0] ToLen;   // Total Length
     reg [15:0] Ident;
     reg [15:0] SeqNum;
-    reg [7:0] ICMP_Msg [255:0];
+//    reg [7:0] ICMP_Msg [255:0];
     
     wire [47:0] rx_dstMAC    = {RXBUF[0],RXBUF[1],RXBUF[2],RXBUF[3],RXBUF[4],RXBUF[5]};
     wire [47:0] rx_srcMAC    = {RXBUF[6],RXBUF[7],RXBUF[8],RXBUF[9],RXBUF[10],RXBUF[11]};
@@ -173,15 +173,15 @@ module ping(
         end
     end
     
-    integer msg_cnt;
-    always_ff @(posedge eth_rxck)begin
-        if(st==Hcsum)begin
-            for(msg_cnt=0;msg_cnt<(256-46);msg_cnt=msg_cnt+1) ICMP_Msg[msg_cnt] <= RXBUF[msg_cnt+42];
-        end
-        else if(st==Idle) begin
-            for(msg_cnt=0;msg_cnt<256;msg_cnt=msg_cnt+1) ICMP_Msg[msg_cnt] <= 8'b0;
-        end
-    end
+//    integer msg_cnt;
+//    always_ff @(posedge eth_rxck)begin
+//        if(st==Hcsum)begin
+//            for(msg_cnt=0;msg_cnt<(256-46);msg_cnt=msg_cnt+1) ICMP_Msg[msg_cnt] <= RXBUF[msg_cnt+42];
+//        end
+//        else if(st==Idle) begin
+//            for(msg_cnt=0;msg_cnt<256;msg_cnt=msg_cnt+1) ICMP_Msg[msg_cnt] <= 8'b0;
+//        end
+//    end
     
     always_ff @(posedge eth_rxck)begin
         if(st==Presv)begin

@@ -40,8 +40,8 @@ module axi_write(
     /*---OUTPUT---*/
     axi_aw,
     axi_w,
-    axi_bready,
-    write_end
+    axi_bready
+    //write_end
     );
     /*---STRUCT---*/
     typedef struct packed{
@@ -83,7 +83,7 @@ module axi_write(
     output      axi_aw;
     output      axi_w;
     output reg axi_bready;
-    output reg write_end;
+    //output reg write_end;
     
     /*---signal---*/
     reg [2:0]   w_ch_st;    // Write Transaction start
@@ -343,10 +343,10 @@ module axi_write(
         else                                    axi_bready <= `HI;
     end
     
-    always_ff @(posedge clk_i)begin
-        if(axi_bresp==2'b0&&axi_bvalid==1'b1)   write_end <= `HI;
-        else                                    write_end <= `LO;        
-    end
+//    always_ff @(posedge clk_i)begin
+//        if(axi_bresp==2'b0&&axi_bvalid==1'b1)   write_end <= `HI;
+//        else                                    write_end <= `LO;        
+//    end
     
     image_8to32 image_8to32_0(
         .clk        (clk_i),

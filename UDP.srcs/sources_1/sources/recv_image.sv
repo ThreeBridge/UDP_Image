@@ -40,8 +40,8 @@ module recv_image(
     ping_st,
     UDP_st,
     els_packet,
-    addrb,
-    addr_cnt,
+    //addrb,
+    //addr_cnt,
     rst_btn,            // 任意のタイミングでのリセット
     trans_err,          // 送信エラー
     SW,
@@ -50,7 +50,7 @@ module recv_image(
     axi_bresp,
     axi_bvalid,
     /*---Output---*/
-    imdata,
+    //imdata,
     recvend,
     DstMAC_o,
     DstIP_o,
@@ -58,8 +58,8 @@ module recv_image(
     DstPort_o,
     axi_aw,
     axi_w,
-    axi_bready,
-    write_end
+    axi_bready
+    //write_end
     );
     /*---STRUCT---*/
     typedef struct packed{
@@ -94,8 +94,8 @@ module recv_image(
     input           ping_st;
     input           UDP_st;
     input           els_packet;
-    input [9:0]     addrb;
-    input [8:0]     addr_cnt;
+    //input [9:0]     addrb;
+    //input [8:0]     addr_cnt;
     
     input           rst_btn;
     input           trans_err;
@@ -105,7 +105,7 @@ module recv_image(
     input           axi_bresp;
     input           axi_bvalid;
         
-    (*dont_touch="true"*)output reg [7:0]  imdata;
+    //(*dont_touch="true"*)output reg [7:0]  imdata;
     output reg        recvend;
     output reg [47:0] DstMAC_o;
     output reg [31:0] DstIP_o;
@@ -115,7 +115,7 @@ module recv_image(
     output AXI_AW   axi_aw;
     output AXI_W    axi_w;
     output          axi_bready;
-    output          write_end;
+    //output          write_end;
     //output reg [7:0]  image_buffer [9999:0];
     
     /*---parameter---*/
@@ -293,9 +293,9 @@ module recv_image(
     end
     
     
-    /*---RAM用データ---*/
+    /*---RAM用データ--->SDRAM用データ---*/
     reg wea;
-    reg [17:0] addra;
+    //reg [17:0] addra;
     always_ff @(posedge eth_rxck)begin
         if(st==Presv) begin
             if(rx_cnt==11'd41) wea <= 1'b1;
@@ -307,16 +307,16 @@ module recv_image(
         end
     end
     
-    always_ff @(posedge eth_rxck)begin
-        if(st==Presv) begin
-            if(rx_cnt>11'd41&&rx_cnt<11'd1042) addra <= addra + 1'b1;
-        end
-        //else if(st==Idle&&packet_cnt==0) begin
-        else if(st==Idle) begin             // add 2018.11.19
-            //addra <= 11'b0;
-            addra <= packet_cnt * 1000;     // add 2018.11.19
-        end
-    end
+//    always_ff @(posedge eth_rxck)begin
+//        if(st==Presv) begin
+//            if(rx_cnt>11'd41&&rx_cnt<11'd1042) addra <= addra + 1'b1;
+//        end
+//        //else if(st==Idle&&packet_cnt==0) begin
+//        else if(st==Idle) begin             // add 2018.11.19
+//            //addra <= 11'b0;
+//            addra <= packet_cnt * 1000;     // add 2018.11.19
+//        end
+//    end
     
     /*---パケット数のカウント---*/
     always_ff @(posedge eth_rxck)begin
@@ -532,23 +532,23 @@ module recv_image(
     /*
     wire [17:0] addr_r = addrb + (addr_cnt * 1000);
     */
-    reg [17:0] addr_r;
-    always_ff @(posedge eth_rxck)begin
-        addr_r <= addrb + (addr_cnt * 1000);
-    end
+//    reg [17:0] addr_r;
+//    always_ff @(posedge eth_rxck)begin
+//        addr_r <= addrb + (addr_cnt * 1000);
+//    end
     
     /*---BlockRAM Generator---*/
-    image_RAM image_RAM(
-        .clka   (eth_rxck),
-        //.ena(1'b1),           // PortA  enable
-        .wea    (wea),          // write enable
-        .addra  (addra),        // write address
-        .dina   (rxd_i[7:0]),   // write data
-        .clkb   (eth_rxck),
-        //.enb(1'b1),           // PortB enable
-        .addrb  (addr_r),       // read address
-        .doutb  (imdata)        // read data
-    );
+//    image_RAM image_RAM(
+//        .clka   (eth_rxck),
+//        //.ena(1'b1),           // PortA  enable
+//        .wea    (wea),          // write enable
+//        .addra  (addra),        // write address
+//        .dina   (rxd_i[7:0]),   // write data
+//        .clkb   (eth_rxck),
+//        //.enb(1'b1),           // PortB enable
+//        .addrb  (addr_r),       // read address
+//        .doutb  (imdata)        // read data
+//    );
     
     axi_write axi_write(
         /*---INPUT---*/
@@ -568,8 +568,8 @@ module recv_image(
         /*---OUTPUT---*/
         .axi_aw     (axi_aw),
         .axi_w      (axi_w),
-        .axi_bready (axi_bready),
-        .write_end  (write_end)
+        .axi_bready (axi_bready)
+        //.write_end  (write_end)
     );
     
     
