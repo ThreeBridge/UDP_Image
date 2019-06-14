@@ -673,28 +673,33 @@ module tb_rarp(
 //         P_RXDV = 0;
          
          /*---UDP_image---*/
-         SW[7:4] = 4'hA;
+         SW[7:4] = 4'hB;
          #2500;
-         UDP_image(0);
-         #96;
-         UDP_image(1);
-         #96;
-         UDP_image(0);
-         #96;
-         UDP_image(1);
-         #96;
-         UDP_image(0);
-         #96;
-         UDP_image(1);
-         #96;
-         UDP_image(0);
-         #96;
-         UDP_image(1);
-         #96;
-         UDP_image(0);
-         #96;
-         UDP_image(1);                
-         #10000;
+         COLOL_640();
+         
+         
+//         SW[7:4] = 4'hA;
+//         #2500;
+//         UDP_image(0);
+//         #96;
+//         UDP_image(1);
+//         #96;
+//         UDP_image(0);
+//         #96;
+//         UDP_image(1);
+//         #96;
+//         UDP_image(0);
+//         #96;
+//         UDP_image(1);
+//         #96;
+//         UDP_image(0);
+//         #96;
+//         UDP_image(1);
+//         #96;
+//         UDP_image(0);
+//         #96;
+//         UDP_image(1);                
+//         #10000;
          
          #100000;
          SW[7:4] = 4'hA;
@@ -970,6 +975,108 @@ module tb_rarp(
         P_RXD = 4'h0;            
         end
    endtask
+   
+   /*---Color_Image---*/
+   /*--640x480--*/
+   integer color;
+   task COLOL_640();
+    for(color=0;color<640;color=color+1)begin
+        UDP_COLOR();
+        #96;
+    end
+   endtask
+   /*--1PIXEL--*/
+   task recvPixel(input [7:0] blue, input [7:0] green, input [7:0] red);
+        begin
+            recvByte(blue);
+            recvByte(green);
+            recvByte(red);
+        end
+   endtask
+   /*--送信--*/
+   task UDP_COLOR();
+    begin
+        // プリアンブル
+        repeat(7) recvByte(8'h55);
+        recvByte(8'hd5);
+        // 宛先MAC
+        recvMac(48'h00_0A_35_02_0F_B0);
+        // 送信元MAC
+        recvMac(48'hF8_32_E4_BA_0D_57);
+        //フレームタイプ
+        recvByte(8'h08);
+        recvByte(8'h00);
+   
+        /*--IP header--*/
+        // Varsion / IHL
+        recvByte(8'h45);
+
+        // ToS
+        recvByte(8'h00);
+   
+        // Total Length = 1,486 - 18 = 1468 = 16'h05_BC
+        recvByte(8'h05);
+        recvByte(8'hBC);
+   
+        // Identification
+        recvByte(8'hAB);
+        recvByte(8'hCD);
+   
+        // Flags[15:13]/Flagment Offset[12:0]
+        recvByte(8'h40);
+        recvByte(8'h00);
+     
+        // Time To Live
+        recvByte(8'd255);
+   
+        // Protocol
+        recvByte(8'h11);
+   
+        // Header Checksum
+        recvByte(8'hCD);
+        recvByte(8'h01);
+   
+        // SrcIP 172.31.210.129
+        recvIp({8'd172, 8'd31, 8'd210, 8'd129});
+   
+        // DstIP 172.31.210.130
+        recvIp({8'd172, 8'd31, 8'd210, 8'd160});         
+   
+        /*--UDPHeader--*/
+        // SrcPort
+        recvByte(8'hAF);
+        recvByte(8'hDB);
+        // DstPort
+        recvByte(8'hEA);
+        recvByte(8'h60);
+        // UDP Len  1,440+8 = 1448 = 16'h05_A8
+        recvByte(8'h05);
+        recvByte(8'hA8);
+        // UDP_Checksum
+        recvByte(8'h00);
+        recvByte(8'h00); 
+        /*--UDP Data--*/    // 480[px]
+        repeat(60) recvPixel(8'hAA,8'hBB,8'hCC);
+        repeat(60) recvPixel(8'h00,8'hFF,8'h00);
+        repeat(60) recvPixel(8'h00,8'h00,8'hFF);
+        repeat(60) recvPixel(8'hBB,8'h00,8'h00);
+        repeat(60) recvPixel(8'h00,8'hBB,8'h00);
+        repeat(60) recvPixel(8'h00,8'h00,8'hBB);
+        repeat(60) recvPixel(8'hFF,8'hAA,8'hBB);
+        repeat(60) recvPixel(8'hCC,8'hDD,8'hEE);
+           
+        // CRC
+       recvByte(8'h6E);
+       recvByte(8'hF4);
+       recvByte(8'h3A);
+       recvByte(8'hEA);
+        recv_end();
+   
+        //P_RXCLK = 0;
+        @(posedge P_RXCLK)
+        P_RXD = 4'h0;            
+        end   
+    endtask
    
    task UDP10000();
        begin

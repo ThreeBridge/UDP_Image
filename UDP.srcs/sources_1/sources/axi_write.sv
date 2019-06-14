@@ -71,7 +71,7 @@ module axi_write(
     input       wea;
     input [7:0] data_i;
     input       udp_flg;
-    input [8:0] packet_cnt;
+    input [10:0] packet_cnt;
     input       UDP_st;
     input       els_packet;
     
