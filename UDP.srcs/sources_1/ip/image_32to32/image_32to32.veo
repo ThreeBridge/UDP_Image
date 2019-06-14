@@ -65,6 +65,7 @@ image_32to32 your_instance_name (
   .overflow(overflow),      // output wire overflow
   .empty(empty),            // output wire empty
   .valid(valid),            // output wire valid
+  .underflow(underflow),    // output wire underflow
   .data_count(data_count)  // output wire [9 : 0] data_count
 );
 // INST_TAG_END ------ End INSTANTIATION Template ---------

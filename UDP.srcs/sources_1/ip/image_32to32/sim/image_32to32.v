@@ -64,6 +64,7 @@ module image_32to32 (
   overflow,
   empty,
   valid,
+  underflow,
   data_count
 );
 
@@ -85,6 +86,7 @@ output wire overflow;
 (* X_INTERFACE_INFO = "xilinx.com:interface:fifo_read:1.0 FIFO_READ EMPTY" *)
 output wire empty;
 output wire valid;
+output wire underflow;
 output wire [9 : 0] data_count;
 
   fifo_generator_v13_2_2 #(
@@ -110,7 +112,7 @@ output wire [9 : 0] data_count;
     .C_HAS_RD_RST(0),
     .C_HAS_RST(0),
     .C_HAS_SRST(1),
-    .C_HAS_UNDERFLOW(0),
+    .C_HAS_UNDERFLOW(1),
     .C_HAS_VALID(1),
     .C_HAS_WR_ACK(0),
     .C_HAS_WR_DATA_COUNT(0),
@@ -321,7 +323,7 @@ output wire [9 : 0] data_count;
     .empty(empty),
     .almost_empty(),
     .valid(valid),
-    .underflow(),
+    .underflow(underflow),
     .data_count(data_count),
     .rd_data_count(),
     .wr_data_count(),

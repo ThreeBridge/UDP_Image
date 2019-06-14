@@ -64,6 +64,7 @@ COMPONENT image_32to32
     overflow : OUT STD_LOGIC;
     empty : OUT STD_LOGIC;
     valid : OUT STD_LOGIC;
+    underflow : OUT STD_LOGIC;
     data_count : OUT STD_LOGIC_VECTOR(9 DOWNTO 0)
   );
 END COMPONENT;
@@ -85,6 +86,7 @@ your_instance_name : image_32to32
     overflow => overflow,
     empty => empty,
     valid => valid,
+    underflow => underflow,
     data_count => data_count
   );
 -- INST_TAG_END ------ End INSTANTIATION Template ---------

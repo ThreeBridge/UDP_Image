@@ -1,7 +1,7 @@
 // Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2018.1 (lin64) Build 2188600 Wed Apr  4 18:39:19 MDT 2018
-// Date        : Fri Jun 14 16:58:16 2019
+// Date        : Fri Jun 14 17:57:25 2019
 // Host        : bluewater01.localdomain running 64-bit unknown
 // Command     : write_verilog -force -mode funcsim
 //               /home/tmitsuhashi/bin/vivado_h30/UDP_Image/UDP.srcs/sources_1/ip/image_32to32/image_32to32_sim_netlist.v
@@ -25,6 +25,7 @@ module image_32to32
     overflow,
     empty,
     valid,
+    underflow,
     data_count);
   (* x_interface_info = "xilinx.com:signal:clock:1.0 core_clk CLK" *) (* x_interface_parameter = "XIL_INTERFACENAME core_clk, FREQ_HZ 100000000, PHASE 0.000" *) input clk;
   input srst;
@@ -36,6 +37,7 @@ module image_32to32
   output overflow;
   (* x_interface_info = "xilinx.com:interface:fifo_read:1.0 FIFO_READ EMPTY" *) output empty;
   output valid;
+  output underflow;
   output [9:0]data_count;
 
   wire clk;
@@ -47,6 +49,7 @@ module image_32to32
   wire overflow;
   wire rd_en;
   wire srst;
+  wire underflow;
   wire valid;
   wire wr_en;
   wire NLW_U0_almost_empty_UNCONNECTED;
@@ -107,7 +110,6 @@ module image_32to32
   wire NLW_U0_s_axi_wready_UNCONNECTED;
   wire NLW_U0_s_axis_tready_UNCONNECTED;
   wire NLW_U0_sbiterr_UNCONNECTED;
-  wire NLW_U0_underflow_UNCONNECTED;
   wire NLW_U0_wr_ack_UNCONNECTED;
   wire NLW_U0_wr_rst_busy_UNCONNECTED;
   wire [4:0]NLW_U0_axi_ar_data_count_UNCONNECTED;
@@ -261,7 +263,7 @@ module image_32to32
   (* C_HAS_RST = "0" *) 
   (* C_HAS_SLAVE_CE = "0" *) 
   (* C_HAS_SRST = "1" *) 
-  (* C_HAS_UNDERFLOW = "0" *) 
+  (* C_HAS_UNDERFLOW = "1" *) 
   (* C_HAS_VALID = "1" *) 
   (* C_HAS_WR_ACK = "0" *) 
   (* C_HAS_WR_DATA_COUNT = "0" *) 
@@ -596,7 +598,7 @@ module image_32to32
         .sbiterr(NLW_U0_sbiterr_UNCONNECTED),
         .sleep(1'b0),
         .srst(srst),
-        .underflow(NLW_U0_underflow_UNCONNECTED),
+        .underflow(underflow),
         .valid(valid),
         .wr_ack(NLW_U0_wr_ack_UNCONNECTED),
         .wr_clk(1'b0),
@@ -1311,6 +1313,7 @@ module image_32to32_fifo_generator_ramfifo
     empty,
     full,
     valid,
+    underflow,
     overflow,
     rd_en,
     clk,
@@ -1322,6 +1325,7 @@ module image_32to32_fifo_generator_ramfifo
   output empty;
   output full;
   output valid;
+  output underflow;
   output overflow;
   input rd_en;
   input clk;
@@ -1348,6 +1352,7 @@ module image_32to32_fifo_generator_ramfifo
   wire rd_en;
   wire srst;
   wire tmp_ram_rd_en;
+  wire underflow;
   wire valid;
   wire wr_en;
 
@@ -1364,6 +1369,7 @@ module image_32to32_fifo_generator_ramfifo
         .rd_en(rd_en),
         .srst(srst),
         .tmp_ram_rd_en(tmp_ram_rd_en),
+        .underflow(underflow),
         .v1_reg(\gwss.wsts/c0/v1_reg ),
         .v1_reg_0(\gwss.wsts/c1/v1_reg ),
         .valid(valid),
@@ -1401,6 +1407,7 @@ module image_32to32_fifo_generator_top
     empty,
     full,
     valid,
+    underflow,
     overflow,
     rd_en,
     clk,
@@ -1412,6 +1419,7 @@ module image_32to32_fifo_generator_top
   output empty;
   output full;
   output valid;
+  output underflow;
   output overflow;
   input rd_en;
   input clk;
@@ -1428,6 +1436,7 @@ module image_32to32_fifo_generator_top
   wire overflow;
   wire rd_en;
   wire srst;
+  wire underflow;
   wire valid;
   wire wr_en;
 
@@ -1441,6 +1450,7 @@ module image_32to32_fifo_generator_top
         .overflow(overflow),
         .rd_en(rd_en),
         .srst(srst),
+        .underflow(underflow),
         .valid(valid),
         .wr_en(wr_en));
 endmodule
@@ -1475,7 +1485,7 @@ endmodule
 (* C_HAS_PROG_FLAGS_RACH = "0" *) (* C_HAS_PROG_FLAGS_RDCH = "0" *) (* C_HAS_PROG_FLAGS_WACH = "0" *) 
 (* C_HAS_PROG_FLAGS_WDCH = "0" *) (* C_HAS_PROG_FLAGS_WRCH = "0" *) (* C_HAS_RD_DATA_COUNT = "0" *) 
 (* C_HAS_RD_RST = "0" *) (* C_HAS_RST = "0" *) (* C_HAS_SLAVE_CE = "0" *) 
-(* C_HAS_SRST = "1" *) (* C_HAS_UNDERFLOW = "0" *) (* C_HAS_VALID = "1" *) 
+(* C_HAS_SRST = "1" *) (* C_HAS_UNDERFLOW = "1" *) (* C_HAS_VALID = "1" *) 
 (* C_HAS_WR_ACK = "0" *) (* C_HAS_WR_DATA_COUNT = "0" *) (* C_HAS_WR_RST = "0" *) 
 (* C_IMPLEMENTATION_TYPE = "0" *) (* C_IMPLEMENTATION_TYPE_AXIS = "1" *) (* C_IMPLEMENTATION_TYPE_RACH = "1" *) 
 (* C_IMPLEMENTATION_TYPE_RDCH = "1" *) (* C_IMPLEMENTATION_TYPE_WACH = "1" *) (* C_IMPLEMENTATION_TYPE_WDCH = "1" *) 
@@ -1988,6 +1998,7 @@ module image_32to32_fifo_generator_v13_2_2
   wire overflow;
   wire rd_en;
   wire srst;
+  wire underflow;
   wire valid;
   wire wr_en;
 
@@ -2491,7 +2502,6 @@ module image_32to32_fifo_generator_v13_2_2
   assign s_axi_wready = \<const0> ;
   assign s_axis_tready = \<const0> ;
   assign sbiterr = \<const0> ;
-  assign underflow = \<const0> ;
   assign wr_ack = \<const0> ;
   assign wr_data_count[9] = \<const0> ;
   assign wr_data_count[8] = \<const0> ;
@@ -2518,6 +2528,7 @@ module image_32to32_fifo_generator_v13_2_2
         .overflow(overflow),
         .rd_en(rd_en),
         .srst(srst),
+        .underflow(underflow),
         .valid(valid),
         .wr_en(wr_en));
 endmodule
@@ -2529,6 +2540,7 @@ module image_32to32_fifo_generator_v13_2_2_synth
     empty,
     full,
     valid,
+    underflow,
     overflow,
     rd_en,
     clk,
@@ -2540,6 +2552,7 @@ module image_32to32_fifo_generator_v13_2_2_synth
   output empty;
   output full;
   output valid;
+  output underflow;
   output overflow;
   input rd_en;
   input clk;
@@ -2556,6 +2569,7 @@ module image_32to32_fifo_generator_v13_2_2_synth
   wire overflow;
   wire rd_en;
   wire srst;
+  wire underflow;
   wire valid;
   wire wr_en;
 
@@ -2569,6 +2583,7 @@ module image_32to32_fifo_generator_v13_2_2_synth
         .overflow(overflow),
         .rd_en(rd_en),
         .srst(srst),
+        .underflow(underflow),
         .valid(valid),
         .wr_en(wr_en));
 endmodule
@@ -3079,19 +3094,33 @@ endmodule
 (* ORIG_REF_NAME = "rd_handshaking_flags" *) 
 module image_32to32_rd_handshaking_flags
    (valid,
+    underflow,
     srst,
     ram_valid_i,
-    clk);
+    clk,
+    p_1_out);
   output valid;
+  output underflow;
   input srst;
   input ram_valid_i;
   input clk;
+  input p_1_out;
 
   wire clk;
+  wire p_1_out;
   wire ram_valid_i;
   wire srst;
+  wire underflow;
   wire valid;
 
+  FDRE #(
+    .INIT(1'b0)) 
+    \guf.guf1.underflow_i_reg 
+       (.C(clk),
+        .CE(1'b1),
+        .D(p_1_out),
+        .Q(underflow),
+        .R(1'b0));
   FDRE #(
     .INIT(1'b0)) 
     \gv.ram_valid_d1_reg 
@@ -3107,6 +3136,7 @@ module image_32to32_rd_logic
    (out,
     empty,
     valid,
+    underflow,
     Q,
     tmp_ram_rd_en,
     v1_reg,
@@ -3123,6 +3153,7 @@ module image_32to32_rd_logic
   output out;
   output empty;
   output valid;
+  output underflow;
   output [9:0]Q;
   output tmp_ram_rd_en;
   output [4:0]v1_reg;
@@ -3146,6 +3177,7 @@ module image_32to32_rd_logic
   wire [9:0]\gcc0.gc0.count_d1_reg[9] ;
   wire [9:0]\gcc0.gc0.count_reg[9] ;
   wire out;
+  wire p_1_out;
   wire p_7_out;
   wire ram_full_fb_i_reg;
   wire ram_valid_i;
@@ -3157,6 +3189,7 @@ module image_32to32_rd_logic
   wire rpntr_n_29;
   wire srst;
   wire tmp_ram_rd_en;
+  wire underflow;
   wire [4:0]v1_reg;
   wire [4:0]v1_reg_0;
   wire valid;
@@ -3164,8 +3197,10 @@ module image_32to32_rd_logic
 
   image_32to32_rd_handshaking_flags \grhf.rhf 
        (.clk(clk),
+        .p_1_out(p_1_out),
         .ram_valid_i(ram_valid_i),
         .srst(srst),
+        .underflow(underflow),
         .valid(valid));
   image_32to32_dc_ss \grss.gdc.dc 
        (.E(E),
@@ -3184,6 +3219,7 @@ module image_32to32_rd_logic
         .\gc0.count_d1_reg[6] (rpntr_n_28),
         .\gc0.count_d1_reg[8] (rpntr_n_29),
         .out(out),
+        .p_1_out(p_1_out),
         .ram_full_fb_i_reg(ram_full_fb_i_reg),
         .ram_valid_i(ram_valid_i),
         .rd_en(rd_en),
@@ -3213,6 +3249,7 @@ module image_32to32_rd_status_flags_ss
    (out,
     empty,
     ram_valid_i,
+    p_1_out,
     tmp_ram_rd_en,
     E,
     \gc0.count_d1_reg[0] ,
@@ -3229,6 +3266,7 @@ module image_32to32_rd_status_flags_ss
   output out;
   output empty;
   output ram_valid_i;
+  output p_1_out;
   output tmp_ram_rd_en;
   output [0:0]E;
   input \gc0.count_d1_reg[0] ;
@@ -3252,6 +3290,7 @@ module image_32to32_rd_status_flags_ss
   wire \gc0.count_d1_reg[4] ;
   wire \gc0.count_d1_reg[6] ;
   wire \gc0.count_d1_reg[8] ;
+  wire p_1_out;
   (* DONT_TOUCH *) wire ram_empty_fb_i;
   (* DONT_TOUCH *) wire ram_empty_i;
   wire ram_full_fb_i_reg;
@@ -3292,6 +3331,12 @@ module image_32to32_rd_status_flags_ss
        (.I0(rd_en),
         .I1(ram_empty_fb_i),
         .O(E));
+  LUT2 #(
+    .INIT(4'h8)) 
+    \guf.guf1.underflow_i_i_1 
+       (.I0(ram_empty_i),
+        .I1(rd_en),
+        .O(p_1_out));
   LUT2 #(
     .INIT(4'h2)) 
     \gv.ram_valid_d1_i_1 

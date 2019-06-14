@@ -1,7 +1,7 @@
 // Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2018.1 (lin64) Build 2188600 Wed Apr  4 18:39:19 MDT 2018
-// Date        : Fri Jun 14 16:58:16 2019
+// Date        : Fri Jun 14 17:57:25 2019
 // Host        : bluewater01.localdomain running 64-bit unknown
 // Command     : write_verilog -force -mode synth_stub
 //               /home/tmitsuhashi/bin/vivado_h30/UDP_Image/UDP.srcs/sources_1/ip/image_32to32/image_32to32_stub.v
@@ -15,8 +15,8 @@
 // Please paste the declaration into a Verilog source file or add the file as an additional source.
 (* x_core_info = "fifo_generator_v13_2_2,Vivado 2018.1" *)
 module image_32to32(clk, srst, din, wr_en, rd_en, dout, full, overflow, 
-  empty, valid, data_count)
-/* synthesis syn_black_box black_box_pad_pin="clk,srst,din[31:0],wr_en,rd_en,dout[31:0],full,overflow,empty,valid,data_count[9:0]" */;
+  empty, valid, underflow, data_count)
+/* synthesis syn_black_box black_box_pad_pin="clk,srst,din[31:0],wr_en,rd_en,dout[31:0],full,overflow,empty,valid,underflow,data_count[9:0]" */;
   input clk;
   input srst;
   input [31:0]din;
@@ -27,5 +27,6 @@ module image_32to32(clk, srst, din, wr_en, rd_en, dout, full, overflow,
   output overflow;
   output empty;
   output valid;
+  output underflow;
   output [9:0]data_count;
 endmodule

@@ -1,7 +1,7 @@
 -- Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2018.1 (lin64) Build 2188600 Wed Apr  4 18:39:19 MDT 2018
--- Date        : Fri Jun 14 16:58:16 2019
+-- Date        : Fri Jun 14 17:57:25 2019
 -- Host        : bluewater01.localdomain running 64-bit unknown
 -- Command     : write_vhdl -force -mode funcsim
 --               /home/tmitsuhashi/bin/vivado_h30/UDP_Image/UDP.srcs/sources_1/ip/image_32to32/image_32to32_sim_netlist.vhdl
@@ -1140,9 +1140,11 @@ use UNISIM.VCOMPONENTS.ALL;
 entity image_32to32_rd_handshaking_flags is
   port (
     valid : out STD_LOGIC;
+    underflow : out STD_LOGIC;
     srst : in STD_LOGIC;
     ram_valid_i : in STD_LOGIC;
-    clk : in STD_LOGIC
+    clk : in STD_LOGIC;
+    p_1_out : in STD_LOGIC
   );
   attribute ORIG_REF_NAME : string;
   attribute ORIG_REF_NAME of image_32to32_rd_handshaking_flags : entity is "rd_handshaking_flags";
@@ -1150,6 +1152,17 @@ end image_32to32_rd_handshaking_flags;
 
 architecture STRUCTURE of image_32to32_rd_handshaking_flags is
 begin
+\guf.guf1.underflow_i_reg\: unisim.vcomponents.FDRE
+    generic map(
+      INIT => '0'
+    )
+        port map (
+      C => clk,
+      CE => '1',
+      D => p_1_out,
+      Q => underflow,
+      R => '0'
+    );
 \gv.ram_valid_d1_reg\: unisim.vcomponents.FDRE
     generic map(
       INIT => '0'
@@ -1943,6 +1956,7 @@ entity image_32to32_rd_status_flags_ss is
     \out\ : out STD_LOGIC;
     empty : out STD_LOGIC;
     ram_valid_i : out STD_LOGIC;
+    p_1_out : out STD_LOGIC;
     tmp_ram_rd_en : out STD_LOGIC;
     E : out STD_LOGIC_VECTOR ( 0 to 0 );
     \gc0.count_d1_reg[0]\ : in STD_LOGIC;
@@ -2017,6 +2031,15 @@ c2: entity work.image_32to32_compare_2
       I0 => rd_en,
       I1 => ram_empty_fb_i,
       O => E(0)
+    );
+\guf.guf1.underflow_i_i_1\: unisim.vcomponents.LUT2
+    generic map(
+      INIT => X"8"
+    )
+        port map (
+      I0 => ram_empty_i,
+      I1 => rd_en,
+      O => p_1_out
     );
 \gv.ram_valid_d1_i_1\: unisim.vcomponents.LUT2
     generic map(
@@ -2221,6 +2244,7 @@ entity image_32to32_rd_logic is
     \out\ : out STD_LOGIC;
     empty : out STD_LOGIC;
     valid : out STD_LOGIC;
+    underflow : out STD_LOGIC;
     Q : out STD_LOGIC_VECTOR ( 9 downto 0 );
     tmp_ram_rd_en : out STD_LOGIC;
     v1_reg : out STD_LOGIC_VECTOR ( 4 downto 0 );
@@ -2242,6 +2266,7 @@ end image_32to32_rd_logic;
 architecture STRUCTURE of image_32to32_rd_logic is
   signal \c2/v1_reg\ : STD_LOGIC_VECTOR ( 4 downto 0 );
   signal \^out\ : STD_LOGIC;
+  signal p_1_out : STD_LOGIC;
   signal p_7_out : STD_LOGIC;
   signal ram_valid_i : STD_LOGIC;
   signal rpntr_n_25 : STD_LOGIC;
@@ -2254,8 +2279,10 @@ begin
 \grhf.rhf\: entity work.image_32to32_rd_handshaking_flags
      port map (
       clk => clk,
+      p_1_out => p_1_out,
       ram_valid_i => ram_valid_i,
       srst => srst,
+      underflow => underflow,
       valid => valid
     );
 \grss.gdc.dc\: entity work.image_32to32_dc_ss
@@ -2278,6 +2305,7 @@ begin
       \gc0.count_d1_reg[6]\ => rpntr_n_28,
       \gc0.count_d1_reg[8]\ => rpntr_n_29,
       \out\ => \^out\,
+      p_1_out => p_1_out,
       ram_full_fb_i_reg => ram_full_fb_i_reg,
       ram_valid_i => ram_valid_i,
       rd_en => rd_en,
@@ -2507,6 +2535,7 @@ entity image_32to32_fifo_generator_ramfifo is
     empty : out STD_LOGIC;
     full : out STD_LOGIC;
     valid : out STD_LOGIC;
+    underflow : out STD_LOGIC;
     overflow : out STD_LOGIC;
     rd_en : in STD_LOGIC;
     clk : in STD_LOGIC;
@@ -2544,6 +2573,7 @@ begin
       rd_en => rd_en,
       srst => srst,
       tmp_ram_rd_en => tmp_ram_rd_en,
+      underflow => underflow,
       v1_reg(4 downto 0) => \gwss.wsts/c0/v1_reg\(4 downto 0),
       v1_reg_0(4 downto 0) => \gwss.wsts/c1/v1_reg\(4 downto 0),
       valid => valid,
@@ -2589,6 +2619,7 @@ entity image_32to32_fifo_generator_top is
     empty : out STD_LOGIC;
     full : out STD_LOGIC;
     valid : out STD_LOGIC;
+    underflow : out STD_LOGIC;
     overflow : out STD_LOGIC;
     rd_en : in STD_LOGIC;
     clk : in STD_LOGIC;
@@ -2613,6 +2644,7 @@ begin
       overflow => overflow,
       rd_en => rd_en,
       srst => srst,
+      underflow => underflow,
       valid => valid,
       wr_en => wr_en
     );
@@ -2628,6 +2660,7 @@ entity image_32to32_fifo_generator_v13_2_2_synth is
     empty : out STD_LOGIC;
     full : out STD_LOGIC;
     valid : out STD_LOGIC;
+    underflow : out STD_LOGIC;
     overflow : out STD_LOGIC;
     rd_en : in STD_LOGIC;
     clk : in STD_LOGIC;
@@ -2652,6 +2685,7 @@ begin
       overflow => overflow,
       rd_en => rd_en,
       srst => srst,
+      underflow => underflow,
       valid => valid,
       wr_en => wr_en
     );
@@ -3077,7 +3111,7 @@ entity image_32to32_fifo_generator_v13_2_2 is
   attribute C_HAS_SRST : integer;
   attribute C_HAS_SRST of image_32to32_fifo_generator_v13_2_2 : entity is 1;
   attribute C_HAS_UNDERFLOW : integer;
-  attribute C_HAS_UNDERFLOW of image_32to32_fifo_generator_v13_2_2 : entity is 0;
+  attribute C_HAS_UNDERFLOW of image_32to32_fifo_generator_v13_2_2 : entity is 1;
   attribute C_HAS_VALID : integer;
   attribute C_HAS_VALID of image_32to32_fifo_generator_v13_2_2 : entity is 1;
   attribute C_HAS_WR_ACK : integer;
@@ -3806,7 +3840,6 @@ begin
   s_axi_wready <= \<const0>\;
   s_axis_tready <= \<const0>\;
   sbiterr <= \<const0>\;
-  underflow <= \<const0>\;
   wr_ack <= \<const0>\;
   wr_data_count(9) <= \<const0>\;
   wr_data_count(8) <= \<const0>\;
@@ -3838,6 +3871,7 @@ inst_fifo_gen: entity work.image_32to32_fifo_generator_v13_2_2_synth
       overflow => overflow,
       rd_en => rd_en,
       srst => srst,
+      underflow => underflow,
       valid => valid,
       wr_en => wr_en
     );
@@ -3858,6 +3892,7 @@ entity image_32to32 is
     overflow : out STD_LOGIC;
     empty : out STD_LOGIC;
     valid : out STD_LOGIC;
+    underflow : out STD_LOGIC;
     data_count : out STD_LOGIC_VECTOR ( 9 downto 0 )
   );
   attribute NotValidForBitStream : boolean;
@@ -3929,7 +3964,6 @@ architecture STRUCTURE of image_32to32 is
   signal NLW_U0_s_axi_wready_UNCONNECTED : STD_LOGIC;
   signal NLW_U0_s_axis_tready_UNCONNECTED : STD_LOGIC;
   signal NLW_U0_sbiterr_UNCONNECTED : STD_LOGIC;
-  signal NLW_U0_underflow_UNCONNECTED : STD_LOGIC;
   signal NLW_U0_wr_ack_UNCONNECTED : STD_LOGIC;
   signal NLW_U0_wr_rst_busy_UNCONNECTED : STD_LOGIC;
   signal NLW_U0_axi_ar_data_count_UNCONNECTED : STD_LOGIC_VECTOR ( 4 downto 0 );
@@ -4174,7 +4208,7 @@ architecture STRUCTURE of image_32to32 is
   attribute C_HAS_SRST : integer;
   attribute C_HAS_SRST of U0 : label is 1;
   attribute C_HAS_UNDERFLOW : integer;
-  attribute C_HAS_UNDERFLOW of U0 : label is 0;
+  attribute C_HAS_UNDERFLOW of U0 : label is 1;
   attribute C_HAS_VALID : integer;
   attribute C_HAS_VALID of U0 : label is 1;
   attribute C_HAS_WR_ACK : integer;
@@ -4631,7 +4665,7 @@ U0: entity work.image_32to32_fifo_generator_v13_2_2
       sbiterr => NLW_U0_sbiterr_UNCONNECTED,
       sleep => '0',
       srst => srst,
-      underflow => NLW_U0_underflow_UNCONNECTED,
+      underflow => underflow,
       valid => valid,
       wr_ack => NLW_U0_wr_ack_UNCONNECTED,
       wr_clk => '0',
