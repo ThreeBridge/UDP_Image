@@ -72,7 +72,7 @@ module image_8to32 (
 input wire clk;
 input wire srst;
 (* X_INTERFACE_INFO = "xilinx.com:interface:fifo_write:1.0 FIFO_WRITE WR_DATA" *)
-input wire [7 : 0] din;
+input wire [31 : 0] din;
 (* X_INTERFACE_INFO = "xilinx.com:interface:fifo_write:1.0 FIFO_WRITE WR_EN" *)
 input wire wr_en;
 (* X_INTERFACE_INFO = "xilinx.com:interface:fifo_read:1.0 FIFO_READ RD_EN" *)
@@ -93,7 +93,7 @@ output wire underflow;
     .C_COUNT_TYPE(0),
     .C_DATA_COUNT_WIDTH(10),
     .C_DEFAULT_VALUE("BlankString"),
-    .C_DIN_WIDTH(8),
+    .C_DIN_WIDTH(32),
     .C_DOUT_RST_VAL("0"),
     .C_DOUT_WIDTH(32),
     .C_ENABLE_RLOCS(0),
@@ -123,17 +123,17 @@ output wire underflow;
     .C_OVERFLOW_LOW(0),
     .C_PRELOAD_LATENCY(1),
     .C_PRELOAD_REGS(0),
-    .C_PRIM_FIFO_TYPE("1kx18"),
+    .C_PRIM_FIFO_TYPE("1kx36"),
     .C_PROG_EMPTY_THRESH_ASSERT_VAL(2),
     .C_PROG_EMPTY_THRESH_NEGATE_VAL(3),
     .C_PROG_EMPTY_TYPE(0),
-    .C_PROG_FULL_THRESH_ASSERT_VAL(1021),
-    .C_PROG_FULL_THRESH_NEGATE_VAL(1020),
+    .C_PROG_FULL_THRESH_ASSERT_VAL(1022),
+    .C_PROG_FULL_THRESH_NEGATE_VAL(1021),
     .C_PROG_FULL_TYPE(0),
-    .C_RD_DATA_COUNT_WIDTH(9),
-    .C_RD_DEPTH(256),
+    .C_RD_DATA_COUNT_WIDTH(10),
+    .C_RD_DEPTH(1024),
     .C_RD_FREQ(1),
-    .C_RD_PNTR_WIDTH(8),
+    .C_RD_PNTR_WIDTH(10),
     .C_UNDERFLOW_LOW(0),
     .C_USE_DOUT_RST(1),
     .C_USE_ECC(0),
@@ -141,10 +141,10 @@ output wire underflow;
     .C_USE_PIPELINE_REG(0),
     .C_POWER_SAVING_MODE(0),
     .C_USE_FIFO16_FLAGS(0),
-    .C_USE_FWFT_DATA_COUNT(1),
+    .C_USE_FWFT_DATA_COUNT(0),
     .C_VALID_LOW(0),
     .C_WR_ACK_LOW(0),
-    .C_WR_DATA_COUNT_WIDTH(11),
+    .C_WR_DATA_COUNT_WIDTH(10),
     .C_WR_DEPTH(1024),
     .C_WR_FREQ(1),
     .C_WR_PNTR_WIDTH(10),
@@ -303,9 +303,9 @@ output wire underflow;
     .din(din),
     .wr_en(wr_en),
     .rd_en(rd_en),
-    .prog_empty_thresh(8'B0),
-    .prog_empty_thresh_assert(8'B0),
-    .prog_empty_thresh_negate(8'B0),
+    .prog_empty_thresh(10'B0),
+    .prog_empty_thresh_assert(10'B0),
+    .prog_empty_thresh_negate(10'B0),
     .prog_full_thresh(10'B0),
     .prog_full_thresh_assert(10'B0),
     .prog_full_thresh_negate(10'B0),

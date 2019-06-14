@@ -96,7 +96,7 @@ parameter  Recv_Data   = 8'h02;
 parameter  Recv_End    = 8'h03;
     
     reg       pre;
-    reg [7:0] RXBUF [1045:0];
+    reg [7:0] RXBUF [1485:0];
     
     /* ステートマシン */
     (*dont_touch="true"*)reg [3:0] st;
