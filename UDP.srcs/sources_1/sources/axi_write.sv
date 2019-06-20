@@ -196,7 +196,7 @@ module axi_write(
     end
     always_ff @(posedge clk_i)begin
         if(st_aw==AWCH)begin
-            d_transaction_cnt <= d_transaction_cnt + 2'b1;
+            d_transaction_cnt <= transaction_cnt;
         end
         else if(st_aw==IDLE)begin
             d_transaction_cnt <= 2'b0;
@@ -208,7 +208,7 @@ module axi_write(
         if (st_aw==AWCH)begin
             axi_aw.id       <= 1'b0;
             //axi_aw.addr     <= 29'b0+(10'd1000*packet_cnt);
-            axi_aw.addr     <= 29'b0+(11'd960*(packet_cnt*2+d_transaction_cnt)); // 240*(3+1)=960
+            axi_aw.addr     <= 29'b0+(11'd960*(packet_cnt*2+transaction_cnt)); // 240*(3+1)=960
             //axi_aw.len      <= 8'hF9;
             axi_aw.len      <= 8'd239;   // 480/2=240
             axi_aw.size     <= 3'b010;
@@ -266,6 +266,9 @@ module axi_write(
                 queue_cnt <= queue_cnt + 3'b1;
             end
         end
+        else begin
+            queue_cnt <= 3'b0;
+        end
     end
     
     logic [31:0] data0;
@@ -275,10 +278,10 @@ module axi_write(
     
     always_comb begin
         if(packet_cnt[0]==1'b0)begin
-            data0 = {8'h55,q_data[2],q_data[1],q_data[0]};   // {dummy,blue,green,red}
+            data0 = {8'h55,q_data[1],q_data[0],data_i};   // {dummy,blue,green,red}
         end
         else begin
-            data1 = {8'h55,q_data[2],q_data[1],q_data[0]};   // {dummy,blue,green,red}
+            data1 = {8'h55,q_data[1],q_data[0],data_i};   // {dummy,blue,green,red}
         end
     end
     
@@ -360,7 +363,7 @@ module axi_write(
     /*---write_end---*/
     always_ff @(posedge clk_i)begin
         if(st_w==WCH)begin
-            if(write_cnt==8'd240)begin
+            if(write_cnt==8'd240&&axi_wready)begin
                 write_end <= write_end + 2'b1;
             end
         end

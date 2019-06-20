@@ -118,9 +118,9 @@ module trans_image(
     parameter   eth_head =  4'd14;
     //parameter   udp     =   6'd34;
     parameter   FTYPE   =   16'h08_00;
-    parameter   MsgSize =   16'd1000;
+    parameter   MsgSize =   16'd1440;
     parameter   TTL     =   8'd255;
-    parameter   PckSize =   11'd1046;
+    parameter   PckSize =   16'd1486;
     
     /*---wire/register---*/
     //wire [3:0] packet_cnt_sel = (SW[7:4]==4'd0) ? SW[7:4] : (SW[7:4] - 4'd1);
@@ -135,20 +135,21 @@ module trans_image(
                                  (SW[7:4]==4'd8) ? 8'd128-1'b1 :
                                  (SW[7:4]==4'd9) ? 9'd256-1'b1 :
                                  (SW[7:4]==4'd10) ? 4'd10-1'b1 :
+                                 (SW[7:4]==4'd11) ? 10'd640-1'b1 :
                                  8'd160-1'b1 ;
 
 
     //reg [7:0]   image_buffer_i [9999:0];
     //reg [7:0]   image_buffer [999:0];
-    reg [7:0]   image_bufferA [499:0];
-    reg [7:0]   image_bufferB [499:0];
-    reg [7:0]   TXBUF [1045:0];
-    reg [7:0]   VBUF [1019:0];
+    //reg [7:0]   image_bufferA [499:0];
+    //reg [7:0]   image_bufferB [499:0];
+    reg [7:0]   TXBUF [PckSize-1:0];
+    //reg [7:0]   VBUF [1019:0];
     reg         rst;
     reg [47:0]  DstMAC_d;
     reg [31:0]  DstIP_d;
     reg [10:0]  UDP_cnt;  // 固定長のUDPデータ用カウント
-    (*dont_touch="true"*)reg [15:0] SrcPort_d;
+    (*dont_touch="true"*)reg [15:0]SrcPort_d;
     (*dont_touch="true"*)reg [15:0] DstPort_d;
     reg [15:0] UDP_Checksum;
     
@@ -169,6 +170,7 @@ module trans_image(
     wire hcend_end = (err_cnt==3'd0);    
     wire ucsum_end = (csum_cnt==MsgSize+5'd20);
     wire ucend_end = (err_cnt==3'd7);
+    wire read_end  = (axi_r.last&&axi_r.valid);
     
     always_ff @(posedge eth_rxck)begin
         if (rst_rx) st <= IDLE;
@@ -183,7 +185,7 @@ module trans_image(
             end
             Presv : begin
                 //if (d_img_cnt[2]>10'd999) nx = READY;
-                if (axi_r.last&&axi_r.valid) nx = READY;
+                if (read_end) nx = READY;
             end
             READY : begin
                 if (ready_end) nx = Hcsum;
@@ -252,7 +254,7 @@ module trans_image(
 //    end
     
     /*--DRAM2BUF--*/
-    reg [7:0] image_buf [999:0];
+    reg [7:0] image_buf [MsgSize-1:0];
     wire [7:0] r_data0 = axi_r.data[31:24] ^ 8'hFF;
     wire [7:0] r_data1 = axi_r.data[23:16] ^ 8'hFF;
     wire [7:0] r_data2 = axi_r.data[15:8] ^ 8'hFF;

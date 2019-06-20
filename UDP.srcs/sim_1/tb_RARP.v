@@ -1063,13 +1063,14 @@ module tb_rarp(
         repeat(60) recvPixel(8'h00,8'hBB,8'h00);
         repeat(60) recvPixel(8'h00,8'h00,8'hBB);
         repeat(60) recvPixel(8'hFF,8'hAA,8'hBB);
-        repeat(60) recvPixel(8'hCC,8'hDD,8'hEE);
+        repeat(59) recvPixel(8'hCC,8'hDD,8'hEE);
+        recvPixel(8'hAA,8'hBB,8'hCC);
            
         // CRC
-       recvByte(8'h6E);
-       recvByte(8'hF4);
-       recvByte(8'h3A);
-       recvByte(8'hEA);
+       recvByte(8'h39);
+       recvByte(8'hCE);
+       recvByte(8'hA7);
+       recvByte(8'h40);
         recv_end();
    
         //P_RXCLK = 0;
