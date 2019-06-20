@@ -59,7 +59,7 @@ module axi_read(
     input       clk_i;
     input       rst;
     input       rd_en;
-    input [8:0] sel;
+    input [10:0] sel;
     input       axi_arready;
     input       axi_r;
     
@@ -67,7 +67,7 @@ module axi_read(
     output reg  axi_rready;
     
     /*---wire/register---*/
-    reg [31:0]  im_buf [249:0];
+    //reg [31:0]  im_buf [249:0];
     reg         r_ch_st;
     
     AXI_AR      axi_ar;
@@ -82,9 +82,15 @@ module axi_read(
     parameter   READ    =   4'h4;
     parameter   REND    =   4'h5;
     
+    parameter   transaction_num =   4'd2;   // トランザクションの数(480回連続では送れないため)
+    
     /*---ステートマシン(AR_CH)---*/
     reg [3:0] st_ar;
     reg [3:0] nx_ar;
+    reg [1:0] transaction_cnt;
+    reg [1:0] read_end;
+    wire      transaction = (transaction_cnt==(transaction_num));
+    wire      archannel_ok = (axi_arready&&axi_ar.valid)&&transaction;
     always_ff @(posedge clk_i)begin
         if(rst) st_ar <= IDLE;
         else    st_ar <= nx_ar;
@@ -97,7 +103,7 @@ module axi_read(
                 if (rd_en) nx_ar = ARCH;
             end
             ARCH : begin
-                if (axi_arready&&axi_ar.valid) nx_ar = AR_OK;
+                if (archannel_ok) nx_ar = AR_OK;
             end
             AR_OK :begin
                 nx_ar = IDLE;
@@ -110,6 +116,7 @@ module axi_read(
     /*---ステートマシン(R_CH)---*/
     reg [3:0] st_r;
     reg [3:0] nx_r;
+    wire rdchannel_end = axi_r.last&&(read_end==transaction_num);
     always_ff @(posedge clk_i)begin
         if(rst) st_r <= IDLE;
         else    st_r <= nx_r;        
@@ -125,7 +132,7 @@ module axi_read(
                 if (axi_r.valid) nx_r = READ;
             end
             READ : begin
-                if (axi_r.last) nx_r = REND;
+                if (rdchannel_end) nx_r = REND;
             end
             REND : begin
                 nx_r = IDLE;
@@ -133,12 +140,25 @@ module axi_read(
         endcase
     end
     
+    /*---トランザクション数をカウント---*/
+    always_ff @(posedge clk_i)begin
+        if(st_ar==ARCH)begin
+            if(axi_arready&&(transaction_cnt!=2'd2))begin
+                transaction_cnt <= transaction_cnt + 2'b1;
+            end
+        end
+        else if(st_ar==IDLE)begin
+            transaction_cnt <= 2'b0;
+        end
+    end    
+    
     /*---AR_CH---*/
     always_ff @(posedge clk_i)begin
         if(st_ar==ARCH)begin
             axi_ar.id       <=  1'b0;
-            axi_ar.addr     <=  29'b0 + (10'd1000*sel);
-            axi_ar.len      <=  8'hF9;
+            //axi_ar.addr     <=  29'b0 + (10'd1000*sel);
+            axi_ar.addr     <=  29'b0+(11'd960*(sel*2+transaction_cnt));
+            axi_ar.len      <=  8'd239;
             axi_ar.size     <=  3'b010;
             axi_ar.burst    <=  2'b01;
             axi_ar.lock     <=  2'b0;
@@ -162,7 +182,7 @@ module axi_read(
     /*--valid--*/
     always_ff @(posedge clk_i)begin
         if(st_ar==ARCH)begin
-            if(axi_arready&&axi_ar.valid)begin
+            if(archannel_ok)begin
                 axi_ar.valid <= `LO;
             end
             else begin
@@ -189,6 +209,17 @@ module axi_read(
         else                axi_rready <= `LO;
     end
     
+    always_ff @(posedge clk_i)begin
+        if(st_r==IDLE)begin
+            read_end <= 2'b0;
+        end
+        else begin
+            if(axi_r.last)begin
+                read_end <= read_end + 2'b1;
+            end
+        end
+    end
+    
     reg [8:0] rd_cnt;
     always_ff @(posedge clk_i)begin
         if(st_r==READ)begin
@@ -199,15 +230,15 @@ module axi_read(
         end
     end
     
-    integer i;
-    always_ff @(posedge clk_i)begin
-        if(st_r==READ)begin
-            im_buf[rd_cnt] <= axi_r.data;
-        end
-        else if(st_r==IDLE)begin
-            for(i=0;i<8'd250;i=i+1) im_buf[i] <= 32'b0;
-        end
-    end
+//    integer i;
+//    always_ff @(posedge clk_i)begin
+//        if(st_r==READ)begin
+//            im_buf[rd_cnt] <= axi_r.data;
+//        end
+//        else if(st_r==IDLE)begin
+//            for(i=0;i<8'd250;i=i+1) im_buf[i] <= 32'b0;
+//        end
+//    end
     
     
 endmodule

@@ -122,9 +122,11 @@ module trans_image(
     parameter   TTL     =   8'd255;
     parameter   PckSize =   16'd1486;
     
+    parameter   transaction_num =   4'd2;   // トランザクションの数(480回連続では送れないため)
+    
     /*---wire/register---*/
     //wire [3:0] packet_cnt_sel = (SW[7:4]==4'd0) ? SW[7:4] : (SW[7:4] - 4'd1);
-    wire [8:0] packet_cnt_sel = (SW[7:4]==4'd0) ? 4'd0 :                            // add 2018.12.6
+    wire [10:0] packet_cnt_sel = (SW[7:4]==4'd0) ? 4'd0 :                            // add 2018.12.6
                                  (SW[7:4]==4'd1) ? 4'd1-1'b1 :
                                  (SW[7:4]==4'd2) ? 4'd2-1'b1 :
                                  (SW[7:4]==4'd3) ? 4'd4-1'b1 :
@@ -160,7 +162,7 @@ module trans_image(
     (*dont_touch="true"*)reg         csum_ok;
     reg [4:0]   err_cnt;
     (*dont_touch="true"*)reg         tx_end;
-    reg [8:0]   packet_cnt;
+    reg [10:0]   packet_cnt;
     //reg         Hcsum_st;
     //reg [3:0]   ready_cnt;
     //reg [9:0]   d_img_cnt [2:0];        // BlockRAMの出力が1サイクルずれるため & recv_image側でimage_cntにFFを挟むため
@@ -170,7 +172,9 @@ module trans_image(
     wire hcend_end = (err_cnt==3'd0);    
     wire ucsum_end = (csum_cnt==MsgSize+5'd20);
     wire ucend_end = (err_cnt==3'd7);
-    wire read_end  = (axi_r.last&&axi_r.valid);
+    reg [1:0] transaction_cnt;
+    wire      transaction = (transaction_cnt==(transaction_num));
+    wire read_end  = (axi_r.last&&axi_r.valid)&&transaction;
     
     always_ff @(posedge eth_rxck)begin
         if (rst_rx) st <= IDLE;
@@ -253,21 +257,47 @@ module trans_image(
 //        end
 //    end
     
+    /*---トランザクション数をカウント---*/
+    always_ff @(posedge eth_rxck)begin
+        if(st==IDLE)begin
+            transaction_cnt <= 2'b0;
+        end
+        else if(st==Presv)begin
+            if(axi_r.last)begin
+                transaction_cnt <= transaction_cnt + 2'b1;
+            end
+        end
+        else if(st==Tx_En)begin
+            if(axi_r.last)begin
+                transaction_cnt <= transaction_cnt + 2'b1;
+            end
+        end
+        else begin
+            transaction_cnt <= 2'b0;
+        end
+    end
+    
     /*--DRAM2BUF--*/
     reg [7:0] image_buf [MsgSize-1:0];
-    wire [7:0] r_data0 = axi_r.data[31:24] ^ 8'hFF;
-    wire [7:0] r_data1 = axi_r.data[23:16] ^ 8'hFF;
-    wire [7:0] r_data2 = axi_r.data[15:8] ^ 8'hFF;
-    wire [7:0] r_data3 = axi_r.data[7:0] ^ 8'hFF;
+//    wire [7:0] r_data0 = axi_r.data[31:24] ^ 8'hFF;
+//    wire [7:0] r_data1 = axi_r.data[23:16] ^ 8'hFF;
+//    wire [7:0] r_data2 = axi_r.data[15:8] ^ 8'hFF;
+//    wire [7:0] r_data3 = axi_r.data[7:0] ^ 8'hFF;
+    wire [7:0] dummy = axi_r.data[31:24];
+    wire [7:0] blue  = axi_r.data[23:16];
+    wire [7:0] green = axi_r.data[15:8];
+    wire [7:0] red   = axi_r.data[7:0];
     always_ff @(posedge eth_rxck)begin
         if(st==Presv)begin
             if(axi_r.valid)begin
-                image_buf <= {r_data3,r_data2,r_data1,r_data0,image_buf[999:4]};
+                //image_buf <= {r_data3,r_data2,r_data1,r_data0,image_buf[999:4]};
+                image_buf <= {blue,green,red,image_buf[MsgSize-1:3]};
             end
         end
         else if(st==Tx_En&&packet_cnt!=packet_cnt_sel)begin
             if(axi_r.valid)begin
-                image_buf <= {r_data3,r_data2,r_data1,r_data0,image_buf[999:4]};
+                //image_buf <= {r_data3,r_data2,r_data1,r_data0,image_buf[999:4]};
+                image_buf <= {blue,green,red,image_buf[MsgSize-1:3]};
             end            
         end
     end
@@ -316,9 +346,9 @@ module trans_image(
 //        end
 //    end
     
-    reg [8:0] addr_cnt;
+    reg [10:0] addr_cnt;
     always_ff @(posedge eth_rxck)begin              // BRAM(DRAM)のアドレスを表現するためのもの
-        if(st==IDLE)        addr_cnt <= 9'b0;
+        if(st==IDLE)        addr_cnt <= 11'b0;
         else if(st==Hc_End) addr_cnt <= packet_cnt + 1;
     end
     
@@ -327,7 +357,7 @@ module trans_image(
 //    end
     
     //<-- add 2018.12.12
-    reg [8:0] d_packet_cnt;
+    reg [10:0] d_packet_cnt;
     always_ff @(posedge eth_rxck)begin
         d_packet_cnt <= packet_cnt;
     end
@@ -561,13 +591,13 @@ module trans_image(
             //for(j=0;j<1000;j=j+1) TXBUF[6'd42+j] <= image_buffer[j];
             //for(tx_A=0;tx_A<500;tx_A=tx_A+1) TXBUF[6'd42+tx_A] <= image_bufferA[tx_A];      // 2018.11.16
             //for(tx_B=0;tx_B<500;tx_B=tx_B+1) TXBUF[6'd42+tx_B+500] <= image_bufferB[tx_B];  // 2018.11.16
-            TXBUF[1041:42] <= image_buf[999:0];
-            {TXBUF[1042],TXBUF[1043],TXBUF[1044],TXBUF[1045]} <= 32'h01_02_03_04;   // dummy
+            TXBUF[PckSize-5:42] <= image_buf[MsgSize-1:0];
+            {TXBUF[PckSize-4],TXBUF[PckSize-3],TXBUF[PckSize-2],TXBUF[PckSize-1]} <= 32'h01_02_03_04;   // dummy
             //Hcsum_st <= 1;
         end
         else if(st==Hc_End)    {TXBUF[24],TXBUF[25]} <= csum_o;
         //else if(st==Uc_End)    {TXBUF[40],TXBUF[41]} <= csum_extend;
-        else if(st==Tx_En) TXBUF <= {TXBUF[0],TXBUF[1045:1]};
+        else if(st==Tx_En) TXBUF <= {TXBUF[0],TXBUF[PckSize-1:1]};
     end
     
     /*---仮想ヘッダ準備---*/

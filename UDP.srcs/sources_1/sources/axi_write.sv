@@ -194,14 +194,6 @@ module axi_write(
             transaction_cnt <= 2'b0;
         end
     end
-    always_ff @(posedge clk_i)begin
-        if(st_aw==AWCH)begin
-            d_transaction_cnt <= transaction_cnt;
-        end
-        else if(st_aw==IDLE)begin
-            d_transaction_cnt <= 2'b0;
-        end
-    end
     
     /*---AWchannel用データ---*/
     always_ff @(posedge clk_i)begin
@@ -334,7 +326,7 @@ module axi_write(
     
     always_ff @(posedge clk_i)begin
         if(st_w==WCH)begin
-            if(write_cnt==8'd240&&axi_wready)begin
+            if(write_end==transaction_num)begin
                 axi_w.strb  <= 4'h0;
                 axi_w.valid <= `LO;              
             end
@@ -375,7 +367,7 @@ module axi_write(
     always_ff @(posedge clk_i)begin
         if(st_w==WCH)begin
             if(axi_wready&&(write_cnt==8'd240))begin
-                write_cnt <= 8'b0;
+                write_cnt <= 8'b1;
             end
             else if(write_cnt==8'd240)begin
                 write_cnt <= write_cnt;

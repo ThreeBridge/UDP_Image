@@ -673,6 +673,16 @@ module tb_rarp(
 //         P_RXDV = 0;
          
          /*---UDP_image---*/
+         #2500;
+         SW[7:4] = 4'h2;
+         #2500;
+         UDP_COLOR();
+         #96;
+         UDP_COLOR();
+         #96;
+         
+         #100000;
+         
          SW[7:4] = 4'hB;
          #2500;
          COLOL_640();
