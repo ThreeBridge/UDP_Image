@@ -111,7 +111,7 @@ module axi_write(
     reg [3:0] nx_aw;
     reg [1:0] transaction_cnt;
     reg [1:0] d_transaction_cnt;
-    wire      transaction = (transaction_cnt==(transaction_num));
+    wire      transaction = (d_transaction_cnt==(transaction_num));
     wire      awchannel_ok = (axi_awready&&axi_aw.valid)&&transaction;
     always_ff @(posedge clk_i)begin
         if(rst) st_aw <= IDLE;
@@ -184,23 +184,35 @@ module axi_write(
     end
     
     /*---トランザクション数をカウント---*/
-    always_ff @(posedge clk_i)begin
-        if(st_aw==AWCH)begin
+    always_ff @(posedge clk_i) begin
+        if(st_aw==IDLE)begin
+            if(udp_flg) transaction_cnt <= transaction_cnt + 2'b1;
+            else        transaction_cnt <= 2'b0;
+        end
+        else if(st_aw==AWCH)begin
             if(axi_awready&&(transaction_cnt!=2'd2))begin
                 transaction_cnt <= transaction_cnt + 2'b1;
             end
         end
-        else if(st_aw==IDLE)begin
-            transaction_cnt <= 2'b0;
+    end
+    always_ff @(posedge clk_i)begin
+        if(st_aw==AWCH)begin
+            d_transaction_cnt <= transaction_cnt;
         end
+        else if(st_aw==IDLE)begin
+            d_transaction_cnt <= 2'b0;
+        end            
     end
     
     /*---AWchannel用データ---*/
+    wire [12:0] address_times = (packet_cnt<<1)+transaction_cnt; // アドレスを何倍するか
+    wire [28:0] address;
     always_ff @(posedge clk_i)begin
         if (st_aw==AWCH)begin
             axi_aw.id       <= 1'b0;
             //axi_aw.addr     <= 29'b0+(10'd1000*packet_cnt);
-            axi_aw.addr     <= 29'b0+(11'd960*(packet_cnt*2+transaction_cnt)); // 240*(3+1)=960
+            //axi_aw.addr     <= 29'b0+(11'd960*(packet_cnt<<1+transaction_cnt)); // 240*(3+1)=960
+            //axi_aw.addr     <= address;
             //axi_aw.len      <= 8'hF9;
             axi_aw.len      <= 8'd239;   // 480/2=240
             axi_aw.size     <= 3'b010;
@@ -212,7 +224,7 @@ module axi_write(
         end
         else if (st_aw==IDLE)begin
             axi_aw.id       <= 1'b0;
-            axi_aw.addr     <= 29'b0;
+            //axi_aw.addr     <= 29'b0;
             axi_aw.len      <= 8'h0;
             axi_aw.size     <= 3'b0;
             axi_aw.burst    <= 2'b0;
@@ -222,6 +234,15 @@ module axi_write(
             axi_aw.qos      <= 4'b0;
         end
     end
+    /*--address--*/
+    assign axi_aw.addr = address;
+
+    /*---Multiplier---*/
+    mult_gen_0 multi_0(
+        .CLK    (clk_i),
+        .A      (address_times),
+        .P      (address)
+    );
     
     /*--valid--*/
     always_ff @(posedge clk_i)begin

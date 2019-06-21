@@ -12,15 +12,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="202663414932fs"></ZoomStartTime>
-      <ZoomEndTime time="202720914933fs"></ZoomEndTime>
-      <Cursor1Time time="202682625000fs"></Cursor1Time>
+      <ZoomStartTime time="156006029172fs"></ZoomStartTime>
+      <ZoomEndTime time="156428660155fs"></ZoomEndTime>
+      <Cursor1Time time="156178625000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="168"></NameColumnWidth>
-      <ValueColumnWidth column_width="104"></ValueColumnWidth>
+      <ValueColumnWidth column_width="100"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="312" />
+   <WVObjectSize size="322" />
    <wave_markers>
       <marker label="" time="32952830000" />
       <marker label="" time="232605844000" />
@@ -781,6 +781,7 @@
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_aw">
       <obj_property name="ElementShortName">axi_aw</obj_property>
       <obj_property name="ObjectShortName">axi_aw</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_aw.id">
          <obj_property name="ElementShortName">.id</obj_property>
          <obj_property name="ObjectShortName">.id</obj_property>
@@ -826,6 +827,24 @@
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_awready">
       <obj_property name="ElementShortName">axi_awready</obj_property>
       <obj_property name="ObjectShortName">axi_awready</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/transaction_cnt">
+      <obj_property name="ElementShortName">transaction_cnt[1:0]</obj_property>
+      <obj_property name="ObjectShortName">transaction_cnt[1:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/d_transaction_cnt">
+      <obj_property name="ElementShortName">d_transaction_cnt[1:0]</obj_property>
+      <obj_property name="ObjectShortName">d_transaction_cnt[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/address_times">
+      <obj_property name="ElementShortName">address_times[12:0]</obj_property>
+      <obj_property name="ObjectShortName">address_times[12:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/address">
+      <obj_property name="ElementShortName">address[28:0]</obj_property>
+      <obj_property name="ObjectShortName">address[28:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/wr_en0">
       <obj_property name="ElementShortName">wr_en0</obj_property>
@@ -900,6 +919,11 @@
    <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/write_end">
       <obj_property name="ElementShortName">write_end[1:0]</obj_property>
       <obj_property name="ObjectShortName">write_end[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/packet_cnt">
+      <obj_property name="ElementShortName">packet_cnt[10:0]</obj_property>
+      <obj_property name="ObjectShortName">packet_cnt[10:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/fifo_sel">
       <obj_property name="ElementShortName">fifo_sel</obj_property>
@@ -989,6 +1013,28 @@
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/axi_read/axi_arready">
       <obj_property name="ElementShortName">axi_arready</obj_property>
       <obj_property name="ObjectShortName">axi_arready</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/axi_read/sel">
+      <obj_property name="ElementShortName">sel[10:0]</obj_property>
+      <obj_property name="ObjectShortName">sel[10:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/axi_read/transaction_cnt">
+      <obj_property name="ElementShortName">transaction_cnt[1:0]</obj_property>
+      <obj_property name="ObjectShortName">transaction_cnt[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/axi_read/d_transaction_cnt">
+      <obj_property name="ElementShortName">d_transaction_cnt[1:0]</obj_property>
+      <obj_property name="ObjectShortName">d_transaction_cnt[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/axi_read/address_times">
+      <obj_property name="ElementShortName">address_times[12:0]</obj_property>
+      <obj_property name="ObjectShortName">address_times[12:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/axi_read/address">
+      <obj_property name="ElementShortName">address[28:0]</obj_property>
+      <obj_property name="ObjectShortName">address[28:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/trans_image/axi_read/r_ch_st">
       <obj_property name="ElementShortName">r_ch_st</obj_property>
