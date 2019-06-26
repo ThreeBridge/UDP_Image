@@ -573,7 +573,7 @@ module trans_image(
             /*-IPヘッダ-*/
             TXBUF[14] <= 8'h45;                             // Version/IHL
             TXBUF[15] <= 8'h00;                             // ToS
-            {TXBUF[16],TXBUF[17]} <= 16'd1028;              // Total Length(16'd1028==IPヘッダ(20)+その下(1008))
+            {TXBUF[16],TXBUF[17]} <= 5'd20+4'd8+MsgSize;    // Total Length(IPヘッダ(20)+UDPヘッダ(8バイト)+UDPデータ)
             {TXBUF[18],TXBUF[19]} <= 16'hAB_CD;             // Identification
             {TXBUF[20],TXBUF[21]} <= {3'b010,13'd0};        // Flags[15:13] ,Flagment Offset[12:0]
             TXBUF[22] <= TTL;                               // Time To Live
@@ -585,7 +585,7 @@ module trans_image(
             /*-UDPヘッダ-*/
             {TXBUF[34],TXBUF[35]} <= DstPort_d;             // 発信元ポート番号
             {TXBUF[36],TXBUF[37]} <= SrcPort_d;             // 宛先ポート番号   
-            {TXBUF[38],TXBUF[39]} <= 16'd1008;              // UDPデータ長 UDPヘッダ(8バイト)+UDPデータ(1000バイト)
+            {TXBUF[38],TXBUF[39]} <= MsgSize+4'd8;          // UDPデータ長 UDPヘッダ(8バイト)+UDPデータ
             {TXBUF[40],TXBUF[41]} <= 16'h00_00;             // UDP Checksum (仮想ヘッダ+UDP)
             /*-UDPデータ(可変長(受信データ長による))____1000バイトに固定____-*/
             //for(j=0;j<1000;j=j+1) TXBUF[6'd42+j] <= image_buffer[j];

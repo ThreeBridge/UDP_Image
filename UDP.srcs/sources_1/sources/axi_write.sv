@@ -157,7 +157,7 @@ module axi_write(
             end
             WCH : begin
                 //if (write_cnt==8'd250&&axi_wready) nx_w = WEND;
-                if (write_end==2'd2&&axi_wready) nx_w = WEND;
+                if (write_end==transaction_num) nx_w = WEND;
             end
             WEND : begin
                 nx_w = IDLE;
@@ -345,23 +345,40 @@ module axi_write(
     logic [31:0] d_out0;
     logic [31:0] d_out1;
     
+    /*--strb--*/
     always_ff @(posedge clk_i)begin
         if(st_w==WCH)begin
             if(write_end==transaction_num)begin
                 axi_w.strb  <= 4'h0;
-                axi_w.valid <= `LO;              
             end
             else begin
                 axi_w.strb  <= 4'hF;
-                axi_w.valid <= `HI;
             end
         end
         else if(st_w==IDLE)begin
             axi_w.strb  <= 4'h0;
-            axi_w.valid <= `LO;            
+        end
+    end
+    /*--valid--*/
+    wire neg_valid = write_cnt==8'd240&&write_end==transaction_num-1&&axi_wready;
+    always_ff @(posedge clk_i)begin
+        if(st_w==WCH)begin
+            if(neg_valid)begin
+                axi_w.valid <= `LO;
+            end
+            else if(write_end==transaction_num)begin
+                axi_w.valid <= `LO;
+            end
+            else begin
+                axi_w.valid <= `HI;
+            end
+        end
+        else begin
+            axi_w.valid <= `LO;
         end
     end
     
+    /*--data--*/
     always_comb begin
         if(st_w==WCH)begin
             axi_w.data  = (!fifo_sel) ? d_out0 : d_out1;
@@ -387,21 +404,22 @@ module axi_write(
 
     always_ff @(posedge clk_i)begin
         if(st_w==WCH)begin
-            if(axi_wready&&(write_cnt==8'd240))begin
-                write_cnt <= 8'b1;
-            end
-            else if(write_cnt==8'd240)begin
+            if(write_end==transaction_num-1&&write_cnt==8'd240)begin
                 write_cnt <= write_cnt;
+            end
+            else if(axi_wready&&(write_cnt==8'd240))begin
+                write_cnt <= 8'b1;
             end
             else if(axi_wready)begin
                 write_cnt <= write_cnt + 8'b1;
             end
         end
-        else if(st_w==IDLE)begin
+        else begin
             write_cnt <= 8'b0;
         end
     end
     
+    /*--last--*/
     always_comb begin
         if(st_w==WCH)begin
             if(write_cnt==8'd240)   axi_w.last = `HI;
