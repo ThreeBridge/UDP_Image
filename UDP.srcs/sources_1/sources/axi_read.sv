@@ -163,7 +163,7 @@ module axi_read(
     end                                              
     
     /*---AR_CH---*/
-    wire [12:0] address_times = (sel<<1)+transaction_cnt; // アドレスを何倍するか
+    wire [13:0] address_times = (sel<<1)+transaction_cnt; // アドレスを何倍するか
     wire [28:0] address;
     always_ff @(posedge clk_i)begin
         if(st_ar==ARCH)begin

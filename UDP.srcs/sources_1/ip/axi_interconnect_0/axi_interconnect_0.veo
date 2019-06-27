@@ -109,8 +109,8 @@ axi_interconnect_0 your_instance_name (
   .M00_AXI_AWQOS(M00_AXI_AWQOS),                // output wire [3 : 0] M00_AXI_AWQOS
   .M00_AXI_AWVALID(M00_AXI_AWVALID),            // output wire M00_AXI_AWVALID
   .M00_AXI_AWREADY(M00_AXI_AWREADY),            // input wire M00_AXI_AWREADY
-  .M00_AXI_WDATA(M00_AXI_WDATA),                // output wire [31 : 0] M00_AXI_WDATA
-  .M00_AXI_WSTRB(M00_AXI_WSTRB),                // output wire [3 : 0] M00_AXI_WSTRB
+  .M00_AXI_WDATA(M00_AXI_WDATA),                // output wire [127 : 0] M00_AXI_WDATA
+  .M00_AXI_WSTRB(M00_AXI_WSTRB),                // output wire [15 : 0] M00_AXI_WSTRB
   .M00_AXI_WLAST(M00_AXI_WLAST),                // output wire M00_AXI_WLAST
   .M00_AXI_WVALID(M00_AXI_WVALID),              // output wire M00_AXI_WVALID
   .M00_AXI_WREADY(M00_AXI_WREADY),              // input wire M00_AXI_WREADY
@@ -130,7 +130,7 @@ axi_interconnect_0 your_instance_name (
   .M00_AXI_ARVALID(M00_AXI_ARVALID),            // output wire M00_AXI_ARVALID
   .M00_AXI_ARREADY(M00_AXI_ARREADY),            // input wire M00_AXI_ARREADY
   .M00_AXI_RID(M00_AXI_RID),                    // input wire [3 : 0] M00_AXI_RID
-  .M00_AXI_RDATA(M00_AXI_RDATA),                // input wire [31 : 0] M00_AXI_RDATA
+  .M00_AXI_RDATA(M00_AXI_RDATA),                // input wire [127 : 0] M00_AXI_RDATA
   .M00_AXI_RRESP(M00_AXI_RRESP),                // input wire [1 : 0] M00_AXI_RRESP
   .M00_AXI_RLAST(M00_AXI_RLAST),                // input wire M00_AXI_RLAST
   .M00_AXI_RVALID(M00_AXI_RVALID),              // input wire M00_AXI_RVALID
