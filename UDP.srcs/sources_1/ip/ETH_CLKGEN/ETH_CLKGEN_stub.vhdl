@@ -1,7 +1,7 @@
 -- Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2018.1 (lin64) Build 2188600 Wed Apr  4 18:39:19 MDT 2018
--- Date        : Wed Apr 24 16:31:54 2019
+-- Date        : Fri Jun 28 17:55:56 2019
 -- Host        : bluewater01.localdomain running 64-bit unknown
 -- Command     : write_vhdl -force -mode synth_stub
 --               /home/tmitsuhashi/bin/vivado_h30/UDP_Image/UDP.srcs/sources_1/ip/ETH_CLKGEN/ETH_CLKGEN_stub.vhdl

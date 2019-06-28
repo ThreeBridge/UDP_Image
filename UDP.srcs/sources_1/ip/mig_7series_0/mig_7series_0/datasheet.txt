@@ -64,7 +64,7 @@ Bank Selections:
 
 System_Clock: 
 	SignalName: sys_clk_i
-		PadLocation: R4(MRCC_P)  Bank: 34
+		PadLocation: R4  Bank: 34
 
 System_Control: 
 	SignalName: sys_rst
