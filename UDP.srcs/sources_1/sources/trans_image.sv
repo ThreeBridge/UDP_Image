@@ -167,14 +167,15 @@ module trans_image(
     //reg [3:0]   ready_cnt;
     //reg [9:0]   d_img_cnt [2:0];        // BlockRAMの出力が1サイクルずれるため & recv_image側でimage_cntにFFを挟むため
     
-    wire ready_end = (err_cnt==5'd30);
-    wire hcsum_end = (csum_cnt==8'd2);
-    wire hcend_end = (err_cnt==3'd0);    
-    wire ucsum_end = (csum_cnt==MsgSize+5'd20);
-    wire ucend_end = (err_cnt==3'd7);
+    wire ready_end  = (err_cnt==5'd30);
+    wire hcsum_end  = (csum_cnt==8'd2);
+    wire hcend_end  = (err_cnt==3'd0);    
+    wire ucsum_end  = (csum_cnt==MsgSize+5'd20);
+    wire ucend_end  = (err_cnt==3'd7);
     reg [1:0] transaction_cnt;
     wire      transaction = (transaction_cnt==(transaction_num));
-    wire read_end  = (axi_r.last&&axi_r.valid)&&transaction;
+    wire pos_last   = axi_r.last&&axi_r.valid;
+    wire read_end   = pos_last&&transaction;
     
     always_ff @(posedge eth_rxck)begin
         if (rst_rx) st <= IDLE;
@@ -189,7 +190,7 @@ module trans_image(
             end
             Presv : begin
                 //if (d_img_cnt[2]>10'd999) nx = READY;
-                if (read_end) nx = READY;
+                if (transaction) nx = READY;
             end
             READY : begin
                 if (ready_end) nx = Hcsum;
@@ -263,12 +264,12 @@ module trans_image(
             transaction_cnt <= 2'b0;
         end
         else if(st==Presv)begin
-            if(axi_r.last)begin
+            if(pos_last)begin
                 transaction_cnt <= transaction_cnt + 2'b1;
             end
         end
         else if(st==Tx_En)begin
-            if(axi_r.last)begin
+            if(pos_last)begin
                 transaction_cnt <= transaction_cnt + 2'b1;
             end
         end
@@ -544,7 +545,6 @@ module trans_image(
         data_en_d <= data_en;
     end
     
-    
     reg [15:0] csum_extend;
     always_ff @(posedge eth_rxck)begin 
        if(st==Hc_End) begin
@@ -687,6 +687,15 @@ module trans_image(
             tx_cnt <= 0;
         end
     end
+    
+    /*---All data trans---*/
+    reg transend;
+    always_ff @(posedge eth_rxck)begin
+        if(st==Tx_End)  transend <= 1'b1;
+        else            transend <= 1'b0;
+    end
+    
+    
 //<-- moikawa add (2018.12.11)
 //    (*dont_touch="true"*)reg [1:0] tx_end_rxck;
 //    always_ff @(posedge eth_rxck)begin
@@ -696,9 +705,9 @@ module trans_image(
 //--> moikawa add (2018.12.11)
 
 //<-- moikawa add (2018.11.02)
-       wire [10:0] txbuf_sel2 = tx_cnt;
-       reg [7:0]  data_pipe2 [17:0]; // part of pipelined selector from TXBUF[].
-       wire [4:0]  data_pipe_sel2;    
+//       wire [10:0] txbuf_sel2 = tx_cnt;
+//       reg [7:0]  data_pipe2 [17:0]; // part of pipelined selector from TXBUF[].
+//       wire [4:0]  data_pipe_sel2;    
 //--> moikawa add (2018.11.02)
     reg delay_flg;
     reg [2:0] fcs_cnt;
@@ -722,43 +731,43 @@ module trans_image(
     end
 
 //<-- moikawa add (2018.11.02)
-    reg [10:0] txbuf_sel_d2;
+//    reg [10:0] txbuf_sel_d2;
 
-    //always_ff @(posedge clk125) begin
-    always_ff @(posedge eth_rxck)begin
-        txbuf_sel_d2 <= txbuf_sel2;
-    end
-    assign data_pipe_sel2 = (txbuf_sel_d2[10:6] < 5'd17)? 
-                             txbuf_sel_d2[10:6] : 5'd17 ;
+//    //always_ff @(posedge clk125) begin
+//    always_ff @(posedge eth_rxck)begin
+//        txbuf_sel_d2 <= txbuf_sel2;
+//    end
+//    assign data_pipe_sel2 = (txbuf_sel_d2[10:6] < 5'd17)? 
+//                             txbuf_sel_d2[10:6] : 5'd17 ;
 
-    //always_ff @(posedge clk125) begin // inserted pipelined stage.
-    always_ff @(posedge eth_rxck)begin
-        //for (k=0; k<64; k=k+1) begin
-        //  data_pipe[k] <= TXBUF[ (64*k) + txbuf_sel[5:0] ];
-        //end
-        data_pipe2[0]  <=  TXBUF[ txbuf_sel2[5:0]         ];
-        data_pipe2[1]  <=  TXBUF[ txbuf_sel2[5:0] + 64    ];
-        data_pipe2[2]  <=  TXBUF[ txbuf_sel2[5:0] + 128   ];
-        data_pipe2[3]  <=  TXBUF[ txbuf_sel2[5:0] + 192   ];
-        data_pipe2[4]  <=  TXBUF[ txbuf_sel2[5:0] + 256   ];
-        data_pipe2[5]  <=  TXBUF[ txbuf_sel2[5:0] + 320   ];
-        data_pipe2[6]  <=  TXBUF[ txbuf_sel2[5:0] + 384   ];
-        data_pipe2[7]  <=  TXBUF[ txbuf_sel2[5:0] + 448   ];
-        data_pipe2[8]  <=  TXBUF[ txbuf_sel2[5:0] + 512   ];
-        data_pipe2[9]  <=  TXBUF[ txbuf_sel2[5:0] + 576   ];
-        data_pipe2[10] <=  TXBUF[ txbuf_sel2[5:0] + 640   ];
-        data_pipe2[11] <=  TXBUF[ txbuf_sel2[5:0] + 704   ];
-        data_pipe2[12] <=  TXBUF[ txbuf_sel2[5:0] + 768   ];
-        data_pipe2[13] <=  TXBUF[ txbuf_sel2[5:0] + 832   ];
-        data_pipe2[14] <=  TXBUF[ txbuf_sel2[5:0] + 896   ];
-        data_pipe2[15] <=  TXBUF[ txbuf_sel2[5:0] + 960   ];
-        if (txbuf_sel2[5:0] < 6'd22) begin
-	       data_pipe2[16] <=  TXBUF[ txbuf_sel2[5:0] + 1024  ];
-        end else begin
-	       data_pipe2[16] <=  8'h00;
-        end
-        data_pipe2[17] <= 8'h00;  // dummy value.
-    end
+//    //always_ff @(posedge clk125) begin // inserted pipelined stage.
+//    always_ff @(posedge eth_rxck)begin
+//        //for (k=0; k<64; k=k+1) begin
+//        //  data_pipe[k] <= TXBUF[ (64*k) + txbuf_sel[5:0] ];
+//        //end
+//        data_pipe2[0]  <=  TXBUF[ txbuf_sel2[5:0]         ];
+//        data_pipe2[1]  <=  TXBUF[ txbuf_sel2[5:0] + 64    ];
+//        data_pipe2[2]  <=  TXBUF[ txbuf_sel2[5:0] + 128   ];
+//        data_pipe2[3]  <=  TXBUF[ txbuf_sel2[5:0] + 192   ];
+//        data_pipe2[4]  <=  TXBUF[ txbuf_sel2[5:0] + 256   ];
+//        data_pipe2[5]  <=  TXBUF[ txbuf_sel2[5:0] + 320   ];
+//        data_pipe2[6]  <=  TXBUF[ txbuf_sel2[5:0] + 384   ];
+//        data_pipe2[7]  <=  TXBUF[ txbuf_sel2[5:0] + 448   ];
+//        data_pipe2[8]  <=  TXBUF[ txbuf_sel2[5:0] + 512   ];
+//        data_pipe2[9]  <=  TXBUF[ txbuf_sel2[5:0] + 576   ];
+//        data_pipe2[10] <=  TXBUF[ txbuf_sel2[5:0] + 640   ];
+//        data_pipe2[11] <=  TXBUF[ txbuf_sel2[5:0] + 704   ];
+//        data_pipe2[12] <=  TXBUF[ txbuf_sel2[5:0] + 768   ];
+//        data_pipe2[13] <=  TXBUF[ txbuf_sel2[5:0] + 832   ];
+//        data_pipe2[14] <=  TXBUF[ txbuf_sel2[5:0] + 896   ];
+//        data_pipe2[15] <=  TXBUF[ txbuf_sel2[5:0] + 960   ];
+//        if (txbuf_sel2[5:0] < 6'd22) begin
+//	       data_pipe2[16] <=  TXBUF[ txbuf_sel2[5:0] + 1024  ];
+//        end else begin
+//	       data_pipe2[16] <=  8'h00;
+//        end
+//        data_pipe2[17] <= 8'h00;  // dummy value.
+//    end
 //--> moikawa add (2018.11.02)
 
 
@@ -772,13 +781,15 @@ module trans_image(
         /*---INPUT---*/
         .clk_i          (eth_rxck),
         .rst            (rst_rx),
+        .rst_btn        (rst_btn),
         .rd_en          (read_en),
         .sel            (addr_cnt),
         .axi_arready    (axi_arready),
         .axi_r          (axi_r),
+        .transend       (transend),
         /*---OUTPUT---*/
         .axi_ar         (axi_ar),
-        .axi_rready     (axi_rready)    
+        .axi_rready     (axi_rready)
     );
     
 endmodule

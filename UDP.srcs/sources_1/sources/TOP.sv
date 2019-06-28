@@ -280,7 +280,7 @@ module TOP(
     logic           s_axi_awready;
     
     logic [127:0]   s_axi_wdata;
-    logic [3:0]     s_axi_wstrb;
+    logic [15:0]    s_axi_wstrb;
     logic           s_axi_wlast;
     logic           s_axi_wvalid;
     logic           s_axi_wready;

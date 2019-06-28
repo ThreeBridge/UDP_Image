@@ -12,13 +12,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="156450360157fs"></ZoomStartTime>
-      <ZoomEndTime time="156621675630fs"></ZoomEndTime>
-      <Cursor1Time time="156549740370fs"></Cursor1Time>
+      <ZoomStartTime time="144432588051fs"></ZoomStartTime>
+      <ZoomEndTime time="144626323238fs"></ZoomEndTime>
+      <Cursor1Time time="205791963938fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="168"></NameColumnWidth>
-      <ValueColumnWidth column_width="88"></ValueColumnWidth>
+      <ValueColumnWidth column_width="84"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="322" />
    <wave_markers>
@@ -798,6 +798,46 @@
          <obj_property name="ElementShortName">.len[7:0]</obj_property>
          <obj_property name="ObjectShortName">.len[7:0]</obj_property>
          <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_aw.size">
+         <obj_property name="ElementShortName">.size[2:0]</obj_property>
+         <obj_property name="ObjectShortName">.size[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_aw.burst">
+         <obj_property name="ElementShortName">.burst[1:0]</obj_property>
+         <obj_property name="ObjectShortName">.burst[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_aw.lock">
+         <obj_property name="ElementShortName">.lock</obj_property>
+         <obj_property name="ObjectShortName">.lock</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_aw.cache">
+         <obj_property name="ElementShortName">.cache[3:0]</obj_property>
+         <obj_property name="ObjectShortName">.cache[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_aw.prot">
+         <obj_property name="ElementShortName">.prot[2:0]</obj_property>
+         <obj_property name="ObjectShortName">.prot[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_aw.qos">
+         <obj_property name="ElementShortName">.qos[3:0]</obj_property>
+         <obj_property name="ObjectShortName">.qos[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_aw.valid">
+         <obj_property name="ElementShortName">.valid</obj_property>
+         <obj_property name="ObjectShortName">.valid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_aw.id">
+         <obj_property name="ElementShortName">.id</obj_property>
+         <obj_property name="ObjectShortName">.id</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_aw.addr">
+         <obj_property name="ElementShortName">.addr[28:0]</obj_property>
+         <obj_property name="ObjectShortName">.addr[28:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_aw.len">
+         <obj_property name="ElementShortName">.len[7:0]</obj_property>
+         <obj_property name="ObjectShortName">.len[7:0]</obj_property>
       </wvobject>
       <wvobject type="array" fp_name="/tb_rarp/top_i/R_Arbiter/recv_image/axi_write/axi_aw.size">
          <obj_property name="ElementShortName">.size[2:0]</obj_property>
@@ -1842,8 +1882,8 @@
       <obj_property name="ObjectShortName">s_axi_wvalid</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_rarp/top_i/s_axi_wstrb">
-      <obj_property name="ElementShortName">s_axi_wstrb[3:0]</obj_property>
-      <obj_property name="ObjectShortName">s_axi_wstrb[3:0]</obj_property>
+      <obj_property name="ElementShortName">s_axi_wstrb[15:0]</obj_property>
+      <obj_property name="ObjectShortName">s_axi_wstrb[15:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_rarp/top_i/s_axi_wready">
       <obj_property name="ElementShortName">s_axi_wready</obj_property>

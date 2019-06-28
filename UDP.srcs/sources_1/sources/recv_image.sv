@@ -562,6 +562,7 @@ module recv_image(
         .packet_cnt (packet_cnt),
         .UDP_st     (UDP_st),
         .els_packet (els_packet),
+        .recvend    (recvend),
         .axi_awready(axi_awready),
         .axi_wready (axi_wready),
         .axi_bresp  (axi_bresp),
