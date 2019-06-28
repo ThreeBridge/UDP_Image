@@ -113,8 +113,8 @@ module mig_7series_0 (
   input         s_axi_awvalid,
   output            s_axi_awready,
   // Slave Interface Write Data Ports
-  input [31:0]         s_axi_wdata,
-  input [3:0]         s_axi_wstrb,
+  input [127:0]         s_axi_wdata,
+  input [15:0]         s_axi_wstrb,
   input         s_axi_wlast,
   input         s_axi_wvalid,
   output            s_axi_wready,
@@ -138,7 +138,7 @@ module mig_7series_0 (
   // Slave Interface Read Data Ports
   input         s_axi_rready,
   output [1:0]          s_axi_rid,
-  output [31:0]            s_axi_rdata,
+  output [127:0]            s_axi_rdata,
   output [1:0]          s_axi_rresp,
   output            s_axi_rlast,
   output            s_axi_rvalid,

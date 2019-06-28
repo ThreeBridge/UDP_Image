@@ -31,6 +31,7 @@ module axi_write(
     packet_cnt,
     UDP_st,
     els_packet,
+    recvend,
     
     axi_awready,
     axi_wready,
@@ -71,9 +72,10 @@ module axi_write(
     input       wea;
     input [7:0] data_i;
     input       udp_flg;
-    input [8:0] packet_cnt;
+    input [10:0] packet_cnt;
     input       UDP_st;
     input       els_packet;
+    input       recvend;
     
     input       axi_awready;
     input       axi_wready;
@@ -87,8 +89,9 @@ module axi_write(
     
     /*---signal---*/
     reg [2:0]   w_ch_st;    // Write Transaction start
-    reg [7:0]   write_cnt;
+    reg [8:0]   write_cnt;
     reg         fifo_sel=0;
+    
     
     (*dont_touch="true"*)AXI_AW      axi_aw;
     (*dont_touch="true"*)AXI_W       axi_w;
@@ -103,9 +106,17 @@ module axi_write(
     parameter   WCH     =   4'h4;
     parameter   WEND    =   4'h5;
     
+    parameter   transaction_num =   4'd2;   // トランザクションの数(480回連続では送れないため)
+    parameter   num_of_write    =   8'd240;
+        
     /*---ステートマシン(AW_CH)---*/
     reg [3:0] st_aw;
     reg [3:0] nx_aw;
+    reg [1:0] transaction_cnt;
+//    reg [1:0] d_transaction_cnt;
+    wire    transaction = (transaction_cnt==transaction_num);
+    wire    awchannel_ok = axi_awready&&axi_aw.valid;
+    wire    aw_end = awchannel_ok&&(transaction_cnt==transaction_num-1);
     always_ff @(posedge clk_i)begin
         if(rst) st_aw <= IDLE;
         else    st_aw <= nx_aw;
@@ -118,8 +129,8 @@ module axi_write(
                 if (udp_flg) nx_aw = AWCH;
             end
             AWCH : begin
-                if (axi_awready&&axi_aw.valid) nx_aw = AW_OK;
-                else if(rst_btn)               nx_aw = IDLE;
+                if (aw_end) nx_aw = AW_OK;
+                else if(rst_btn)    nx_aw = IDLE;
             end
             AW_OK :begin
                 nx_aw = IDLE;
@@ -132,6 +143,7 @@ module axi_write(
     /*---ステートマシン(W_CH)---*/
     reg [3:0] st_w;
     reg [3:0] nx_w;
+    reg [1:0] write_end;
     always_ff @(posedge clk_i)begin
         if(rst) st_w <= IDLE;
         else    st_w <= nx_w;
@@ -148,7 +160,8 @@ module axi_write(
                 else if(els_packet) nx_w = IDLE;
             end
             WCH : begin
-                if (write_cnt==8'd250&&axi_wready) nx_w = WEND;
+                //if (write_cnt==8'd250&&axi_wready) nx_w = WEND;
+                if (write_end==transaction_num) nx_w = WEND;
             end
             WEND : begin
                 nx_w = IDLE;
@@ -158,7 +171,7 @@ module axi_write(
         endcase
     end
     
-    
+    /*---AWchannelの予約を保持しておくため---*/
     always_ff @(posedge clk_i)begin
         if(rst)begin
             w_ch_st <= 3'b0;
@@ -174,11 +187,29 @@ module axi_write(
         end
     end
     
+    /*---トランザクション数をカウント---*/
+    always_ff @(posedge clk_i) begin
+        if(st_aw==AWCH)begin
+            if(axi_awready&&axi_aw.valid)begin
+                transaction_cnt <= transaction_cnt + 2'b1;
+            end
+        end
+        else begin
+            transaction_cnt <= 2'b0;
+        end
+    end
+    
+    /*---AWchannel用データ---*/
+//    wire [13:0] address_times = (packet_cnt<<1)+transaction_cnt; // アドレスを何倍するか
+//    wire [28:0] address;
     always_ff @(posedge clk_i)begin
         if (st_aw==AWCH)begin
             axi_aw.id       <= 1'b0;
-            axi_aw.addr     <= 29'b0+(10'd1000*packet_cnt);
-            axi_aw.len      <= 8'hF9;
+            //axi_aw.addr     <= 29'b0+(10'd1000*packet_cnt);
+            //axi_aw.addr     <= 29'b0+(11'd960*(packet_cnt<<1+transaction_cnt)); // 240*(3+1)=960
+            //axi_aw.addr     <= address;
+            //axi_aw.len      <= 8'hF9;
+            axi_aw.len      <= 8'd239;   // 480/2=240
             axi_aw.size     <= 3'b010;
             axi_aw.burst    <= 2'b01;
             axi_aw.lock     <= 2'b0;
@@ -188,7 +219,7 @@ module axi_write(
         end
         else if (st_aw==IDLE)begin
             axi_aw.id       <= 1'b0;
-            axi_aw.addr     <= 29'b0;
+            //axi_aw.addr     <= 29'b0;
             axi_aw.len      <= 8'h0;
             axi_aw.size     <= 3'b0;
             axi_aw.burst    <= 2'b0;
@@ -198,11 +229,27 @@ module axi_write(
             axi_aw.qos      <= 4'b0;
         end
     end
+    /*--address--*/
+    wire addr_reset = rst_btn||rst||recvend;
+    reg [28:0] address_buff;
+    always_ff @(posedge clk_i)begin
+        if(addr_reset) address_buff <= 29'b0;
+        else if(awchannel_ok) address_buff <= address_buff + 11'd960;
+    end
+    
+    assign axi_aw.addr = address_buff;
+
+//    /*---Multiplier---*/
+//    mult_gen_0 multi_0(
+//        .CLK    (clk_i),
+//        .A      (address_times),
+//        .P      (address)
+//    );
     
     /*--valid--*/
     always_ff @(posedge clk_i)begin
         if(st_aw==AWCH)begin
-            if(axi_awready&&axi_aw.valid)begin
+            if(awchannel_ok)begin
                 axi_aw.valid <= `LO;
             end
             else begin
@@ -217,35 +264,55 @@ module axi_write(
         end
     end
     
-    /*---8to32 FIFO---*/
-    logic [7:0] data0;
-    logic [7:0] data1;
+    /*---32to32 FIFO---*/
+    logic [7:0] q_data [2:0];
+    always_ff @(posedge clk_i)begin
+        q_data <= {q_data[1:0],data_i};
+    end
+    
+    reg wea_en;
+    logic [2:0] queue_cnt;
+    always_ff @(posedge clk_i)begin
+        if(wea)begin
+            if(queue_cnt==3'd2)begin
+                queue_cnt <= 3'b0;
+            end
+            else begin
+                queue_cnt <= queue_cnt + 3'b1;
+            end
+        end
+        else begin
+            queue_cnt <= 3'b0;
+        end
+    end
+    
+    logic [31:0] data0;
+    logic [31:0] data1;
     logic       wr_en0;
     logic       wr_en1;
     
     always_comb begin
         if(packet_cnt[0]==1'b0)begin
-            data0 = data_i;
+            data0 = {8'h55,q_data[1],q_data[0],data_i};   // {dummy,blue,green,red}
         end
         else begin
-            data1 = data_i;
+            data1 = {8'h55,q_data[1],q_data[0],data_i};   // {dummy,blue,green,red}
         end
     end
     
     /*---wea制御信号---*/
-    reg wea_en;
     always_ff @(posedge clk_i)begin
         if(udp_flg) wea_en <= `HI;
         else if(UDP_st) wea_en <= `LO; 
     end
     
     always_comb begin
-        if(wea_en)begin
+        if(wea_en&&(queue_cnt==3'd2))begin
             if(packet_cnt[0]==1'b0)begin
-                wr_en0 = wea;
+                wr_en0 = `HI;
             end
             else begin
-                wr_en1 = wea;
+                wr_en1 = `HI;
             end
         end
         else begin
@@ -280,23 +347,40 @@ module axi_write(
     logic [31:0] d_out0;
     logic [31:0] d_out1;
     
+    /*--strb--*/
     always_ff @(posedge clk_i)begin
         if(st_w==WCH)begin
-            if(write_cnt==8'd250&&axi_wready)begin
+            if(write_end==transaction_num)begin
                 axi_w.strb  <= 4'h0;
-                axi_w.valid <= `LO;              
             end
             else begin
                 axi_w.strb  <= 4'hF;
-                axi_w.valid <= `HI;
             end
         end
         else if(st_w==IDLE)begin
             axi_w.strb  <= 4'h0;
-            axi_w.valid <= `LO;            
+        end
+    end
+    /*--valid--*/
+    wire neg_valid = (write_cnt==num_of_write)&&(write_end==transaction_num-1)&&axi_wready;
+    always_ff @(posedge clk_i)begin
+        if(st_w==WCH)begin
+            if(neg_valid)begin
+                axi_w.valid <= `LO;
+            end
+            else if(write_end==transaction_num)begin
+                axi_w.valid <= `LO;
+            end
+            else begin
+                axi_w.valid <= `HI;
+            end
+        end
+        else begin
+            axi_w.valid <= `LO;
         end
     end
     
+    /*--data--*/
     always_comb begin
         if(st_w==WCH)begin
             axi_w.data  = (!fifo_sel) ? d_out0 : d_out1;
@@ -308,29 +392,59 @@ module axi_write(
         else axi_w.data = 32'b0;
     end
     
+    /*---write_end---*/
+    always_ff @(posedge clk_i)begin
+        if(st_w==WCH)begin
+            if(write_cnt==num_of_write&&axi_wready)begin
+                write_end <= write_end + 2'b1;
+            end
+        end
+        else if(st_w==IDLE)begin
+            write_end <= 2'b0;
+        end
+    end
 
     always_ff @(posedge clk_i)begin
         if(st_w==WCH)begin
-            if(axi_wready) write_cnt <= write_cnt + 8'b1;
+            if(write_end==transaction_num-1&&write_cnt==num_of_write)begin
+                write_cnt <= write_cnt;
+            end
+            else if(axi_wready&&(write_cnt==num_of_write))begin
+                write_cnt <= 8'b1;
+            end
+            else if(axi_wready)begin
+                write_cnt <= write_cnt + 8'b1;
+            end
         end
-        else if(st_w==IDLE)begin
+        else begin
             write_cnt <= 8'b0;
         end
     end
     
-    always_comb begin
+    /*--last--*/
+//    always_comb begin
+//        if(st_w==WCH)begin
+//            if(write_cnt==8'd240)   axi_w.last = `HI;
+//            else                    axi_w.last = `LO;
+//        end
+//        else if(st_w==WEND)begin
+//            axi_w.last = `LO;
+//        end
+//        else if(st_w==IDLE)begin
+//            axi_w.last = `LO;
+//        end
+//        else axi_w.last = `LO;
+//    end
+    always_ff @(posedge clk_i)begin
         if(st_w==WCH)begin
-            if(write_cnt==8'd250)   axi_w.last = `HI;
-            else                    axi_w.last = `LO;
+            if(write_cnt==num_of_write-1&&axi_wready)
+                axi_w.last = `HI;
+            else if(write_cnt==num_of_write&&axi_wready)
+                axi_w.last = `LO;
         end
-        else if(st_w==WEND)begin
-            axi_w.last = `LO;
-        end
-        else if(st_w==IDLE)begin
-            axi_w.last = `LO;
-        end
-        else axi_w.last = `LO;
+        else    axi_w.last = `LO;
     end
+    
     
     always_ff @(posedge clk_i)begin
         if(rst)             fifo_sel <= 1'b0;
@@ -348,13 +462,13 @@ module axi_write(
 //        else                                    write_end <= `LO;        
 //    end
     
-    image_8to32 image_8to32_0(
+    image_32to32 image_32to32_0(
         .clk        (clk_i),
         .srst       (rst),
-        .din        (data0),
+        .din        (data0),    // 32bit
         .wr_en      (wr_en0),
         .rd_en      (rd_en0),
-        .dout       (d_out0),
+        .dout       (d_out0),   // 32bit
         .full       (),
         .overflow   (),
         .empty      (),
@@ -362,13 +476,13 @@ module axi_write(
         .underflow  ()
     );
 
-    image_8to32 image_8to32_1(
+    image_32to32 image_32to32_1(
         .clk        (clk_i),
         .srst       (rst),
-        .din        (data1),
+        .din        (data1),    // 32bit
         .wr_en      (wr_en1),
         .rd_en      (rd_en1),
-        .dout       (d_out1),
+        .dout       (d_out1),   // 32bit
         .full       (),
         .overflow   (),
         .empty      (),

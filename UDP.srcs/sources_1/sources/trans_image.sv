@@ -118,13 +118,15 @@ module trans_image(
     parameter   eth_head =  4'd14;
     //parameter   udp     =   6'd34;
     parameter   FTYPE   =   16'h08_00;
-    parameter   MsgSize =   16'd1000;
+    parameter   MsgSize =   16'd1440;
     parameter   TTL     =   8'd255;
-    parameter   PckSize =   11'd1046;
+    parameter   PckSize =   16'd1486;
+    
+    parameter   transaction_num =   4'd2;   // トランザクションの数(480回連続では送れないため)
     
     /*---wire/register---*/
     //wire [3:0] packet_cnt_sel = (SW[7:4]==4'd0) ? SW[7:4] : (SW[7:4] - 4'd1);
-    wire [8:0] packet_cnt_sel = (SW[7:4]==4'd0) ? 4'd0 :                            // add 2018.12.6
+    wire [10:0] packet_cnt_sel = (SW[7:4]==4'd0) ? 4'd0 :                            // add 2018.12.6
                                  (SW[7:4]==4'd1) ? 4'd1-1'b1 :
                                  (SW[7:4]==4'd2) ? 4'd2-1'b1 :
                                  (SW[7:4]==4'd3) ? 4'd4-1'b1 :
@@ -135,20 +137,21 @@ module trans_image(
                                  (SW[7:4]==4'd8) ? 8'd128-1'b1 :
                                  (SW[7:4]==4'd9) ? 9'd256-1'b1 :
                                  (SW[7:4]==4'd10) ? 4'd10-1'b1 :
+                                 (SW[7:4]==4'd11) ? 10'd640-1'b1 :
                                  8'd160-1'b1 ;
 
 
     //reg [7:0]   image_buffer_i [9999:0];
     //reg [7:0]   image_buffer [999:0];
-    reg [7:0]   image_bufferA [499:0];
-    reg [7:0]   image_bufferB [499:0];
-    reg [7:0]   TXBUF [1045:0];
-    reg [7:0]   VBUF [1019:0];
+    //reg [7:0]   image_bufferA [499:0];
+    //reg [7:0]   image_bufferB [499:0];
+    reg [7:0]   TXBUF [PckSize-1:0];
+    //reg [7:0]   VBUF [1019:0];
     reg         rst;
     reg [47:0]  DstMAC_d;
     reg [31:0]  DstIP_d;
     reg [10:0]  UDP_cnt;  // 固定長のUDPデータ用カウント
-    (*dont_touch="true"*)reg [15:0] SrcPort_d;
+    (*dont_touch="true"*)reg [15:0]SrcPort_d;
     (*dont_touch="true"*)reg [15:0] DstPort_d;
     reg [15:0] UDP_Checksum;
     
@@ -159,16 +162,20 @@ module trans_image(
     (*dont_touch="true"*)reg         csum_ok;
     reg [4:0]   err_cnt;
     (*dont_touch="true"*)reg         tx_end;
-    reg [8:0]   packet_cnt;
+    reg [10:0]   packet_cnt;
     //reg         Hcsum_st;
     //reg [3:0]   ready_cnt;
     //reg [9:0]   d_img_cnt [2:0];        // BlockRAMの出力が1サイクルずれるため & recv_image側でimage_cntにFFを挟むため
     
-    wire ready_end = (err_cnt==5'd30);
-    wire hcsum_end = (csum_cnt==8'd2);
-    wire hcend_end = (err_cnt==3'd0);    
-    wire ucsum_end = (csum_cnt==MsgSize+5'd20);
-    wire ucend_end = (err_cnt==3'd7);
+    wire ready_end  = (err_cnt==5'd30);
+    wire hcsum_end  = (csum_cnt==8'd2);
+    wire hcend_end  = (err_cnt==3'd0);    
+    wire ucsum_end  = (csum_cnt==MsgSize+5'd20);
+    wire ucend_end  = (err_cnt==3'd7);
+    reg [1:0] transaction_cnt;
+    wire      transaction = (transaction_cnt==(transaction_num));
+    wire pos_last   = axi_r.last&&axi_r.valid;
+    wire read_end   = pos_last&&transaction;
     
     always_ff @(posedge eth_rxck)begin
         if (rst_rx) st <= IDLE;
@@ -183,7 +190,7 @@ module trans_image(
             end
             Presv : begin
                 //if (d_img_cnt[2]>10'd999) nx = READY;
-                if (axi_r.last&&axi_r.valid) nx = READY;
+                if (transaction) nx = READY;
             end
             READY : begin
                 if (ready_end) nx = Hcsum;
@@ -251,21 +258,47 @@ module trans_image(
 //        end
 //    end
     
+    /*---トランザクション数をカウント---*/
+    always_ff @(posedge eth_rxck)begin
+        if(st==IDLE)begin
+            transaction_cnt <= 2'b0;
+        end
+        else if(st==Presv)begin
+            if(pos_last)begin
+                transaction_cnt <= transaction_cnt + 2'b1;
+            end
+        end
+        else if(st==Tx_En)begin
+            if(pos_last)begin
+                transaction_cnt <= transaction_cnt + 2'b1;
+            end
+        end
+        else begin
+            transaction_cnt <= 2'b0;
+        end
+    end
+    
     /*--DRAM2BUF--*/
-    reg [7:0] image_buf [999:0];
-    wire [7:0] r_data0 = axi_r.data[31:24] ^ 8'hFF;
-    wire [7:0] r_data1 = axi_r.data[23:16] ^ 8'hFF;
-    wire [7:0] r_data2 = axi_r.data[15:8] ^ 8'hFF;
-    wire [7:0] r_data3 = axi_r.data[7:0] ^ 8'hFF;
+    reg [7:0] image_buf [MsgSize-1:0];
+//    wire [7:0] r_data0 = axi_r.data[31:24] ^ 8'hFF;
+//    wire [7:0] r_data1 = axi_r.data[23:16] ^ 8'hFF;
+//    wire [7:0] r_data2 = axi_r.data[15:8] ^ 8'hFF;
+//    wire [7:0] r_data3 = axi_r.data[7:0] ^ 8'hFF;
+    wire [7:0] dummy = axi_r.data[31:24];
+    wire [7:0] blue  = axi_r.data[23:16];
+    wire [7:0] green = axi_r.data[15:8];
+    wire [7:0] red   = axi_r.data[7:0];
     always_ff @(posedge eth_rxck)begin
         if(st==Presv)begin
             if(axi_r.valid)begin
-                image_buf <= {r_data3,r_data2,r_data1,r_data0,image_buf[999:4]};
+                //image_buf <= {r_data3,r_data2,r_data1,r_data0,image_buf[999:4]};
+                image_buf <= {blue,green,red,image_buf[MsgSize-1:3]};
             end
         end
         else if(st==Tx_En&&packet_cnt!=packet_cnt_sel)begin
             if(axi_r.valid)begin
-                image_buf <= {r_data3,r_data2,r_data1,r_data0,image_buf[999:4]};
+                //image_buf <= {r_data3,r_data2,r_data1,r_data0,image_buf[999:4]};
+                image_buf <= {blue,green,red,image_buf[MsgSize-1:3]};
             end            
         end
     end
@@ -314,9 +347,9 @@ module trans_image(
 //        end
 //    end
     
-    reg [8:0] addr_cnt;
+    reg [10:0] addr_cnt;
     always_ff @(posedge eth_rxck)begin              // BRAM(DRAM)のアドレスを表現するためのもの
-        if(st==IDLE)        addr_cnt <= 9'b0;
+        if(st==IDLE)        addr_cnt <= 11'b0;
         else if(st==Hc_End) addr_cnt <= packet_cnt + 1;
     end
     
@@ -325,7 +358,7 @@ module trans_image(
 //    end
     
     //<-- add 2018.12.12
-    reg [8:0] d_packet_cnt;
+    reg [10:0] d_packet_cnt;
     always_ff @(posedge eth_rxck)begin
         d_packet_cnt <= packet_cnt;
     end
@@ -512,7 +545,6 @@ module trans_image(
         data_en_d <= data_en;
     end
     
-    
     reg [15:0] csum_extend;
     always_ff @(posedge eth_rxck)begin 
        if(st==Hc_End) begin
@@ -541,7 +573,7 @@ module trans_image(
             /*-IPヘッダ-*/
             TXBUF[14] <= 8'h45;                             // Version/IHL
             TXBUF[15] <= 8'h00;                             // ToS
-            {TXBUF[16],TXBUF[17]} <= 16'd1028;              // Total Length(16'd1028==IPヘッダ(20)+その下(1008))
+            {TXBUF[16],TXBUF[17]} <= 5'd20+4'd8+MsgSize;    // Total Length(IPヘッダ(20)+UDPヘッダ(8バイト)+UDPデータ)
             {TXBUF[18],TXBUF[19]} <= 16'hAB_CD;             // Identification
             {TXBUF[20],TXBUF[21]} <= {3'b010,13'd0};        // Flags[15:13] ,Flagment Offset[12:0]
             TXBUF[22] <= TTL;                               // Time To Live
@@ -553,19 +585,19 @@ module trans_image(
             /*-UDPヘッダ-*/
             {TXBUF[34],TXBUF[35]} <= DstPort_d;             // 発信元ポート番号
             {TXBUF[36],TXBUF[37]} <= SrcPort_d;             // 宛先ポート番号   
-            {TXBUF[38],TXBUF[39]} <= 16'd1008;              // UDPデータ長 UDPヘッダ(8バイト)+UDPデータ(1000バイト)
+            {TXBUF[38],TXBUF[39]} <= MsgSize+4'd8;          // UDPデータ長 UDPヘッダ(8バイト)+UDPデータ
             {TXBUF[40],TXBUF[41]} <= 16'h00_00;             // UDP Checksum (仮想ヘッダ+UDP)
             /*-UDPデータ(可変長(受信データ長による))____1000バイトに固定____-*/
             //for(j=0;j<1000;j=j+1) TXBUF[6'd42+j] <= image_buffer[j];
             //for(tx_A=0;tx_A<500;tx_A=tx_A+1) TXBUF[6'd42+tx_A] <= image_bufferA[tx_A];      // 2018.11.16
             //for(tx_B=0;tx_B<500;tx_B=tx_B+1) TXBUF[6'd42+tx_B+500] <= image_bufferB[tx_B];  // 2018.11.16
-            TXBUF[1041:42] <= image_buf[999:0];
-            {TXBUF[1042],TXBUF[1043],TXBUF[1044],TXBUF[1045]} <= 32'h01_02_03_04;   // dummy
+            TXBUF[PckSize-5:42] <= image_buf[MsgSize-1:0];
+            {TXBUF[PckSize-4],TXBUF[PckSize-3],TXBUF[PckSize-2],TXBUF[PckSize-1]} <= 32'h01_02_03_04;   // dummy
             //Hcsum_st <= 1;
         end
         else if(st==Hc_End)    {TXBUF[24],TXBUF[25]} <= csum_o;
         //else if(st==Uc_End)    {TXBUF[40],TXBUF[41]} <= csum_extend;
-        else if(st==Tx_En) TXBUF <= {TXBUF[0],TXBUF[1045:1]};
+        else if(st==Tx_En) TXBUF <= {TXBUF[0],TXBUF[PckSize-1:1]};
     end
     
     /*---仮想ヘッダ準備---*/
@@ -655,6 +687,15 @@ module trans_image(
             tx_cnt <= 0;
         end
     end
+    
+    /*---All data trans---*/
+    reg transend;
+    always_ff @(posedge eth_rxck)begin
+        if(st==Tx_End)  transend <= 1'b1;
+        else            transend <= 1'b0;
+    end
+    
+    
 //<-- moikawa add (2018.12.11)
 //    (*dont_touch="true"*)reg [1:0] tx_end_rxck;
 //    always_ff @(posedge eth_rxck)begin
@@ -664,9 +705,9 @@ module trans_image(
 //--> moikawa add (2018.12.11)
 
 //<-- moikawa add (2018.11.02)
-       wire [10:0] txbuf_sel2 = tx_cnt;
-       reg [7:0]  data_pipe2 [17:0]; // part of pipelined selector from TXBUF[].
-       wire [4:0]  data_pipe_sel2;    
+//       wire [10:0] txbuf_sel2 = tx_cnt;
+//       reg [7:0]  data_pipe2 [17:0]; // part of pipelined selector from TXBUF[].
+//       wire [4:0]  data_pipe_sel2;    
 //--> moikawa add (2018.11.02)
     reg delay_flg;
     reg [2:0] fcs_cnt;
@@ -690,43 +731,43 @@ module trans_image(
     end
 
 //<-- moikawa add (2018.11.02)
-    reg [10:0] txbuf_sel_d2;
+//    reg [10:0] txbuf_sel_d2;
 
-    //always_ff @(posedge clk125) begin
-    always_ff @(posedge eth_rxck)begin
-        txbuf_sel_d2 <= txbuf_sel2;
-    end
-    assign data_pipe_sel2 = (txbuf_sel_d2[10:6] < 5'd17)? 
-                             txbuf_sel_d2[10:6] : 5'd17 ;
+//    //always_ff @(posedge clk125) begin
+//    always_ff @(posedge eth_rxck)begin
+//        txbuf_sel_d2 <= txbuf_sel2;
+//    end
+//    assign data_pipe_sel2 = (txbuf_sel_d2[10:6] < 5'd17)? 
+//                             txbuf_sel_d2[10:6] : 5'd17 ;
 
-    //always_ff @(posedge clk125) begin // inserted pipelined stage.
-    always_ff @(posedge eth_rxck)begin
-        //for (k=0; k<64; k=k+1) begin
-        //  data_pipe[k] <= TXBUF[ (64*k) + txbuf_sel[5:0] ];
-        //end
-        data_pipe2[0]  <=  TXBUF[ txbuf_sel2[5:0]         ];
-        data_pipe2[1]  <=  TXBUF[ txbuf_sel2[5:0] + 64    ];
-        data_pipe2[2]  <=  TXBUF[ txbuf_sel2[5:0] + 128   ];
-        data_pipe2[3]  <=  TXBUF[ txbuf_sel2[5:0] + 192   ];
-        data_pipe2[4]  <=  TXBUF[ txbuf_sel2[5:0] + 256   ];
-        data_pipe2[5]  <=  TXBUF[ txbuf_sel2[5:0] + 320   ];
-        data_pipe2[6]  <=  TXBUF[ txbuf_sel2[5:0] + 384   ];
-        data_pipe2[7]  <=  TXBUF[ txbuf_sel2[5:0] + 448   ];
-        data_pipe2[8]  <=  TXBUF[ txbuf_sel2[5:0] + 512   ];
-        data_pipe2[9]  <=  TXBUF[ txbuf_sel2[5:0] + 576   ];
-        data_pipe2[10] <=  TXBUF[ txbuf_sel2[5:0] + 640   ];
-        data_pipe2[11] <=  TXBUF[ txbuf_sel2[5:0] + 704   ];
-        data_pipe2[12] <=  TXBUF[ txbuf_sel2[5:0] + 768   ];
-        data_pipe2[13] <=  TXBUF[ txbuf_sel2[5:0] + 832   ];
-        data_pipe2[14] <=  TXBUF[ txbuf_sel2[5:0] + 896   ];
-        data_pipe2[15] <=  TXBUF[ txbuf_sel2[5:0] + 960   ];
-        if (txbuf_sel2[5:0] < 6'd22) begin
-	       data_pipe2[16] <=  TXBUF[ txbuf_sel2[5:0] + 1024  ];
-        end else begin
-	       data_pipe2[16] <=  8'h00;
-        end
-        data_pipe2[17] <= 8'h00;  // dummy value.
-    end
+//    //always_ff @(posedge clk125) begin // inserted pipelined stage.
+//    always_ff @(posedge eth_rxck)begin
+//        //for (k=0; k<64; k=k+1) begin
+//        //  data_pipe[k] <= TXBUF[ (64*k) + txbuf_sel[5:0] ];
+//        //end
+//        data_pipe2[0]  <=  TXBUF[ txbuf_sel2[5:0]         ];
+//        data_pipe2[1]  <=  TXBUF[ txbuf_sel2[5:0] + 64    ];
+//        data_pipe2[2]  <=  TXBUF[ txbuf_sel2[5:0] + 128   ];
+//        data_pipe2[3]  <=  TXBUF[ txbuf_sel2[5:0] + 192   ];
+//        data_pipe2[4]  <=  TXBUF[ txbuf_sel2[5:0] + 256   ];
+//        data_pipe2[5]  <=  TXBUF[ txbuf_sel2[5:0] + 320   ];
+//        data_pipe2[6]  <=  TXBUF[ txbuf_sel2[5:0] + 384   ];
+//        data_pipe2[7]  <=  TXBUF[ txbuf_sel2[5:0] + 448   ];
+//        data_pipe2[8]  <=  TXBUF[ txbuf_sel2[5:0] + 512   ];
+//        data_pipe2[9]  <=  TXBUF[ txbuf_sel2[5:0] + 576   ];
+//        data_pipe2[10] <=  TXBUF[ txbuf_sel2[5:0] + 640   ];
+//        data_pipe2[11] <=  TXBUF[ txbuf_sel2[5:0] + 704   ];
+//        data_pipe2[12] <=  TXBUF[ txbuf_sel2[5:0] + 768   ];
+//        data_pipe2[13] <=  TXBUF[ txbuf_sel2[5:0] + 832   ];
+//        data_pipe2[14] <=  TXBUF[ txbuf_sel2[5:0] + 896   ];
+//        data_pipe2[15] <=  TXBUF[ txbuf_sel2[5:0] + 960   ];
+//        if (txbuf_sel2[5:0] < 6'd22) begin
+//	       data_pipe2[16] <=  TXBUF[ txbuf_sel2[5:0] + 1024  ];
+//        end else begin
+//	       data_pipe2[16] <=  8'h00;
+//        end
+//        data_pipe2[17] <= 8'h00;  // dummy value.
+//    end
 //--> moikawa add (2018.11.02)
 
 
@@ -740,13 +781,15 @@ module trans_image(
         /*---INPUT---*/
         .clk_i          (eth_rxck),
         .rst            (rst_rx),
+        .rst_btn        (rst_btn),
         .rd_en          (read_en),
         .sel            (addr_cnt),
         .axi_arready    (axi_arready),
         .axi_r          (axi_r),
+        .transend       (transend),
         /*---OUTPUT---*/
         .axi_ar         (axi_ar),
-        .axi_rready     (axi_rready)    
+        .axi_rready     (axi_rready)
     );
     
 endmodule

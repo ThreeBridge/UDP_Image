@@ -387,11 +387,11 @@ module mig_7series_0_mig #
    //***************************************************************************
    parameter IBUF_LPWR_MODE        = "OFF",
                                      // to phy_top
-   parameter DATA_IO_IDLE_PWRDWN   = "ON",
+   parameter DATA_IO_IDLE_PWRDWN   = "OFF",
                                      // # = "ON", "OFF"
    parameter BANK_TYPE             = "HR_IO",
                                      // # = "HP_IO", "HPL_IO", "HR_IO", "HRL_IO"
-   parameter DATA_IO_PRIM_TYPE     = "HR_LP",
+   parameter DATA_IO_PRIM_TYPE     = "DEFAULT",
                                      // # = "HP_LP", "HR_LP", "DEFAULT"
    parameter CKE_ODT_AUX           = "FALSE",
    parameter USER_REFRESH          = "OFF",
@@ -485,7 +485,7 @@ module mig_7series_0_mig #
                                              // Width of S_AXI_AWADDR, S_AXI_ARADDR, M_AXI_AWADDR and
                                              // M_AXI_ARADDR for all SI/MI slots.
                                              // # = 32.
-   parameter C_S_AXI_DATA_WIDTH            = 32,
+   parameter C_S_AXI_DATA_WIDTH            = 128,
                                              // Width of WDATA and RDATA on SI slot.
                                              // Must be <= APP_DATA_WIDTH.
                                              // # = 32, 64, 128, 256.

@@ -132,11 +132,11 @@ module recv_image(
     
     parameter   eth_head    =   4'd14;
     //parameter   udp         =   6'd34;
-    parameter   MsgSize     =   16'd1000;
+    parameter   MsgSize     =   16'd1440;   // 1440[byte] / 3[channel] = 480[px]
     
     /*---wire/register---*/
     //wire [3:0] packet_cnt_sel = (SW[7:4]==4'd0) ? SW[7:4] : (SW[7:4] - 4'd1) ;     // add 2018.12.5
-    wire [8:0] packet_cnt_sel = (SW[7:4]==4'd0) ? 4'd0 :                            // add 2018.12.6
+    wire [10:0] packet_cnt_sel = (SW[7:4]==4'd0) ? 4'd0 :                            // add 2018.12.6
                                  (SW[7:4]==4'd1) ? 4'd1-1'b1 :
                                  (SW[7:4]==4'd2) ? 4'd2-1'b1 :
                                  (SW[7:4]==4'd3) ? 4'd4-1'b1 :
@@ -147,10 +147,11 @@ module recv_image(
                                  (SW[7:4]==4'd8) ? 8'd128-1'b1 :
                                  (SW[7:4]==4'd9) ? 9'd256-1'b1 :
                                  (SW[7:4]==4'd10) ? 4'd10-1'b1 :
+                                 (SW[7:4]==4'd11) ? 10'd640-1'b1 :
                                  8'd160-1'b1;
     
-    reg [7:0]   RXBUF   [1045:0];
-    reg [7:0]   VBUF    [1019:0];
+    reg [7:0]   RXBUF   [1485:0];
+    //reg [7:0]   VBUF    [1459:0];
     reg [10:0]  rx_cnt;
     reg         rst;
     reg [10:0]  UDP_cnt;  // 固定長のUDPデータ用カウント
@@ -164,9 +165,9 @@ module recv_image(
     (*dont_touch="true"*)reg [10:0]  d_csum_cnt;   
     (*dont_touch="true"*)reg         csum_ok;
     reg [2:0]   err_cnt;
-    reg [8:0]   packet_cnt;
+    reg [10:0]   packet_cnt;
     
-    wire hcsum_end = (csum_cnt==8'd0);
+    wire hcsum_end = (csum_cnt==11'd0);
     wire hcend_end = (err_cnt==3'd1);    
     wire ucsum_end = (csum_cnt==MsgSize+5'd20);
     wire ucend_end = (err_cnt==3'd7);    
@@ -248,7 +249,7 @@ module recv_image(
             RXBUF[rx_cnt] <= rxd_i[7:0];
         end
         else if(st==Idle)begin
-            for (i=0;i<1046;i=i+1) RXBUF[i] <= 8'h00;
+            for (i=0;i<1486;i=i+1) RXBUF[i] <= 8'h00;
         end
     end
     
@@ -300,7 +301,7 @@ module recv_image(
         if(st==Presv) begin
             if(rx_cnt==11'd41) wea <= 1'b1;
             //if(rx_cnt==11'd42) wea <= 1'b1;     // debug
-            else if(rx_cnt==11'd1041) wea <= 1'b0;
+            else if(rx_cnt==11'd1481) wea <= 1'b0;
         end
         else begin
             wea <= 1'b0;
@@ -320,10 +321,10 @@ module recv_image(
     
     /*---パケット数のカウント---*/
     always_ff @(posedge eth_rxck)begin
-        if (rst_rx)                         packet_cnt <= 9'd0;
-        else if (rst_btn||trans_err)        packet_cnt <= 9'd0;
-        else if (st==Select)                packet_cnt <= packet_cnt + 9'b1;
-        else if (st==Recv_End||st==ERROR)   packet_cnt <= 0;
+        if (rst_rx)                         packet_cnt <= 11'd0;    //9'd0 -> 11'd0
+        else if (rst_btn||trans_err)        packet_cnt <= 11'd0;
+        else if (st==Select)                packet_cnt <= packet_cnt + 11'b1;
+        else if (st==Recv_End||st==ERROR)   packet_cnt <= 11'b0;;
     end
     
     /*---リセット信号---*/
@@ -353,14 +354,14 @@ module recv_image(
 
 
 //<-- moikawa add (2018.11.02)
-    wire [10:0] rxbuf_sel = csum_cnt + eth_head;
-    //wire [10:0] rxbuf_sel = csum_cnt;
-    reg [7:0]  data_pipe [17:0]; // part of pipelined selector from TXBUF[].
-    wire [4:0]  data_pipe_sel;
+//    wire [10:0] rxbuf_sel = csum_cnt + eth_head;
+//    //wire [10:0] rxbuf_sel = csum_cnt;
+//    reg [7:0]  data_pipe [17:0]; // part of pipelined selector from TXBUF[].
+//    wire [4:0]  data_pipe_sel;
 
-    wire [10:0] rxbuf_sel_v = csum_cnt;
-    reg [7:0]  data_pipe_v [16:0]; // part of pipelined selector from TXBUF[].
-    wire [4:0]  data_pipe_sel_v; 
+//    wire [10:0] rxbuf_sel_v = csum_cnt;
+//    reg [7:0]  data_pipe_v [16:0]; // part of pipelined selector from TXBUF[].
+//    wire [4:0]  data_pipe_sel_v; 
 //--> moikawa add (2018.11.02)
 
     
@@ -561,6 +562,7 @@ module recv_image(
         .packet_cnt (packet_cnt),
         .UDP_st     (UDP_st),
         .els_packet (els_packet),
+        .recvend    (recvend),
         .axi_awready(axi_awready),
         .axi_wready (axi_wready),
         .axi_bresp  (axi_bresp),
