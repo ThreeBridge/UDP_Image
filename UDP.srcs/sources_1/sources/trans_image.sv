@@ -292,13 +292,13 @@ module trans_image(
         if(st==Presv)begin
             if(axi_r.valid)begin
                 //image_buf <= {r_data3,r_data2,r_data1,r_data0,image_buf[999:4]};
-                image_buf <= {blue,green,red,image_buf[MsgSize-1:3]};
+                image_buf <= {red,green,blue,image_buf[MsgSize-1:3]};
             end
         end
         else if(st==Tx_En&&packet_cnt!=packet_cnt_sel)begin
             if(axi_r.valid)begin
                 //image_buf <= {r_data3,r_data2,r_data1,r_data0,image_buf[999:4]};
-                image_buf <= {blue,green,red,image_buf[MsgSize-1:3]};
+                image_buf <= {red,green,blue,image_buf[MsgSize-1:3]};
             end            
         end
     end
