@@ -137,7 +137,8 @@ module trans_image(
                                  (SW[7:4]==4'd8) ? 8'd128-1'b1 :
                                  (SW[7:4]==4'd9) ? 9'd256-1'b1 :
                                  (SW[7:4]==4'd10) ? 4'd10-1'b1 :
-                                 (SW[7:4]==4'd11) ? 10'd640-1'b1 :
+                                 (SW[7:4]==4'd11) ? 10'd640-1'b1 :  // 640x480(RGB)
+                                 (SW[7:4]==4'd12) ? 11'd1920-1'b1 : // 1280x720(RGB)
                                  8'd160-1'b1 ;
 
 
@@ -285,9 +286,19 @@ module trans_image(
 //    wire [7:0] r_data2 = axi_r.data[15:8] ^ 8'hFF;
 //    wire [7:0] r_data3 = axi_r.data[7:0] ^ 8'hFF;
     wire [7:0] dummy = axi_r.data[31:24];
-    wire [7:0] blue  = axi_r.data[23:16];
-    wire [7:0] green = axi_r.data[15:8];
-    wire [7:0] red   = axi_r.data[7:0];
+    wire [7:0] i_blue  = axi_r.data[23:16];
+    wire [7:0] i_green = axi_r.data[15:8];
+    wire [7:0] i_red   = axi_r.data[7:0];
+    wire strong_red = (i_blue<=8'd30) && (i_green<=8'd30) && (i_red>=8'd160);
+    
+    wire [7:0] blue;
+    wire [7:0] green;
+    wire [7:0] red;
+    /*---RED to WHITE---*/
+    assign blue = (strong_red) ? 8'hFF : i_blue;
+    assign green = (strong_red) ? 8'hFF : i_green;
+    assign red = (strong_red) ? 8'hFF : i_red;
+    
     always_ff @(posedge eth_rxck)begin
         if(st==Presv)begin
             if(axi_r.valid)begin
