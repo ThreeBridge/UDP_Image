@@ -425,6 +425,16 @@ parameter  Recv_End    = 8'h03;
 //        /*---Output---*/
 //        .UDP_tx(UDP_tx),
 //        .UDP_d(UDP_d)
-//    ); 
+//    );
+    
+    axi_block_rw axi_block_rw(
+        /*---INPUT---*/
+        .CLK_i      (eth_rxck),
+        .rst        (rst_rx),
+        .recvend    (recvend),
+        .axi_arready(axi_arready),
+        /*---OUTPUT---*/
+        .axi_ar     (axi_ar)
+    );
          
 endmodule

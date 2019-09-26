@@ -575,5 +575,4 @@ module recv_image(
         //.write_end  (write_end)
     );
     
-    
 endmodule

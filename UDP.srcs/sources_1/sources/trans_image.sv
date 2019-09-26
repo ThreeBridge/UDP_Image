@@ -289,7 +289,7 @@ module trans_image(
     wire [7:0] i_blue  = axi_r.data[23:16];
     wire [7:0] i_green = axi_r.data[15:8];
     wire [7:0] i_red   = axi_r.data[7:0];
-    wire strong_red = (i_blue<=8'd30) && (i_green<=8'd30) && (i_red>=8'd100);
+    wire strong_red = (i_blue<=8'd70) && (i_green<=8'd70) && (i_red>=8'd120);
     
     wire [7:0] blue;
     wire [7:0] green;
