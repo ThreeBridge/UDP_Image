@@ -52,27 +52,27 @@ module trans_image(
     axi_rready
     );
     
-    /*---STRUCT---*/
-    typedef struct packed{
-        logic           id;
-        logic [28:0]    addr;
-        logic [7:0]     len;
-        logic [2:0]     size;
-        logic [1:0]     burst;
-        logic           lock;
-        logic [3:0]     cache;
-        logic [2:0]     prot;
-        logic [3:0]     qos;
-        logic           valid;    
-    }AXI_AR;
+//    /*---STRUCT---*/
+//    typedef struct packed{
+//        logic           id;
+//        logic [28:0]    addr;
+//        logic [7:0]     len;
+//        logic [2:0]     size;
+//        logic [1:0]     burst;
+//        logic           lock;
+//        logic [3:0]     cache;
+//        logic [2:0]     prot;
+//        logic [3:0]     qos;
+//        logic           valid;    
+//    }AXI_AR;
     
-    typedef struct packed{
-        logic [31:0]    data;
-        logic [3:0]     strb;
-        logic           last;
-        logic           valid;
-        logic [1:0]     resp;
-    }AXI_R;    
+//    typedef struct packed{
+//        logic [31:0]    data;
+//        logic [3:0]     strb;
+//        logic           last;
+//        logic           valid;
+//        logic [1:0]     resp;
+//    }AXI_R;    
     
     /*---I/O Declare---*/
     input       eth_rxck;
@@ -139,6 +139,7 @@ module trans_image(
                                  (SW[7:4]==4'd10) ? 4'd10-1'b1 :
                                  (SW[7:4]==4'd11) ? 10'd640-1'b1 :  // 640x480(RGB)
                                  (SW[7:4]==4'd12) ? 11'd1920-1'b1 : // 1280x720(RGB)
+                                 (SW[7:4]==4'd13) ? 11'd3-1'b1 :    // 48x30(RGB)
                                  8'd160-1'b1 ;
 
 

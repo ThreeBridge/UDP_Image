@@ -20,46 +20,46 @@
 //////////////////////////////////////////////////////////////////////////////////
 `include "user_defines.sv"
     /*---STRUCT---*/
-    typedef struct packed{
-        logic           id;
-        logic [28:0]    addr;
-        logic [7:0]     len;
-        logic [2:0]     size;
-        logic [1:0]     burst;
-        logic           lock;
-        logic [3:0]     cache;
-        logic [2:0]     prot;
-        logic [3:0]     qos;
-        logic           valid;    
-    }AXI_AW;
+//    typedef struct packed{
+//        logic           id;
+//        logic [28:0]    addr;
+//        logic [7:0]     len;
+//        logic [2:0]     size;
+//        logic [1:0]     burst;
+//        logic           lock;
+//        logic [3:0]     cache;
+//        logic [2:0]     prot;
+//        logic [3:0]     qos;
+//        logic           valid;    
+//    }AXI_AW;
     
-    typedef struct packed{
-        logic [31:0]    data;
-        logic [3:0]     strb;
-        logic           last;
-        logic           valid;  
-    }AXI_W;
+//    typedef struct packed{
+//        logic [31:0]    data;
+//        logic [3:0]     strb;
+//        logic           last;
+//        logic           valid;  
+//    }AXI_W;
     
-    typedef struct packed{
-        logic           id;
-        logic [28:0]    addr;
-        logic [7:0]     len;
-        logic [2:0]     size;
-        logic [1:0]     burst;
-        logic           lock;
-        logic [3:0]     cache;
-        logic [2:0]     prot;
-        logic [3:0]     qos;
-        logic           valid;    
-    }AXI_AR;
+//    typedef struct packed{
+//        logic           id;
+//        logic [28:0]    addr;
+//        logic [7:0]     len;
+//        logic [2:0]     size;
+//        logic [1:0]     burst;
+//        logic           lock;
+//        logic [3:0]     cache;
+//        logic [2:0]     prot;
+//        logic [3:0]     qos;
+//        logic           valid;    
+//    }AXI_AR;
     
-    typedef struct packed{
-        logic [31:0]    data;
-        logic [3:0]     strb;
-        logic           last;
-        logic           valid;
-        logic [1:0]     resp;
-    }AXI_R;        
+//    typedef struct packed{
+//        logic [31:0]    data;
+//        logic [3:0]     strb;
+//        logic           last;
+//        logic           valid;
+//        logic [1:0]     resp;
+//    }AXI_R;        
     
 module Arbiter(
     input [7:0]           gmii_rxd,
@@ -71,22 +71,36 @@ module Arbiter(
     
     input                 rst_btn,
     input [7:0]           SW,
+    //AXI0
     input                 axi_awready,
     input                 axi_wready,
     input                 axi_bresp,
     input                 axi_bvalid,
     input                 axi_arready,
     input AXI_R           axi_r,
+    //AXI1
+    input                 axi_arready1,
+    input AXI_R           axi_r1,
+    input                 axi_awready1,
+    input                 axi_wready1,
+    input                 axi_bresp1,
+    input                 axi_bvalid1,
     
     output [8:0]          rarp_o,
     output [8:0]          ping_o,
     output [8:0]          UDP_o,
-    //output reg [7:0]      LED
+    //AXI0
     output AXI_AW         axi_aw,
     output AXI_W          axi_w,
     output                axi_bready,
     output AXI_AR         axi_ar,
-    output                axi_rready
+    output                axi_rready,
+    //AXI1
+    output AXI_AR         axi_ar1,
+    output                axi_rready1,
+    output AXI_AW         axi_aw1,
+    output AXI_W          axi_w1,
+    output                axi_bready1
     );
 
 
@@ -432,9 +446,18 @@ parameter  Recv_End    = 8'h03;
         .CLK_i      (eth_rxck),
         .rst        (rst_rx),
         .recvend    (recvend),
-        .axi_arready(axi_arready),
+        .axi_arready(axi_arready1),
+        .axi_r      (axi_r1),
+        .axi_awready(axi_awready1),
+        .axi_wready (axi_wready1),
+        .axi_bresp  (axi_bresp1),
+        .axi_bvalid (axi_bvalid1),
         /*---OUTPUT---*/
-        .axi_ar     (axi_ar)
+        .axi_ar     (axi_ar1),
+        .axi_rready (axi_rready1),
+        .axi_aw     (axi_aw1),
+        .axi_w      (axi_w1),
+        .axi_bready (axi_bready1)
     );
          
 endmodule

@@ -19,8 +19,6 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-`include "struct_list.vh"
-
 module axi_block_rw(
     CLK_i,
     rst,
@@ -29,10 +27,14 @@ module axi_block_rw(
     axi_r,
     axi_awready,
     axi_wready,
+    axi_bresp,
+    axi_bvalid,
     
     axi_ar,
     axi_rready,
-    axi_aw
+    axi_aw,
+    axi_w,
+    axi_bready
 );
     /*---parameter---*/
     parameter   IDLE    =   4'h0;
@@ -54,24 +56,30 @@ module axi_block_rw(
     /*---I/O---*/
     input   CLK_i;
     input   rst;
-    input   recv_end;
+    input   recvend;
     input   axi_arready;
     input   AXI_R   axi_r;
     input   axi_awready;
     input   axi_wready;
+    input   axi_bresp;
+    input   axi_bvalid;
 
     output  AXI_AR  axi_ar;
     output  axi_rready;
     output  AXI_AW  axi_aw;
-    output  AXI_W   axi_w; 
+    output  AXI_W   axi_w;
+    output reg axi_bready; 
 
     /* State-Machine(AR_CH) */
     reg [3:0]   st_ar;
     reg [3:0]   nx_ar;
     reg [1:0]   transaction_cnt;
     wire        transaction_end = (transaction_cnt==transaction_num);
-    wire        ar_valid = (axi_arready && axi_ar.valid)
+    wire        ar_valid = (axi_arready && axi_ar.valid);
     wire        ar_end = ar_valid && transaction_end;
+    reg         wend;
+    reg [10:0]  wendcnt;
+    wire        start_ar = recvend || wend;
     always_ff @(posedge CLK_i)begin
         if (rst)	st_ar <= IDLE;
         else		st_ar <= nx_ar;
@@ -81,7 +89,7 @@ module axi_block_rw(
         nx_ar = st_ar;
         case (st_ar)
             IDLE : begin
-                if(recv_end) nx_ar = ARCH;
+                if(start_ar) nx_ar = ARCH;
             end
             ARCH : begin
                 if(ar_end) nx_ar = AROK;
@@ -156,9 +164,9 @@ module axi_block_rw(
     reg [28:0]  araddr_buff;
     always_ff @(posedge CLK_i)begin
         if(addr_reset)  araddr_buff <= 29'b0;
-        else            araddr_buff <= ar_xcount + (ar_ycount<<5 + ar_ycount<<4);
+        else            araddr_buff <= ar_xcount + (ar_ycount<<5 + ar_ycount<<4);   // 0,1,2... x 48
     end
-    assign axi_ar.addr = araddr_buff + (transaction_cnt<<5 + transaction_cnt<<4);
+    assign axi_ar.addr = (araddr_buff + (transaction_cnt<<5 + transaction_cnt<<4)) << 2;
 
     /*--Valid--*/
     always_ff @(posedge CLK_i)begin
@@ -241,10 +249,7 @@ module axi_block_rw(
         end
     end
 
-    always_comb begin
-        if(axi_r.valid)     axi_rready <= `HI;
-        else                axi_rready <= `LO;
-    end
+    assign axi_rready = (axi_r.valid) ? `HI : `LO;
 
     /*--Read_End--*/
     reg r_end;
@@ -336,7 +341,7 @@ module axi_block_rw(
         if(aw_addr_reset)   awaddr_buff <= 29'b0;
         else                awaddr_buff <= aw_xcount  + 49 + (aw_ycount<<5 + aw_ycount<<4);
     end
-    assign axi_ar.addr = awsaddr_buff;
+    assign axi_ar.addr = (awaddr_buff + 1440) << 2;
 
     /*--Valid--*/
     always_ff @(posedge CLK_i)begin
@@ -348,7 +353,7 @@ module axi_block_rw(
                 axi_aw.valid <= `HI;
             end
         end
-        else if (st_aw==AW_OK)begin
+        else if (st_aw==AWOK)begin
             axi_aw.valid    <= `LO;
         end
         else if (st_aw==IDLE)begin
@@ -425,6 +430,34 @@ module axi_block_rw(
         end
         else begin
             axi_w.last <= 1'b0;
+        end
+    end
+
+    always_ff @(posedge CLK_i)begin
+        if(axi_bresp==2'b0&&axi_bvalid==1'b1)   axi_bready <= `LO;
+        else                                    axi_bready <= `HI;
+    end
+
+    always_ff @(posedge CLK_i)begin
+        if(rst)begin
+            wendcnt <= 11'b0;
+        end
+        else if(wendcnt==11'd1288)begin
+            wendcnt <= 11'b0;
+        end
+        else if(st_w==WEND)begin
+            wendcnt <= wendcnt + 11'b1;
+        end
+    end
+
+    always_ff @(posedge CLK_i)begin
+        if(st_w==WEND)begin
+            if(wendcnt<=11'd1286)begin  // 1288-1
+                wend <= `HI;    
+            end
+        end
+        else begin
+            wend <= `LO;
         end
     end
 
