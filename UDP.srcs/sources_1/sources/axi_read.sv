@@ -18,8 +18,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
-
+//`include "struct_list.vh"
 module axi_read(
     /*---INPUT---*/
     clk_i,
@@ -36,26 +35,26 @@ module axi_read(
     );
     
     /*---STRUCT---*/
-    typedef struct packed{
-        logic           id;
-        logic [28:0]    addr;
-        logic [7:0]     len;
-        logic [2:0]     size;
-        logic [1:0]     burst;
-        logic           lock;
-        logic [3:0]     cache;
-        logic [2:0]     prot;
-        logic [3:0]     qos;
-        logic           valid;    
-    }AXI_AR;
+    // typedef struct packed{
+    //     logic           id;
+    //     logic [28:0]    addr;
+    //     logic [7:0]     len;
+    //     logic [2:0]     size;
+    //     logic [1:0]     burst;
+    //     logic           lock;
+    //     logic [3:0]     cache;
+    //     logic [2:0]     prot;
+    //     logic [3:0]     qos;
+    //     logic           valid;    
+    // }AXI_AR;
     
-    typedef struct packed{
-        logic [31:0]    data;
-        logic [3:0]     strb;
-        logic           last;
-        logic           valid;
-        logic [1:0]     resp;
-    }AXI_R;    
+    // typedef struct packed{
+    //     logic [31:0]    data;
+    //     logic [3:0]     strb;
+    //     logic           last;
+    //     logic           valid;
+    //     logic [1:0]     resp;
+    // }AXI_R;    
     
     /*---I/O Declare---*/
     input       clk_i;
@@ -191,7 +190,7 @@ module axi_read(
     wire addr_reset = rst_btn||rst||transend;
     reg [28:0] address_buff;
     always_ff @(posedge clk_i)begin
-        if(addr_reset) address_buff <= 29'b0;
+        if(addr_reset) address_buff <= 29'd5760;   // 読み出し開始地点
         else if(archannel_ok) address_buff <= address_buff + 11'd960;
     end
     assign axi_ar.addr = address_buff;

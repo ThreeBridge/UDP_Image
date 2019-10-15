@@ -18,8 +18,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
-
+//`include "struct_list.vh"
 module axi_write(
     /*---INPUT---*/
     clk_i,
@@ -45,25 +44,25 @@ module axi_write(
     //write_end
     );
     /*---STRUCT---*/
-    typedef struct packed{
-        logic           id;
-        logic [28:0]    addr;
-        logic [7:0]     len;
-        logic [2:0]     size;
-        logic [1:0]     burst;
-        logic           lock;
-        logic [3:0]     cache;
-        logic [2:0]     prot;
-        logic [3:0]     qos;
-        logic           valid;    
-    }AXI_AW;
+    // typedef struct packed{
+    //     logic           id;
+    //     logic [28:0]    addr;
+    //     logic [7:0]     len;
+    //     logic [2:0]     size;
+    //     logic [1:0]     burst;
+    //     logic           lock;
+    //     logic [3:0]     cache;
+    //     logic [2:0]     prot;
+    //     logic [3:0]     qos;
+    //     logic           valid;    
+    // }AXI_AW;
     
-    typedef struct packed{
-        logic [31:0]    data;
-        logic [3:0]     strb;
-        logic           last;
-        logic           valid;  
-    }AXI_W;
+    // typedef struct packed{
+    //     logic [31:0]    data;
+    //     logic [3:0]     strb;
+    //     logic           last;
+    //     logic           valid;  
+    // }AXI_W;
     
     /*---I/O Declare---*/
     input       clk_i;

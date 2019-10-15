@@ -18,11 +18,11 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
+//`include "struct_list.vh"
 module axi_block_rw(
     CLK_i,
     rst,
-    recv_end,
+    recvend,
     axi_arready,
     axi_r,
     axi_awready,
@@ -139,10 +139,14 @@ module axi_block_rw(
     end
 
     /*--x/y count--*/
+    wire      addr_reset = rst;
     reg [5:0] ar_xcount;
     reg [4:0] ar_ycount;
     always_ff @(posedge CLK_i)begin
-        if(ar_xcount==6'd46)begin
+        if(addr_reset)begin
+            ar_xcount <= 6'b0;
+        end
+        else if(ar_xcount==6'd46)begin
             ar_xcount <= 6'b0;
         end
         else if(ar_end)begin
@@ -151,7 +155,10 @@ module axi_block_rw(
     end
 
     always_ff @(posedge CLK_i)begin
-        if(ar_ycount==5'd28)begin
+        if(addr_reset)begin
+            ar_ycount <= 6'b0;
+        end
+        else if(ar_ycount==5'd28)begin
             ar_ycount <= 5'b0;
         end
         else if(ar_xcount==6'd46)begin
@@ -160,7 +167,6 @@ module axi_block_rw(
     end
 
     /*--Address--*/
-    wire        addr_reset = rst;
     reg [28:0]  araddr_buff;
     always_ff @(posedge CLK_i)begin
         if(addr_reset)  araddr_buff <= 29'b0;
@@ -314,10 +320,14 @@ module axi_block_rw(
     end
 
     /*--x/y count--*/
+    wire      aw_addr_reset = rst;
     reg [5:0] aw_xcount;
     reg [4:0] aw_ycount;
     always_ff @(posedge CLK_i)begin
-        if(aw_xcount==6'd46)begin
+        if(aw_addr_reset)begin
+            aw_xcount <= 6'b0;
+        end
+        else if(aw_xcount==6'd46)begin
             aw_xcount <= 6'b0;
         end
         else if(ar_end)begin
@@ -326,7 +336,10 @@ module axi_block_rw(
     end
 
     always_ff @(posedge CLK_i)begin
-        if(aw_ycount==5'd28)begin
+        if(aw_addr_reset)begin
+            aw_ycount <= 6'b0;
+        end
+        else if(aw_ycount==5'd28)begin
             aw_ycount <= 5'b0;
         end
         else if(aw_xcount==6'd46)begin
@@ -335,7 +348,6 @@ module axi_block_rw(
     end
 
     /*--Address--*/
-    wire        aw_addr_reset = rst;
     reg [28:0]  awaddr_buff;
     always_ff @(posedge CLK_i)begin
         if(aw_addr_reset)   awaddr_buff <= 29'b0;

@@ -18,7 +18,8 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
+`include "user_defines.sv"
+//`include "struct_list.vh"
 module TOP(
     input [3:0]     ETH_RXD,     // 受信フレームデータ
     input           ETH_RXCK,    // 受信クロック

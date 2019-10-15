@@ -172,7 +172,9 @@ module tb_rarp(
    parameter   AR_OK   =   4'h2;
    
    parameter   READ    =   4'h4;
-   parameter   REND    =   4'h5;   
+   parameter   REND    =   4'h5;
+   
+
    
    reg [79:0] str_st_rx;
    reg [79:0] str_st_tx;
@@ -183,7 +185,11 @@ module tb_rarp(
    reg [79:0] str_st_axi_aw;
    reg [79:0] str_st_axi_w;
    reg [79:0] str_st_axi_ar;
-   reg [79:0] str_st_axi_r;   
+   reg [79:0] str_st_axi_r;
+   reg [79:0] str_st_axi_block_ar;
+   reg [79:0] str_st_axi_block_r;
+   reg [79:0] str_st_axi_block_aw;
+   reg [79:0] str_st_axi_block_w; 
    always_comb begin
       case (top_i.R_Arbiter.st)
          Idle: str_st_rx = "idle";   
@@ -325,7 +331,54 @@ module tb_rarp(
             READ : str_st_axi_r = "read";
             REND : str_st_axi_r = "rend";
         endcase    
-    end    
+    end
+
+    /*---axi_block---*/
+    parameter   ARCH_b  =   4'h1;
+    parameter   AROK_b  =   4'h2;
+
+    parameter   READ_b  =   4'h3;
+    parameter   DEAL_b  =   4'h4;
+    parameter   REND_b  =   4'h5;
+
+    parameter   AWCH_b  =   4'h6;
+    parameter   AWOK_b  =   4'h7;
+
+    parameter   WCH_b   =   4'h8;
+    parameter   WEND_b  =   4'h9;
+    always_comb begin
+        case (top_i.R_Arbiter.axi_block_rw.st_ar)
+            IDLE : str_st_axi_block_ar = "idle";
+            ARCH_b : str_st_axi_block_ar = "arch";
+            AROK_b : str_st_axi_block_ar = "arok";
+        endcase
+    end
+
+    always_comb begin
+        case (top_i.R_Arbiter.axi_block_rw.st_r)
+            IDLE : str_st_axi_block_r = "idle";
+            READ_b : str_st_axi_block_r = "read";
+            DEAL_b : str_st_axi_block_r = "deal";
+            REND_b : str_st_axi_block_r = "rend";
+        endcase
+    end
+
+    always_comb begin
+        case (top_i.R_Arbiter.axi_block_rw.st_aw)
+            IDLE : str_st_axi_block_aw = "idle";
+            AWCH_b : str_st_axi_block_aw = "awch";
+            AWOK_b : str_st_axi_block_aw = "awok";
+        endcase
+    end
+
+    always_comb begin
+        case (top_i.R_Arbiter.axi_block_rw.st_w)
+            IDLE : str_st_axi_block_w = "idle";
+            WCH_b : str_st_axi_block_w = "wch";
+            WEND_b : str_st_axi_block_w = "wend";
+        endcase
+    end
+
 
       
    initial begin
@@ -683,9 +736,12 @@ module tb_rarp(
          
          #100000;
          
-         SW[7:4] = 4'hB;
+//         SW[7:4] = 4'hB;
+//         #2500;
+//         COLOL_640();
+         SW[7:4] = 4'hD;
          #2500;
-         COLOL_640();
+         GLAY_3();
          
          
 //         SW[7:4] = 4'hA;
@@ -985,7 +1041,15 @@ module tb_rarp(
         P_RXD = 4'h0;            
         end
    endtask
-   
+   /*---Glay_Image---*/
+   /*--48x30--*/
+   integer glay;
+   task GLAY_3();
+    for(glay=0;glay<3;glay=glay+1)begin
+        UDP_GLAY();
+        #96;
+    end
+   endtask
    /*---Color_Image---*/
    /*--640x480--*/
    integer color;
@@ -1122,6 +1186,91 @@ module tb_rarp(
        UDP_image(0);
        end
    endtask
+   
+   task UDP_GLAY();
+    begin
+        // プリアンブル
+        repeat(7) recvByte(8'h55);
+        recvByte(8'hd5);
+        // 宛先MAC
+        recvMac(48'h00_0A_35_02_0F_B0);
+        // 送信元MAC
+        recvMac(48'hF8_32_E4_BA_0D_57);
+        //フレームタイプ
+        recvByte(8'h08);
+        recvByte(8'h00);
+   
+        /*--IP header--*/
+        // Varsion / IHL
+        recvByte(8'h45);
+
+        // ToS
+        recvByte(8'h00);
+   
+        // Total Length = 1,486 - 18 = 1468 = 16'h05_BC
+        recvByte(8'h05);
+        recvByte(8'hBC);
+   
+        // Identification
+        recvByte(8'hAB);
+        recvByte(8'hCD);
+   
+        // Flags[15:13]/Flagment Offset[12:0]
+        recvByte(8'h40);
+        recvByte(8'h00);
+     
+        // Time To Live
+        recvByte(8'd255);
+   
+        // Protocol
+        recvByte(8'h11);
+   
+        // Header Checksum
+        recvByte(8'hCD);
+        recvByte(8'h01);
+   
+        // SrcIP 172.31.210.129
+        recvIp({8'd172, 8'd31, 8'd210, 8'd129});
+   
+        // DstIP 172.31.210.130
+        recvIp({8'd172, 8'd31, 8'd210, 8'd160});         
+   
+        /*--UDPHeader--*/
+        // SrcPort
+        recvByte(8'hAF);
+        recvByte(8'hDB);
+        // DstPort
+        recvByte(8'hEA);
+        recvByte(8'h60);
+        // UDP Len  1,440+8 = 1448 = 16'h05_A8
+        recvByte(8'h05);
+        recvByte(8'hA8);
+        // UDP_Checksum
+        recvByte(8'h00);
+        recvByte(8'h00); 
+        /*--UDP Data--*/    // 480[px]
+        repeat(60) recvPixel(8'hFF,8'hFF,8'hFF);
+        repeat(60) recvPixel(8'h00,8'h00,8'h00);
+        repeat(60) recvPixel(8'hFF,8'hFF,8'hFF);
+        repeat(60) recvPixel(8'hFF,8'hFF,8'hFF);
+        repeat(60) recvPixel(8'h00,8'h00,8'h00);
+        repeat(60) recvPixel(8'h00,8'h00,8'h00);
+        repeat(60) recvPixel(8'hFF,8'hFF,8'hFF);
+        repeat(59) recvPixel(8'hFF,8'hFF,8'hFF);
+        recvPixel(8'h00,8'h00,8'h00);
+           
+        // CRC
+       recvByte(8'h39);
+       recvByte(8'hCE);
+       recvByte(8'hA7);
+       recvByte(8'h40);
+        recv_end();
+   
+        //P_RXCLK = 0;
+        @(posedge P_RXCLK)
+        P_RXD = 4'h0;            
+        end   
+    endtask
    
    task recv_end();
        @(posedge P_RXCLK);
