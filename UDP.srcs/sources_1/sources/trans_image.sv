@@ -33,6 +33,7 @@ module trans_image(
     rst_btn,
     //imdata,
     recvend,
+    block_end,
     //image_buffer,
     my_MACadd_i,
     my_IPadd_i,
@@ -81,6 +82,7 @@ module trans_image(
     input       rst_btn;
     //input [7:0] imdata;
     input       recvend;
+    input       block_end;
     //input [7:0] image_buffer [9999:0];
     input [47:0] my_MACadd_i;     //<--- add 2018.12.5
     input [31:0] my_IPadd_i;      //--->
@@ -188,7 +190,7 @@ module trans_image(
         nx = st;
         case (st)
             IDLE : begin
-                if (recvend) nx = Presv;
+                if (block_end) nx = Presv;
             end
             Presv : begin
                 //if (d_img_cnt[2]>10'd999) nx = READY;

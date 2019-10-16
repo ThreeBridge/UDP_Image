@@ -34,7 +34,8 @@ module axi_block_rw(
     axi_rready,
     axi_aw,
     axi_w,
-    axi_bready
+    axi_bready,
+    block_end
 );
     /*---parameter---*/
     parameter   IDLE    =   4'h0;
@@ -68,13 +69,14 @@ module axi_block_rw(
     output  axi_rready;
     output  AXI_AW  axi_aw;
     output  AXI_W   axi_w;
-    output reg axi_bready; 
+    output reg axi_bready;
+    output reg block_end;
 
     /* State-Machine(AR_CH) */
     reg [3:0]   st_ar;
     reg [3:0]   nx_ar;
     reg [1:0]   transaction_cnt;
-    wire        transaction_end = (transaction_cnt==transaction_num);
+    wire        transaction_end = (transaction_cnt==transaction_num-1);
     wire        ar_valid = (axi_arready && axi_ar.valid);
     wire        ar_end = ar_valid && transaction_end;
     reg         wend;
@@ -464,12 +466,23 @@ module axi_block_rw(
 
     always_ff @(posedge CLK_i)begin
         if(st_w==WEND)begin
-            if(wendcnt<=11'd1286)begin  // 1288-1
+            if(wendcnt<=11'd1286)begin  // 1288-1回
                 wend <= `HI;    
             end
         end
         else begin
             wend <= `LO;
+        end
+    end
+    
+    always_ff @(posedge CLK_i)begin
+        if(st_w==WEND)begin
+            if(wendcnt==11'd1287)begin  // 1288-1回
+                block_end <= `HI;
+            end
+        end
+        else begin
+            block_end <= `LO;
         end
     end
 

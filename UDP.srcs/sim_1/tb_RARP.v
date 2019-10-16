@@ -727,14 +727,14 @@ module tb_rarp(
          
          /*---UDP_image---*/
          #2500;
-         SW[7:4] = 4'h2;
-         #2500;
-         UDP_COLOR();
-         #96;
-         UDP_COLOR();
-         #96;
+//         SW[7:4] = 4'h2;
+//         #2500;
+//         UDP_COLOR();
+//         #96;
+//         UDP_COLOR();
+//         #96;
          
-         #100000;
+//         #100000;
          
 //         SW[7:4] = 4'hB;
 //         #2500;
@@ -1260,10 +1260,10 @@ module tb_rarp(
         recvPixel(8'h00,8'h00,8'h00);
            
         // CRC
-       recvByte(8'h39);
-       recvByte(8'hCE);
-       recvByte(8'hA7);
-       recvByte(8'h40);
+       recvByte(8'h3E);
+       recvByte(8'h73);
+       recvByte(8'hBC);
+       recvByte(8'hFF);
         recv_end();
    
         //P_RXCLK = 0;

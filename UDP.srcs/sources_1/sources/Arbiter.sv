@@ -361,6 +361,7 @@ parameter  Recv_End    = 8'h03;
     wire [31:0] DstIP_UDP;
     wire [15:0] SrcPort;
     wire [15:0] DstPort;
+    wire block_end;
     
     recv_image recv_image(
         /*---Input---*/
@@ -405,6 +406,7 @@ parameter  Recv_End    = 8'h03;
         .rst_btn        (rst_btn),
         //.imdata         (imdata),
         .recvend        (recvend),
+        .block_end      (block_end),
         //.image_buffer(image_buffer),
         .my_MACadd_i    (my_MACadd),
         .my_IPadd_i     (my_IPadd),
@@ -457,7 +459,8 @@ parameter  Recv_End    = 8'h03;
         .axi_rready (axi_rready1),
         .axi_aw     (axi_aw1),
         .axi_w      (axi_w1),
-        .axi_bready (axi_bready1)
+        .axi_bready (axi_bready1),
+        .block_end  (block_end)
     );
          
 endmodule
